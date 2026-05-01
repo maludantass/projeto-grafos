@@ -1,0 +1,24 @@
+origem,destino,tipo_conexao,justificativa,peso
+MAO,BEL,regional,fluxo intrarregional norte,1.0
+MAO,PVH,regional,fluxo intrarregional norte,1.0
+PVH,RBR,regional,fluxo intrarregional norte,1.0
+SSA,REC,regional,fluxo intrarregional nordeste,1.0
+REC,JPA,regional,fluxo intrarregional nordeste,1.0
+JPA,NAT,regional,fluxo intrarregional nordeste,1.0
+NAT,FOR,regional,fluxo intrarregional nordeste,1.0
+FOR,THE,regional,fluxo intrarregional nordeste,1.0
+BSB,GYN,regional,fluxo intrarregional centro-oeste,1.0
+GRU,CGH,regional,fluxo intrarregional sudeste,1.0
+GRU,GIG,regional,fluxo intrarregional sudeste,1.0
+GIG,CNF,regional,fluxo intrarregional sudeste,1.0
+GIG,VIX,regional,fluxo intrarregional sudeste,1.0
+CWB,FLN,regional,fluxo intrarregional sul,1.0
+FLN,POA,regional,fluxo intrarregional sul,1.0
+GRU,CWB,hub,conexao inter-regional sudeste-sul,2.0
+GRU,BSB,hub,conexao inter-regional sudeste-centro-oeste,2.0
+GIG,SSA,hub,conexao inter-regional sudeste-nordeste,3.0
+CNF,BSB,hub,conexao inter-regional sudeste-centro-oeste,2.0
+BSB,BEL,hub,conexao inter-regional centro-oeste-norte,3.0
+BSB,MAO,hub,conexao inter-regional centro-oeste-norte,3.0
+BSB,FOR,hub,conexao inter-regional centro-oeste-nordeste,3.0
+FOR,BEL,hub,conexao inter-regional nordeste-norte,2.0
