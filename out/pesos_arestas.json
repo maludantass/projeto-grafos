@@ -1,0 +1,12 @@
+{
+  "regua_pesos": {
+    "1.0": "Conexão regional intrarregional",
+    "2.0": "Conexão inter-regional curta/média ou entre hubs próximos",
+    "3.0": "Conexão inter-regional longa ou entre regiões distantes"
+  },
+  "distribuicao": {
+    "1.0": 15,
+    "2.0": 4,
+    "3.0": 4
+  }
+}

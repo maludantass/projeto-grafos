@@ -45,6 +45,15 @@ class Grafo:
 
     def get_atributos_no(self, rotulo):
         return self.nodes.get(rotulo)
+    
+    def get_vizinhos(self, no):
+        if no not in self.adj_list:
+            return []
+
+        return [aresta["vizinho"] for aresta in self.adj_list[no]]
+
+    def get_arestas(self, no):
+        return self.adj_list.get(no, [])
 
     def __str__(self):
         # grafo é não direcionado

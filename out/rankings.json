@@ -1,0 +1,10 @@
+{
+    "aeroporto_mais_conectado": {
+        "aeroporto": "BSB",
+        "grau": 6
+    },
+    "aeroporto_maior_densidade_local": {
+        "aeroporto": "CGH",
+        "densidade_ego": 1.0
+    }
+}
