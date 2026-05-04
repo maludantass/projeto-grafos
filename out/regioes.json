@@ -1,0 +1,62 @@
+[
+  {
+    "regiao": "Centro-Oeste",
+    "nos": [
+      "BSB",
+      "GYN"
+    ],
+    "ordem": 2,
+    "tamanho": 1,
+    "densidade": 1.0
+  },
+  {
+    "regiao": "Nordeste",
+    "nos": [
+      "FOR",
+      "JPA",
+      "NAT",
+      "REC",
+      "SSA",
+      "THE"
+    ],
+    "ordem": 6,
+    "tamanho": 5,
+    "densidade": 0.333333
+  },
+  {
+    "regiao": "Norte",
+    "nos": [
+      "BEL",
+      "MAO",
+      "PVH",
+      "RBR"
+    ],
+    "ordem": 4,
+    "tamanho": 3,
+    "densidade": 0.5
+  },
+  {
+    "regiao": "Sudeste",
+    "nos": [
+      "CGH",
+      "CNF",
+      "GIG",
+      "GRU",
+      "VIX"
+    ],
+    "ordem": 5,
+    "tamanho": 4,
+    "densidade": 0.4
+  },
+  {
+    "regiao": "Sul",
+    "nos": [
+      "CWB",
+      "FLN",
+      "POA"
+    ],
+    "ordem": 3,
+    "tamanho": 2,
+    "densidade": 0.666667
+  }
+]
