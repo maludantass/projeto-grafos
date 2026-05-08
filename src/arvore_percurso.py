@@ -1,14 +1,128 @@
-#PARTE 7: Árvore de Caminho: Recife → Porto Alegre e Manaus → São Paulo
+# PARTE 7: Árvore de Caminho: Recife → Porto Alegre e Manaus → São Paulo
 import os
 import sys
 import csv
-
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
-
-from graphs.io import ler_aeroportos, ler_adjacencias
-from pathlib import Path
-
 import heapq
+
+class Grafo:
+    """
+    RÉGUA DE PESOS UTILIZADA:
+    Peso 1.0 (Conexão Regional): Voos intrarregionais (dentro da mesma região).
+    Peso 2.0 (Conexão Inter-regional Curta/Média): Voos conectando Hubs de regiões próximas.
+    Peso 3.0 (Conexão Inter-regional Longa): Voos conectando Hubs de regiões mais distantes.
+    """
+
+    def __init__(self):
+        self.adj_list = {}
+        self.nodes = {}
+
+    def adicionar_no(self, rotulo, **kwargs):
+        if rotulo not in self.adj_list:
+            self.adj_list[rotulo] = []
+            self.nodes[rotulo] = kwargs
+
+    def adicionar_aresta(self, origem, destino, peso=1.0, tipo_conexao='', justificativa=''):
+        if origem not in self.adj_list:
+            self.adicionar_no(origem)
+        if destino not in self.adj_list:
+            self.adicionar_no(destino)
+
+        self.adj_list[origem].append({
+            'vizinho': destino,
+            'peso': float(peso),
+            'tipo_conexao': tipo_conexao,
+            'justificativa': justificativa
+        })
+        self.adj_list[destino].append({
+            'vizinho': origem,
+            'peso': float(peso),
+            'tipo_conexao': tipo_conexao,
+            'justificativa': justificativa
+        })
+
+    def get_nos(self):
+        return list(self.adj_list.keys())
+
+    def get_atributos_no(self, rotulo):
+        return self.nodes.get(rotulo)
+
+    def get_vizinhos(self, no):
+        if no not in self.adj_list:
+            return []
+        return [aresta["vizinho"] for aresta in self.adj_list[no]]
+
+    def get_arestas(self, no):
+        return self.adj_list.get(no, [])
+
+    def __str__(self):
+        num_arestas = sum(len(v) for v in self.adj_list.values()) // 2
+        return f"Grafo(nós={len(self.nodes)}, arestas={num_arestas})"
+
+
+def ler_aeroportos(caminho_arquivo):
+    grafo = Grafo()
+    with open(caminho_arquivo, mode='r', encoding='utf-8') as f:
+        leitor_csv = csv.DictReader(f)
+        for linha in leitor_csv:
+            iata = linha.get('iata', '').strip()
+            cidade = linha.get('cidade', '').strip()
+            regiao = linha.get('regiao', '').strip()
+            if iata:
+                grafo.adicionar_no(iata, cidade=cidade, regiao=regiao)
+    return grafo
+
+
+def ler_adjacencias(grafo, caminho_arquivo):
+    colunas_obrigatorias = {"origem", "destino", "tipo_conexao", "justificativa", "peso"}
+
+    with open(caminho_arquivo, mode='r', encoding='utf-8') as f:
+        leitor_csv = csv.DictReader(f)
+
+        if leitor_csv.fieldnames is None:
+            raise ValueError("O arquivo de adjacências está vazio.")
+
+        colunas_faltando = colunas_obrigatorias - set(leitor_csv.fieldnames)
+        if colunas_faltando:
+            raise ValueError(
+                "Colunas obrigatórias ausentes em adjacencias_aeroportos.csv: "
+                + ", ".join(sorted(colunas_faltando))
+            )
+
+        for numero_linha, linha in enumerate(leitor_csv, start=2):
+            origem = linha.get('origem', '').strip().upper()
+            destino = linha.get('destino', '').strip().upper()
+            tipo_conexao = linha.get('tipo_conexao', '').strip()
+            justificativa = linha.get('justificativa', '').strip()
+            peso_texto = linha.get('peso', '').strip()
+
+            if not origem:
+                raise ValueError(f"Linha {numero_linha}: origem vazia.")
+            if not destino:
+                raise ValueError(f"Linha {numero_linha}: destino vazio.")
+            if not tipo_conexao:
+                raise ValueError(f"Linha {numero_linha}: tipo_conexao vazio.")
+            if not justificativa:
+                raise ValueError(f"Linha {numero_linha}: justificativa vazia.")
+            if not peso_texto:
+                raise ValueError(f"Linha {numero_linha}: peso vazio.")
+
+            try:
+                peso = float(peso_texto)
+            except ValueError:
+                raise ValueError(f"Linha {numero_linha}: peso inválido: {peso_texto}")
+
+            if peso < 0:
+                raise ValueError(f"Linha {numero_linha}: peso negativo não é permitido.")
+
+            grafo.adicionar_aresta(
+                origem=origem,
+                destino=destino,
+                peso=peso,
+                tipo_conexao=tipo_conexao,
+                justificativa=justificativa
+            )
+
+
 
 def dijkstra(grafo, origem):
     distancias = {no: float('inf') for no in grafo.get_nos()}
@@ -30,6 +144,7 @@ def dijkstra(grafo, origem):
                 heapq.heappush(heap, (novo_custo, vizinho))
     return distancias, predecessores
 
+
 def reconstruir_caminho(predecessores, origem, destino):
     caminho = []
     atual = destino
@@ -39,11 +154,13 @@ def reconstruir_caminho(predecessores, origem, destino):
     caminho.reverse()
     return caminho if caminho and caminho[0] == origem else None
 
+
 def caminho_para_arestas(caminho):
-    #Converte lista de nós em lista de arestas
+    # Converte lista de nós em lista de arestas
     return [(caminho[i], caminho[i + 1]) for i in range(len(caminho) - 1)]
 
-#Metadados dos aeroportos
+
+
 def ler_metadados(caminho_nos):
     meta = {}
     with open(caminho_nos, encoding='utf-8') as f:
@@ -54,7 +171,8 @@ def ler_metadados(caminho_nos):
             }
     return meta
 
-#HTML interativa 
+
+
 def gerar_html(caminhos_info, grafo, meta, caminho_saida):
     from pyvis.network import Network
 
@@ -62,7 +180,7 @@ def gerar_html(caminhos_info, grafo, meta, caminho_saida):
         {"label": "Recife → Porto Alegre", "cor_no": "#e74c3c", "cor_aresta": "#e74c3c"},
         {"label": "Manaus → São Paulo",    "cor_no": "#2980b9", "cor_aresta": "#2980b9"},
     ]
-    COR_COMPARTILHADO = "#8e44ad"  
+    COR_COMPARTILHADO = "#8e44ad"
     COR_FUNDO_NO      = "#ecf0f1"
     COR_ARESTA_FUNDO  = "#bdc3c7"
 
@@ -89,7 +207,7 @@ def gerar_html(caminhos_info, grafo, meta, caminho_saida):
     }
     """)
 
-    nos_por_rota    = [set(info['caminho']) for info in caminhos_info]
+    nos_por_rota     = [set(info['caminho']) for info in caminhos_info]
     arestas_por_rota = [set(map(tuple, info['arestas'])) for info in caminhos_info]
 
     todos_nos = set(grafo.get_nos())
@@ -144,14 +262,6 @@ def gerar_html(caminhos_info, grafo, meta, caminho_saida):
                 font={"size": 12, "color": "#f1c40f", "strokeWidth": 3, "strokeColor": "#1a1a2e"}
             )
 
-    legenda_html = (
-        "<b>Legenda</b><br>"
-        f"<span style='color:#e74c3c'>●</span> Recife → Porto Alegre<br>"
-        f"<span style='color:#2980b9'>●</span> Manaus → São Paulo<br>"
-        f"<span style='color:#8e44ad'>●</span> Trecho compartilhado<br>"
-        f"<span style='color:#bdc3c7'>●</span> Demais conexões"
-    )
-
     html_titulo = """
     <div style="position:fixed;top:10px;left:50%;transform:translateX(-50%);
                 background:#16213e;color:white;padding:10px 24px;border-radius:8px;
@@ -166,7 +276,7 @@ def gerar_html(caminhos_info, grafo, meta, caminho_saida):
     </div>
     """
 
-    Path(caminho_saida).parent.mkdir(parents=True, exist_ok=True)
+    os.makedirs(os.path.dirname(caminho_saida), exist_ok=True)
     net.save_graph(str(caminho_saida))
 
     with open(caminho_saida, 'r', encoding='utf-8') as f:
@@ -177,11 +287,13 @@ def gerar_html(caminhos_info, grafo, meta, caminho_saida):
 
     print(f"HTML salvo em: {caminho_saida}")
 
+
+
 def main():
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    arquivo_nos    = os.path.join(base_dir, "data", "aeroportos_data.csv")
+    arquivo_nos     = os.path.join(base_dir, "data", "aeroportos_data.csv")
     arquivo_arestas = os.path.join(base_dir, "data", "adjacencias_aeroportos.csv")
-    out_dir        = os.path.join(base_dir, "out")
+    out_dir         = os.path.join(base_dir, "out")
 
     print("Carregando grafo...")
     grafo = ler_aeroportos(arquivo_nos)
@@ -208,6 +320,7 @@ def main():
         os.path.join(out_dir, "arvore_percurso.html")
     )
     print("\nConcluído")
+
 
 if __name__ == "__main__":
     main()
