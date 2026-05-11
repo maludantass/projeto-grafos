@@ -1,5 +1,22 @@
+# Python cache
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 .pytest_cache/
+
+# Arquivos gerados pelo projeto
+out/*
+!out/.gitkeep
+
+# Ambiente virtual (se alguém criar)
+.venv/
+venv/
+env/
+
+# VSCode
+.vscode/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
