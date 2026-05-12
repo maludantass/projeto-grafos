@@ -8,6 +8,10 @@ __pycache__/
 # Arquivos gerados pelo projeto
 out/*
 !out/.gitkeep
+!out/*.html
+!out/*.png
+!out/*.csv
+!out/*.json
 
 # Ambiente virtual (se alguém criar)
 .venv/

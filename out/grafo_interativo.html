@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<title>Rede de Aeroportos do Brasil</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
+<link  href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" rel="stylesheet"/>
+<style>
+*{
+ margin:0;
+ padding:0;
+ box-sizing:border-box;
+}
+
+
+body{
+ font-family: Inter, sans-serif;
+ background:
+   radial-gradient(circle at top, #132238 0%, #08111f 45%, #050b14 100%);
+ color:white;
+ height:100vh;
+ overflow:hidden;
+}
+
+
+
+
+#header{
+ height:88px;
+ padding:18px 24px;
+ display:flex;
+ align-items:center;
+ gap:16px;
+ border-bottom:1px solid rgba(255,255,255,.08);
+ background:rgba(8,14,24,.88);
+ backdrop-filter:blur(12px);
+ position:relative;
+ z-index:10;
+}
+
+
+#header::after{
+ content:"";
+ position:absolute;
+ left:0;
+ bottom:0;
+ width:100%;
+ height:1px;
+ background:linear-gradient(
+   90deg,
+   transparent,
+   rgba(88,166,255,.6),
+   transparent
+ );
+}
+
+
+#header h1{
+ font-size:24px;
+ font-weight:800;
+ letter-spacing:.5px;
+ color:#ffffff;
+ margin-right:12px;
+}
+
+
+#search-box{
+ display:flex;
+ align-items:center;
+ gap:10px;
+ flex:1;
+}
+
+
+#search-box input{
+ height:44px;
+ width:260px;
+ border:none;
+ border-radius:14px;
+ background:#101b2b;
+ color:white;
+ padding:0 16px;
+ font-size:14px;
+ outline:none;
+ border:1px solid rgba(255,255,255,.08);
+ transition:.2s;
+}
+
+
+#search-box input:focus{
+ border-color:#58a6ff;
+ box-shadow:0 0 0 4px rgba(88,166,255,.15);
+}
+
+
+#search-box input::placeholder{
+ color:#7d8ca3;
+}
+
+
+#search-box button{
+ height:44px;
+ padding:0 18px;
+ border:none;
+ border-radius:14px;
+ background:#1f6feb;
+ color:white;
+ font-weight:600;
+ cursor:pointer;
+ transition:.2s;
+}
+
+
+#search-box button:hover{
+ transform:translateY(-2px);
+ background:#388bfd;
+}
+
+
+#btn-clear{
+ background:#182537 !important;
+ border:1px solid rgba(255,255,255,.08) !important;
+ color:#9fb3c8 !important;
+}
+
+
+
+
+.path-btn{
+ height:44px;
+ padding:0 18px;
+ border:none;
+ border-radius:14px;
+ cursor:pointer;
+ font-size:13px;
+ font-weight:700;
+ transition:.2s;
+}
+
+
+.path-btn:hover{
+ transform:translateY(-2px);
+}
+
+
+#btn-rec-poa{
+ background:linear-gradient(135deg,#ffb347,#ff7b00);
+ color:#111;
+ box-shadow:0 8px 24px rgba(255,140,0,.25);
+}
+
+
+#btn-mao-gru{
+ background:linear-gradient(135deg,#42a5f5,#1565c0);
+ color:white;
+ box-shadow:0 8px 24px rgba(33,150,243,.25);
+}
+
+
+#btn-reset-paths{
+ height:44px;
+ padding:0 18px;
+ border:none;
+ border-radius:14px;
+ background:#182537;
+ color:#d0dceb;
+ cursor:pointer;
+ transition:.2s;
+}
+
+
+#btn-reset-paths:hover{
+ background:#223248;
+}
+
+
+#main{
+ display:flex;
+ height:calc(100vh - 88px);
+ padding:18px;
+ gap:18px;
+}
+
+
+#network{
+ flex:1;
+ border-radius:28px;
+ background:
+   linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+   linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px),
+   #07101d;
+ background-size:40px 40px;
+ border:1px solid rgba(255,255,255,.06);
+ box-shadow:
+   inset 0 0 80px rgba(88,166,255,.04),
+   0 20px 50px rgba(0,0,0,.45);
+ position:relative;
+ overflow:hidden;
+}
+
+
+#network::before{
+ content:"";
+ position:absolute;
+ inset:0;
+ background:
+   radial-gradient(circle at center,
+   rgba(88,166,255,.06),
+   transparent 70%);
+ pointer-events:none;
+}
+
+
+#sidebar{
+ width:300px;
+ border-radius:28px;
+ background:rgba(10,18,30,.92);
+ border:1px solid rgba(255,255,255,.06);
+ padding:22px;
+ display:flex;
+ flex-direction:column;
+ gap:22px;
+ overflow-y:auto;
+ box-shadow:
+   0 20px 40px rgba(0,0,0,.45);
+}
+
+
+#sidebar h2{
+ font-size:13px;
+ text-transform:uppercase;
+ letter-spacing:1.2px;
+ color:#58a6ff;
+ margin-bottom:12px;
+}
+
+
+#sidebar > div{
+ background:#0f1a2a;
+ border:1px solid rgba(255,255,255,.05);
+ border-radius:20px;
+ padding:18px;
+}
+
+
+.leg-item,
+.path-legend{
+ display:flex;
+ align-items:center;
+ gap:10px;
+ margin-bottom:12px;
+ font-size:13px;
+ color:#d8e4f2;
+}
+
+
+.leg-dot{
+ width:14px;
+ height:14px;
+ border-radius:50%;
+ box-shadow:0 0 12px rgba(255,255,255,.3);
+}
+
+
+.path-line{
+ width:34px;
+ height:6px;
+ border-radius:999px;
+}
+
+
+#info-box{
+ background:#09111d;
+ border-radius:16px;
+ padding:16px;
+ line-height:1.8;
+ border:1px solid rgba(255,255,255,.05);
+ color:#d7e4f3;
+ min-height:100px;
+}
+
+
+#info-box b{
+ color:#58a6ff;
+ font-size:16px;
+}
+
+
+.dim{
+ color:#8ca0b8;
+}
+
+
+#stats-box{
+ line-height:2;
+ color:#c9d7e6;
+ font-size:14px;
+}
+
+
+#stats-box span{
+ color:#58a6ff;
+ font-weight:700;
+}
+
+
+::-webkit-scrollbar{
+ width:8px;
+}
+
+
+::-webkit-scrollbar-thumb{
+ background:#1f3047;
+ border-radius:999px;
+}
+
+
+.vis-tooltip{
+ background:#0f1a2a !important;
+ border:1px solid rgba(88,166,255,.3) !important;
+ border-radius:14px !important;
+ color:white !important;
+ padding:12px !important;
+ font-size:13px !important;
+ box-shadow:0 12px 24px rgba(0,0,0,.4);
+}
+
+
+@media(max-width:1100px){
+
+
+ #main{
+   flex-direction:column;
+ }
+
+
+ #sidebar{
+   width:100%;
+   height:320px;
+ }
+
+
+ #header{
+   height:auto;
+   flex-wrap:wrap;
+ }
+}
+
+
+.vis-navigation{
+ top:18px !important;
+ right:18px !important;
+ display:flex !important;
+ flex-direction:column !important;
+ gap:8px !important;
+}
+
+
+.vis-button{
+ width:36px !important;
+ height:36px !important;
+ border-radius:12px !important;
+ background:rgba(12,20,32,.92) !important;
+ border:1px solid rgba(255,255,255,.06) !important;
+ backdrop-filter:blur(8px);
+ box-shadow:0 6px 18px rgba(0,0,0,.28);
+ transition:.18s ease !important;
+
+
+ display:flex !important;
+ align-items:center !important;
+ justify-content:center !important;
+
+
+ color:#6cb6ff !important;
+ font-size:18px !important;
+ font-weight:700 !important;
+}
+
+
+.vis-button:hover{
+ background:#162235 !important;
+ border-color:rgba(88,166,255,.35) !important;
+ transform:translateY(-1px);
+}
+
+
+div.vis-network div.vis-navigation div.vis-button{
+ background-image:none !important;
+}
+
+
+.vis-button.vis-up::after{
+ content:"↑";
+}
+
+
+.vis-button.vis-down::after{
+ content:"↓";
+}
+
+
+.vis-button.vis-left::after{
+ content:"←";
+}
+
+
+.vis-button.vis-right::after{
+ content:"→";
+}
+
+
+.vis-button.vis-zoomIn::after{
+ content:"+";
+}
+
+
+.vis-button.vis-zoomOut::after{
+ content:"−";
+}
+
+
+.vis-button.vis-zoomExtends::after{
+ content:"⤢";
+}
+
+
+#region-filters{
+ display:flex;
+ flex-wrap:wrap;
+ gap:10px;
+ margin-top:6px;
+}
+
+
+.region-btn{
+ flex:1;
+
+
+ min-width:95px;
+
+
+ border:none;
+ border-radius:12px;
+
+
+ padding:10px 12px;
+
+
+ background:#1b2636;
+
+
+ color:#d6e2f0;
+
+
+ font-size:12px;
+ font-weight:600;
+
+
+ cursor:pointer;
+
+
+ transition:.18s ease;
+}
+
+
+.region-btn:hover{
+ background:#24364f;
+ transform:translateY(-1px);
+}
+
+
+.region-btn.active{
+ background:#58a6ff;
+ color:white;
+
+
+ box-shadow:
+   0 0 18px rgba(88,166,255,.28);
+}
+
+
+.region-btn.clear{
+ background:#2b2024;
+ color:#ffb7c2;
+}
+
+
+.region-btn.clear:hover{
+ background:#40272d;
+}
+#intro-screen{
+ position:fixed;
+ inset:0;
+
+
+ background:
+   radial-gradient(circle at top, #132238 0%, #0b1119 60%);
+
+
+ display:flex;
+ align-items:center;
+ justify-content:center;
+
+
+ z-index:99999;
+
+
+ animation:introFadeOut 1.2s ease forwards;
+ animation-delay:2.4s;
+}
+
+
+#intro-content{
+ text-align:center;
+
+
+ animation:introAppear 1.2s ease;
+}
+
+
+#intro-icon{
+ font-size:64px;
+ margin-bottom:18px;
+
+
+ filter:drop-shadow(0 0 18px rgba(88,166,255,.35));
+
+
+ animation:floatPlane 2s ease-in-out infinite alternate;
+}
+
+
+#intro-content h1{
+ font-size:42px;
+ font-weight:800;
+
+
+ color:#f0f6fc;
+
+
+ margin-bottom:14px;
+
+
+ letter-spacing:.5px;
+}
+
+
+#intro-content p{
+ font-size:18px;
+ color:#8ea6c0;
+
+
+ line-height:1.8;
+}
+
+
+@keyframes introAppear{
+ from{
+   opacity:0;
+   transform:translateY(24px) scale(.96);
+ }
+
+
+ to{
+   opacity:1;
+   transform:translateY(0) scale(1);
+ }
+}
+
+
+@keyframes introFadeOut{
+ to{
+   opacity:0;
+   visibility:hidden;
+ }
+}
+
+
+@keyframes floatPlane{
+ from{
+   transform:translateY(0px);
+ }
+
+
+ to{
+   transform:translateY(-10px);
+ }
+}
+</style>
+</head>
+<body>
+<div id="intro-screen">
+
+
+ <div id="intro-content">
+
+
+   <div id="intro-icon">✈</div>
+
+
+   <h1>Rede de Aeroportos do Brasil</h1>
+
+
+   <p>
+     19 aeroportos conectados<br>
+     23 rotas aéreas
+   </p>
+
+
+ </div>
+
+
+</div>
+<div id="header">
+ <h1>Rede de Aeroportos do Brasil</h1>
+
+
+ <div id="search-box">
+   <input id="search-input" type="text" placeholder="Buscar aeroporto (ex: REC)..." onkeydown="if(event.key==='Enter') buscar()"/>
+   <button onclick="buscar()">Buscar</button>
+   <button id="btn-clear" onclick="limparBusca()">✕</button>
+ </div>
+
+
+
+
+ <button class="path-btn" id="btn-rec-poa" onclick="destacarCaminho('rec-poa')">
+    Recife → Porto Alegre
+ </button>
+ <button class="path-btn" id="btn-mao-gru" onclick="destacarCaminho('mao-gru')">
+    Manaus → São Paulo
+ </button>
+ <button id="btn-reset-paths" onclick="resetarCaminhos()">Limpar destaque</button>
+</div>
+
+
+<div id="main">
+ <div id="network"></div>
+
+
+ <div id="sidebar">
+   <div>
+     <h2>Legenda — Regiões</h2>
+     <span class="leg-item"><span class="leg-dot" style="background:#2196F3"></span>Norte</span><span class="leg-item"><span class="leg-dot" style="background:#FF9800"></span>Nordeste</span><span class="leg-item"><span class="leg-dot" style="background:#9C27B0"></span>Centro-Oeste</span><span class="leg-item"><span class="leg-dot" style="background:#F44336"></span>Sudeste</span><span class="leg-item"><span class="leg-dot" style="background:#4CAF50"></span>Sul</span>
+   </div>
+<div>
+
+
+ <h2>Filtrar Região</h2>
+
+
+ <div id="region-filters">
+
+
+   <button class="region-btn"
+     onclick="filtrarRegiao('Norte')">
+     Norte
+   </button>
+
+
+   <button class="region-btn"
+     onclick="filtrarRegiao('Nordeste')">
+     Nordeste
+   </button>
+
+
+   <button class="region-btn"
+     onclick="filtrarRegiao('Centro-Oeste')">
+     Centro-Oeste
+   </button>
+
+
+   <button class="region-btn"
+     onclick="filtrarRegiao('Sudeste')">
+     Sudeste
+   </button>
+
+
+   <button class="region-btn"
+     onclick="filtrarRegiao('Sul')">
+     Sul
+   </button>
+
+
+   <button class="region-btn clear"
+     onclick="limparFiltroRegiao()">
+     Limpar
+   </button>
+
+
+ </div>
+
+
+</div>
+   <div>
+     <h2>Caminhos Obrigatórios</h2>
+     <div class="path-legend">
+       <div class="path-line" style="background:#FF9800"></div>
+       <span>Recife → Porto Alegre</span>
+     </div>
+     <div class="path-legend">
+       <div class="path-line" style="background:#2196F3"></div>
+       <span>Manaus → São Paulo</span>
+     </div>
+     <div class="path-legend">
+       <div class="path-line" style="background:#9C27B0"></div>
+       <span>Ambos os caminhos</span>
+     </div>
+   </div>
+
+
+   <div>
+     <h2>Nó selecionado</h2>
+     <div id="info-box">
+       <span class="dim">Clique em um aeroporto para ver detalhes.</span>
+     </div>
+   </div>
+
+
+   <div>
+     <h2>Estatísticas</h2>
+     <div id="stats-box" id="stats-box"></div>
+   </div>
+ </div>
+</div>
+
+
+<script>
+const NODES_DATA = [{"id": "REC", "label": "REC", "title": "<b>REC</b> — Recife<br>Região: Nordeste<br>Grau: 2<br>Densidade ego: 0.667", "color": {"background": "#FF9800", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 20, "x": 455.0, "y": -130.0, "region": "Nordeste", "cidade": "Recife", "grau": 2, "densidade": 0.667}, {"id": "SSA", "label": "SSA", "title": "<b>SSA</b> — Salvador<br>Região: Nordeste<br>Grau: 2<br>Densidade ego: 0.667", "color": {"background": "#FF9800", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 20, "x": 364.0, "y": -39.0, "region": "Nordeste", "cidade": "Salvador", "grau": 2, "densidade": 0.667}, {"id": "FOR", "label": "FOR", "title": "<b>FOR</b> — Fortaleza<br>Região: Nordeste<br>Grau: 4<br>Densidade ego: 0.500", "color": {"background": "#FF9800", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 28, "x": 299.0, "y": -351.0, "region": "Nordeste", "cidade": "Fortaleza", "grau": 4, "densidade": 0.5}, {"id": "NAT", "label": "NAT", "title": "<b>NAT</b> — Natal<br>Região: Nordeste<br>Grau: 2<br>Densidade ego: 0.667", "color": {"background": "#FF9800", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 20, "x": 403.0, "y": -299.0, "region": "Nordeste", "cidade": "Natal", "grau": 2, "densidade": 0.667}, {"id": "JPA", "label": "JPA", "title": "<b>JPA</b> — João Pessoa<br>Região: Nordeste<br>Grau: 2<br>Densidade ego: 0.667", "color": {"background": "#FF9800", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 20, "x": 442.0, "y": -221.0, "region": "Nordeste", "cidade": "João Pessoa", "grau": 2, "densidade": 0.667}, {"id": "GRU", "label": "GRU", "title": "<b>GRU</b> — São Paulo<br>Região: Sudeste<br>Grau: 4<br>Densidade ego: 0.400", "color": {"background": "#F44336", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 28, "x": 65.0, "y": 195.0, "region": "Sudeste", "cidade": "São Paulo", "grau": 4, "densidade": 0.4}, {"id": "CGH", "label": "CGH", "title": "<b>CGH</b> — São Paulo<br>Região: Sudeste<br>Grau: 1<br>Densidade ego: 1.000", "color": {"background": "#F44336", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 16, "x": 104.0, "y": 260.0, "region": "Sudeste", "cidade": "São Paulo", "grau": 1, "densidade": 1.0}, {"id": "GIG", "label": "GIG", "title": "<b>GIG</b> — Rio de Janeiro<br>Região: Sudeste<br>Grau: 4<br>Densidade ego: 0.400", "color": {"background": "#F44336", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 28, "x": 234.0, "y": 130.0, "region": "Sudeste", "cidade": "Rio de Janeiro", "grau": 4, "densidade": 0.4}, {"id": "CNF", "label": "CNF", "title": "<b>CNF</b> — Belo Horizonte<br>Região: Sudeste<br>Grau: 2<br>Densidade ego: 0.667", "color": {"background": "#F44336", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 20, "x": 130.0, "y": 104.0, "region": "Sudeste", "cidade": "Belo Horizonte", "grau": 2, "densidade": 0.667}, {"id": "VIX", "label": "VIX", "title": "<b>VIX</b> — Vitória<br>Região: Sudeste<br>Grau: 1<br>Densidade ego: 1.000", "color": {"background": "#F44336", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 16, "x": 325.0, "y": 65.0, "region": "Sudeste", "cidade": "Vitória", "grau": 1, "densidade": 1.0}, {"id": "BSB", "label": "BSB", "title": "<b>BSB</b> — Brasília<br>Região: Centro-Oeste<br>Grau: 6<br>Densidade ego: 0.381", "color": {"background": "#9C27B0", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 36, "x": -78.0, "y": -104.0, "region": "Centro-Oeste", "cidade": "Brasília", "grau": 6, "densidade": 0.381}, {"id": "GYN", "label": "GYN", "title": "<b>GYN</b> — Goiânia<br>Região: Centro-Oeste<br>Grau: 1<br>Densidade ego: 1.000", "color": {"background": "#9C27B0", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 16, "x": -169.0, "y": -39.0, "region": "Centro-Oeste", "cidade": "Goiânia", "grau": 1, "densidade": 1.0}, {"id": "CWB", "label": "CWB", "title": "<b>CWB</b> — Curitiba<br>Região: Sul<br>Grau: 2<br>Densidade ego: 0.667", "color": {"background": "#4CAF50", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 20, "x": -65.0, "y": 325.0, "region": "Sul", "cidade": "Curitiba", "grau": 2, "densidade": 0.667}, {"id": "FLN", "label": "FLN", "title": "<b>FLN</b> — Florianópolis<br>Região: Sul<br>Grau: 2<br>Densidade ego: 0.667", "color": {"background": "#4CAF50", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 20, "x": 39.0, "y": 403.0, "region": "Sul", "cidade": "Florianópolis", "grau": 2, "densidade": 0.667}, {"id": "POA", "label": "POA", "title": "<b>POA</b> — Porto Alegre<br>Região: Sul<br>Grau: 1<br>Densidade ego: 1.000", "color": {"background": "#4CAF50", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 16, "x": -78.0, "y": 494.0, "region": "Sul", "cidade": "Porto Alegre", "grau": 1, "densidade": 1.0}, {"id": "MAO", "label": "MAO", "title": "<b>MAO</b> — Manaus<br>Região: Norte<br>Grau: 3<br>Densidade ego: 0.667", "color": {"background": "#2196F3", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 24, "x": -455.0, "y": -260.0, "region": "Norte", "cidade": "Manaus", "grau": 3, "densidade": 0.667}, {"id": "BEL", "label": "BEL", "title": "<b>BEL</b> — Belém<br>Região: Norte<br>Grau: 3<br>Densidade ego: 0.833", "color": {"background": "#2196F3", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 24, "x": -104.0, "y": -325.0, "region": "Norte", "cidade": "Belém", "grau": 3, "densidade": 0.833}, {"id": "PVH", "label": "PVH", "title": "<b>PVH</b> — Porto Velho<br>Região: Norte<br>Grau: 2<br>Densidade ego: 0.667", "color": {"background": "#2196F3", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 20, "x": -546.0, "y": -130.0, "region": "Norte", "cidade": "Porto Velho", "grau": 2, "densidade": 0.667}, {"id": "RBR", "label": "RBR", "title": "<b>RBR</b> — Rio Branco<br>Região: Norte<br>Grau: 1<br>Densidade ego: 1.000", "color": {"background": "#2196F3", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 16, "x": -650.0, "y": -65.0, "region": "Norte", "cidade": "Rio Branco", "grau": 1, "densidade": 1.0}, {"id": "THE", "label": "THE", "title": "<b>THE</b> — Teresina<br>Região: Nordeste<br>Grau: 1<br>Densidade ego: 1.000", "color": {"background": "#FF9800", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 16, "x": 156.0, "y": -390.0, "region": "Nordeste", "cidade": "Teresina", "grau": 1, "densidade": 1.0}];
+const EDGES_DATA = [{"id": 0, "from": "MAO", "to": "BEL", "weight": 1.0, "tipo": "regional", "label": "1.0", "title": "regional<br>Peso: 1.0<br>fluxo intrarregional norte", "color": {"color": "#aaaaaa", "highlight": "#FFD600"}, "width": 1.0, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 1, "from": "MAO", "to": "PVH", "weight": 1.0, "tipo": "regional", "label": "1.0", "title": "regional<br>Peso: 1.0<br>fluxo intrarregional norte", "color": {"color": "#aaaaaa", "highlight": "#FFD600"}, "width": 1.0, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 2, "from": "PVH", "to": "RBR", "weight": 1.0, "tipo": "regional", "label": "1.0", "title": "regional<br>Peso: 1.0<br>fluxo intrarregional norte", "color": {"color": "#aaaaaa", "highlight": "#FFD600"}, "width": 1.0, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 3, "from": "SSA", "to": "REC", "weight": 1.0, "tipo": "regional", "label": "1.0", "title": "regional<br>Peso: 1.0<br>fluxo intrarregional nordeste", "color": {"color": "#FF9800", "highlight": "#FFD600"}, "width": 4, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 4, "from": "REC", "to": "JPA", "weight": 1.0, "tipo": "regional", "label": "1.0", "title": "regional<br>Peso: 1.0<br>fluxo intrarregional nordeste", "color": {"color": "#aaaaaa", "highlight": "#FFD600"}, "width": 1.0, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 5, "from": "JPA", "to": "NAT", "weight": 1.0, "tipo": "regional", "label": "1.0", "title": "regional<br>Peso: 1.0<br>fluxo intrarregional nordeste", "color": {"color": "#aaaaaa", "highlight": "#FFD600"}, "width": 1.0, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 6, "from": "NAT", "to": "FOR", "weight": 1.0, "tipo": "regional", "label": "1.0", "title": "regional<br>Peso: 1.0<br>fluxo intrarregional nordeste", "color": {"color": "#aaaaaa", "highlight": "#FFD600"}, "width": 1.0, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 7, "from": "FOR", "to": "THE", "weight": 1.0, "tipo": "regional", "label": "1.0", "title": "regional<br>Peso: 1.0<br>fluxo intrarregional nordeste", "color": {"color": "#aaaaaa", "highlight": "#FFD600"}, "width": 1.0, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 8, "from": "BSB", "to": "GYN", "weight": 1.0, "tipo": "regional", "label": "1.0", "title": "regional<br>Peso: 1.0<br>fluxo intrarregional centro-oeste", "color": {"color": "#aaaaaa", "highlight": "#FFD600"}, "width": 1.0, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 9, "from": "GRU", "to": "CGH", "weight": 1.0, "tipo": "regional", "label": "1.0", "title": "regional<br>Peso: 1.0<br>fluxo intrarregional sudeste", "color": {"color": "#aaaaaa", "highlight": "#FFD600"}, "width": 1.0, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 10, "from": "GRU", "to": "GIG", "weight": 1.0, "tipo": "regional", "label": "1.0", "title": "regional<br>Peso: 1.0<br>fluxo intrarregional sudeste", "color": {"color": "#FF9800", "highlight": "#FFD600"}, "width": 4, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 11, "from": "GIG", "to": "CNF", "weight": 1.0, "tipo": "regional", "label": "1.0", "title": "regional<br>Peso: 1.0<br>fluxo intrarregional sudeste", "color": {"color": "#aaaaaa", "highlight": "#FFD600"}, "width": 1.0, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 12, "from": "GIG", "to": "VIX", "weight": 1.0, "tipo": "regional", "label": "1.0", "title": "regional<br>Peso: 1.0<br>fluxo intrarregional sudeste", "color": {"color": "#aaaaaa", "highlight": "#FFD600"}, "width": 1.0, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 13, "from": "CWB", "to": "FLN", "weight": 1.0, "tipo": "regional", "label": "1.0", "title": "regional<br>Peso: 1.0<br>fluxo intrarregional sul", "color": {"color": "#FF9800", "highlight": "#FFD600"}, "width": 4, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 14, "from": "FLN", "to": "POA", "weight": 1.0, "tipo": "regional", "label": "1.0", "title": "regional<br>Peso: 1.0<br>fluxo intrarregional sul", "color": {"color": "#FF9800", "highlight": "#FFD600"}, "width": 4, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 15, "from": "GRU", "to": "CWB", "weight": 2.0, "tipo": "hub", "label": "2.0", "title": "hub<br>Peso: 2.0<br>conexao inter-regional sudeste-sul", "color": {"color": "#FF9800", "highlight": "#FFD600"}, "width": 4, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 16, "from": "GRU", "to": "BSB", "weight": 2.0, "tipo": "hub", "label": "2.0", "title": "hub<br>Peso: 2.0<br>conexao inter-regional sudeste-centro-oeste", "color": {"color": "#2196F3", "highlight": "#FFD600"}, "width": 4, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 17, "from": "GIG", "to": "SSA", "weight": 3.0, "tipo": "hub", "label": "3.0", "title": "hub<br>Peso: 3.0<br>conexao inter-regional sudeste-nordeste", "color": {"color": "#FF9800", "highlight": "#FFD600"}, "width": 4, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 18, "from": "CNF", "to": "BSB", "weight": 2.0, "tipo": "hub", "label": "2.0", "title": "hub<br>Peso: 2.0<br>conexao inter-regional sudeste-centro-oeste", "color": {"color": "#aaaaaa", "highlight": "#FFD600"}, "width": 1.8, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 19, "from": "BSB", "to": "BEL", "weight": 3.0, "tipo": "hub", "label": "3.0", "title": "hub<br>Peso: 3.0<br>conexao inter-regional centro-oeste-norte", "color": {"color": "#aaaaaa", "highlight": "#FFD600"}, "width": 2.6, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 20, "from": "BSB", "to": "MAO", "weight": 3.0, "tipo": "hub", "label": "3.0", "title": "hub<br>Peso: 3.0<br>conexao inter-regional centro-oeste-norte", "color": {"color": "#2196F3", "highlight": "#FFD600"}, "width": 4, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 21, "from": "BSB", "to": "FOR", "weight": 3.0, "tipo": "hub", "label": "3.0", "title": "hub<br>Peso: 3.0<br>conexao inter-regional centro-oeste-nordeste", "color": {"color": "#aaaaaa", "highlight": "#FFD600"}, "width": 2.6, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 22, "from": "FOR", "to": "BEL", "weight": 2.0, "tipo": "hub", "label": "2.0", "title": "hub<br>Peso: 2.0<br>conexao inter-regional nordeste-norte", "color": {"color": "#aaaaaa", "highlight": "#FFD600"}, "width": 1.8, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}];
+
+
+const CAMINHO_REC_POA = ["REC", "SSA", "GIG", "GRU", "CWB", "FLN", "POA"];
+const CAMINHO_MAO_GRU = ["MAO", "BSB", "GRU"];
+
+
+const ORIG_EDGE_COLORS = {};
+const ORIG_EDGE_WIDTHS = {};
+
+
+const nodesDS = new vis.DataSet(NODES_DATA);
+const edgesDS = new vis.DataSet(EDGES_DATA);
+EDGES_DATA.forEach(e => {
+ ORIG_EDGE_COLORS[e.id] = e.color.color;
+ ORIG_EDGE_WIDTHS[e.id] = e.width;
+});
+
+
+const container = document.getElementById("network");
+const network = new vis.Network(container, { nodes: nodesDS, edges: edgesDS }, {
+ physics: {
+   enabled: false,
+ },
+ interaction: {
+   hover: true,
+   tooltipDelay: 150,
+   navigationButtons: true,
+   keyboard: true,
+ },
+ nodes: {
+   shape: "dot",
+   borderWidth: 2,
+ },
+ edges: {
+   arrows: { to: { enabled: false } },
+ },
+});
+
+
+const totalNos = NODES_DATA.length;
+const totalArestas = EDGES_DATA.length;
+const grauMax = Math.max(...NODES_DATA.map(n => n.grau));
+const hubNode = NODES_DATA.find(n => n.grau === grauMax);
+const statsBox = document.getElementById("stats-box");
+statsBox.innerHTML = `
+ Aeroportos: <span>${totalNos}</span><br>
+ Conexões: <span>${totalArestas}</span><br>
+ Hub principal: <span>${hubNode ? hubNode.id : "-"}</span><br>
+ Maior grau: <span>${grauMax}</span>
+`;
+
+
+
+
+network.on("click", function(params) {
+
+
+ if (params.nodes.length === 0) {
+
+
+   if (!modoAtivo) {
+     noSelecionado = null;
+
+
+     nodesDS.update(
+       NODES_DATA.map(n => ({
+         id: n.id,
+         opacity: 1
+       }))
+     );
+
+
+     edgesDS.update(
+       EDGES_DATA.map(e => ({
+         id: e.id,
+         color: {
+           color: ORIG_EDGE_COLORS[e.id]
+         },
+         width: ORIG_EDGE_WIDTHS[e.id]
+       }))
+     );
+   }
+
+
+   return;
+ }
+
+
+ const id = params.nodes[0];
+
+
+ noSelecionado = id;
+
+
+ const n = NODES_DATA.find(x => x.id === id);
+
+
+ if (!n) return;
+
+
+ const connectedNodes = network.getConnectedNodes(id);
+
+
+ nodesDS.update(
+   NODES_DATA.map(node => ({
+     id: node.id,
+
+
+     opacity:
+       node.id === id || connectedNodes.includes(node.id)
+         ? 1
+         : 0.12
+   }))
+ );
+
+
+ edgesDS.update(
+   EDGES_DATA.map(e => ({
+     id: e.id,
+
+
+     color: {
+       color:
+         e.from === id || e.to === id
+           ? ORIG_EDGE_COLORS[e.id]
+           : "#243041"
+     },
+
+
+     width:
+       e.from === id || e.to === id
+         ? ORIG_EDGE_WIDTHS[e.id] + 2
+         : 1
+   }))
+ );
+
+
+ document.getElementById("info-box").innerHTML = `
+   <b>${n.id}</b> — ${n.cidade}<br>
+   <span class="dim">Região:</span> ${n.region}<br>
+   <span class="dim">Grau:</span> ${n.grau}<br>
+   <span class="dim">Densidade ego:</span> ${n.densidade}
+ `;
+
+
+});
+
+
+
+
+let hoverTimeout = null;
+
+
+network.on("hoverNode", function(params) {
+
+
+if (modoAtivo || noSelecionado) return;
+
+
+ clearTimeout(hoverTimeout);
+
+
+ hoverTimeout = setTimeout(() => {
+
+
+   const nodeId = params.node;
+
+
+   const connectedNodes = network.getConnectedNodes(nodeId);
+
+
+   nodesDS.update(
+     NODES_DATA.map(n => ({
+       id: n.id,
+
+
+       opacity:
+         n.id === nodeId || connectedNodes.includes(n.id)
+           ? 1
+           : 0.12
+     }))
+   );
+
+
+   edgesDS.update(
+     EDGES_DATA.map(e => ({
+       id: e.id,
+
+
+       color: {
+         color:
+           e.from === nodeId || e.to === nodeId
+             ? ORIG_EDGE_COLORS[e.id]
+             : "#243041"
+       },
+
+
+       width:
+         e.from === nodeId || e.to === nodeId
+           ? ORIG_EDGE_WIDTHS[e.id] + 2
+           : 1
+     }))
+   );
+
+
+ }, 20);
+
+
+});
+
+
+network.on("blurNode", function() {
+
+
+if (modoAtivo || noSelecionado) return;
+
+
+ nodesDS.update(
+   NODES_DATA.map(n => ({
+     id: n.id,
+     opacity: 1
+   }))
+ );
+
+
+ edgesDS.update(
+   EDGES_DATA.map(e => ({
+     id: e.id,
+
+
+     color: {
+       color: ORIG_EDGE_COLORS[e.id]
+     },
+
+
+     width: ORIG_EDGE_WIDTHS[e.id]
+   }))
+ );
+
+
+});
+
+
+function buscar() {
+ const q = document.getElementById("search-input").value.trim().toUpperCase();
+ if (!q) return;
+ const n = NODES_DATA.find(x => x.id === q || x.cidade.toUpperCase().includes(q));
+ if (!n) { alert("Aeroporto não encontrado: " + q); return; }
+ network.selectNodes([n.id]);
+ network.focus(n.id, { scale: 1.6, animation: { duration: 600, easingFunction: "easeInOutQuad" } });
+  document.getElementById("info-box").innerHTML = `
+   <b>${n.id}</b> — ${n.cidade}<br>
+   <span class="dim">Região:</span> ${n.region}<br>
+   <span class="dim">Grau:</span> ${n.grau}<br>
+   <span class="dim">Densidade ego:</span> ${n.densidade}
+ `;
+}
+
+
+function limparBusca() {
+ document.getElementById("search-input").value = "";
+ network.unselectAll();
+ network.fit({ animation: true });
+ document.getElementById("info-box").innerHTML = '<span class="dim">Clique em um aeroporto para ver detalhes.</span>';
+}
+
+
+let modoAtivo = null;
+let noSelecionado = null;
+let regiaoAtiva = null;
+
+
+function edgesNoCaminho(caminho) {
+ const set = new Set();
+ for (let i = 0; i < caminho.length - 1; i++) {
+   const a = caminho[i], b = caminho[i+1];
+   EDGES_DATA.forEach(e => {
+     if ((e.from===a && e.to===b) || (e.from===b && e.to===a)) set.add(e.id);
+   });
+ }
+ return set;
+}
+
+
+const ARESTAS_REC_POA = edgesNoCaminho(CAMINHO_REC_POA);
+const ARESTAS_MAO_GRU = edgesNoCaminho(CAMINHO_MAO_GRU);
+
+
+function destacarCaminho(modo) {
+ if (modoAtivo === modo) { resetarCaminhos(); return; }
+ modoAtivo = modo;
+
+
+ document.getElementById("btn-rec-poa").classList.toggle("active", modo==="rec-poa");
+ document.getElementById("btn-mao-gru").classList.toggle("active", modo==="mao-gru");
+
+
+ const caminho  = modo === "rec-poa" ? CAMINHO_REC_POA : CAMINHO_MAO_GRU;
+ const arestas  = modo === "rec-poa" ? ARESTAS_REC_POA : ARESTAS_MAO_GRU;
+ const corDest  = modo === "rec-poa" ? "#FF9800" : "#2196F3";
+
+
+ nodesDS.update(NODES_DATA.map(n => ({ id: n.id, opacity: 0.15 })));
+ edgesDS.update(EDGES_DATA.map(e => ({ id: e.id, color: { color: "#333" }, width: 1 })));
+
+
+ caminho.forEach(id => nodesDS.update([{ id, opacity: 1.0 }]));
+
+
+ [...arestas].forEach(eid => edgesDS.update([{ id: eid, color: { color: corDest }, width: 5 }]));
+
+
+}
+
+
+function filtrarRegiao(regiao) {
+
+
+ regiaoAtiva = regiao;
+
+
+ document.querySelectorAll(".region-btn")
+   .forEach(btn => btn.classList.remove("active"));
+
+
+ const btn = [...document.querySelectorAll(".region-btn")]
+   .find(b => b.innerText === regiao);
+
+
+ if(btn) btn.classList.add("active");
+
+
+ nodesDS.update(
+   NODES_DATA.map(n => ({
+     id: n.id,
+     opacity: n.region === regiao ? 1 : 0.08
+   }))
+ );
+
+
+ edgesDS.update(
+   EDGES_DATA.map(e => {
+
+
+     const fromNode = NODES_DATA.find(n => n.id === e.from);
+     const toNode   = NODES_DATA.find(n => n.id === e.to);
+
+
+     const ativa =
+       fromNode?.region === regiao &&
+       toNode?.region === regiao;
+
+
+     return {
+       id: e.id,
+
+
+       color: {
+         color: ativa
+           ? ORIG_EDGE_COLORS[e.id]
+           : "rgba(80,80,80,.08)"
+       },
+
+
+       width: ativa
+         ? ORIG_EDGE_WIDTHS[e.id]
+         : 0.5
+     };
+
+
+   })
+ );
+
+
+}
+function limparFiltroRegiao() {
+
+
+ regiaoAtiva = null;
+
+
+ document.querySelectorAll(".region-btn")
+   .forEach(btn => btn.classList.remove("active"));
+
+
+ nodesDS.update(
+   NODES_DATA.map(n => ({
+     id: n.id,
+     opacity: 1
+   }))
+ );
+
+
+ edgesDS.update(
+   EDGES_DATA.map(e => ({
+     id: e.id,
+
+
+     color: {
+       color: ORIG_EDGE_COLORS[e.id]
+     },
+
+
+     width: ORIG_EDGE_WIDTHS[e.id]
+   }))
+ );
+
+
+}
+
+
+function resetarCaminhos() {
+ modoAtivo = null;
+ noSelecionado = null;
+
+
+ document.getElementById("btn-rec-poa").classList.remove("active");
+ document.getElementById("btn-mao-gru").classList.remove("active");
+
+
+ nodesDS.update(NODES_DATA.map(n => ({
+   id: n.id,
+   opacity: 1.0
+ })));
+
+
+ edgesDS.update(EDGES_DATA.map(e => ({
+   id: e.id,
+   color: { color: ORIG_EDGE_COLORS[e.id] },
+   width: ORIG_EDGE_WIDTHS[e.id],
+ })));
+
+
+ network.unselectAll();
+
+
+ document.getElementById("info-box").innerHTML =
+   '<span class="dim">Clique em um aeroporto para ver detalhes.</span>';
+}
+</script>
+</body>
+</html>
+
