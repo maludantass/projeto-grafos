@@ -1,10 +1,5 @@
 class Grafo:
-    """
-    RÉGUA DE PESOS UTILIZADA:
-    Peso 1.0 (Conexão Regional): Voos intrarregionais (dentro da mesma região). São mais curtos e com menor custo.
-    Peso 2.0 (Conexão Inter-regional Curta/Média): Voos conectando Hubs de regiões próximas (ex: Sudeste-Sul, Sudeste-Centro-Oeste, Nordeste-Norte).
-    Peso 3.0 (Conexão Inter-regional Longa): Voos conectando Hubs de regiões mais distantes (ex: Sudeste-Nordeste, Centro-Oeste-Norte).
-    """
+
     def __init__(self):
         self.adj_list = {}
         self.nodes = {}
@@ -15,13 +10,7 @@ class Grafo:
             self.nodes[rotulo] = kwargs
 
     def adicionar_aresta(self, origem, destino, peso=1.0, tipo_conexao='', justificativa=''):
-        """
-        origem: Rótulo do nó de origem.
-        destino: Rótulo do nó de destino.
-        peso: Peso da aresta.
-        tipo_conexao: Tipo da conexão (ex: regional, hub).
-        justificativa: Justificativa para a existência da aresta.
-        """
+
         if origem not in self.adj_list:
             self.adicionar_no(origem)
         if destino not in self.adj_list:

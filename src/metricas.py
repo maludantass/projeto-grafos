@@ -1,6 +1,3 @@
-"""
-Parte 3 - Métricas Globais e por Grupo
-"""
 import os
 import sys
 import json
@@ -172,12 +169,7 @@ def salvar_rankings_json(
 
 
 def calcular_resumo_pesos(grafo):
-    """
-    Calcula um resumo da distribuição dos pesos das arestas.
 
-    Como o grafo é não direcionado e cada aresta é armazenada nos dois sentidos,
-    a função usa um conjunto para contar cada par apenas uma vez.
-    """
     distribuicao = {}
     arestas_vistas = set()
 
@@ -232,7 +224,7 @@ def main():
     resumo_pesos = calcular_resumo_pesos(grafo)
 
     print("\n" + "=" * 60)
-    print("PARTE 3 — MÉTRICAS GLOBAIS E POR GRUPO")
+    print("MÉTRICAS GLOBAIS E POR GRUPO")
     print("=" * 60)
 
     print("\n[1] Grafo Completo")

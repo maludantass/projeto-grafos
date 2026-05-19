@@ -1,8 +1,3 @@
-"""
-viz.py — Parte 8: Explorações e Visualizações Analíticas
-Gera 4 visualizações salvas em out/
-"""
-
 import csv
 import json
 import os
@@ -37,7 +32,7 @@ COR_REGIAO = {
     "Sul":          "#4CAF50",
 }
 
-# ── VIZ 1: Histograma de distribuição de graus ─────────────────────────────
+#Histograma de distribuição de graus
 def viz1_distribuicao_graus():
     graus_raw = ler_csv(os.path.join(OUT, "graus.csv"))
     graus = [int(r["grau"]) for r in graus_raw]
@@ -75,7 +70,7 @@ def viz1_distribuicao_graus():
     plt.close()
     print(f"[OK] {path}")
 
-# ── VIZ 2: Ranking de aeroportos (barras horizontais) ─────────────────────
+#Ranking de aeroportos
 def viz2_ranking_aeroportos():
     aeroportos_raw = ler_csv(os.path.join(DATA, "aeroportos_data.csv"))
     regiao_map = {r["iata"]: r["regiao"] for r in aeroportos_raw}
@@ -117,7 +112,7 @@ def viz2_ranking_aeroportos():
     plt.close()
     print(f"[OK] {path}")
 
-# ── VIZ 3: Comparação de métricas por região (barras agrupadas) ────────────
+#Comparação de métricas por região 
 def viz3_comparacao_regioes():
     regioes = ler_json(os.path.join(OUT, "regioes.json"))
 
@@ -172,7 +167,7 @@ def viz3_comparacao_regioes():
     plt.close()
     print(f"[OK] {path}")
 
-# ── VIZ 4: Camadas BFS a partir de BSB ────────────────────────────────────
+#Camadas BFS a partir de BSB 
 def bfs_camadas(adj, origem):
     visitado = {origem: 0}
     fila = [origem]

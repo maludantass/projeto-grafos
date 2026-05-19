@@ -1,0 +1,92 @@
+{
+  "algoritmo": "BFS",
+  "origem": "REC",
+  "tempo_ms": 0.3841,
+  "nos_visitados": 20,
+  "ordem_visita": [
+    "REC",
+    "SSA",
+    "JPA",
+    "GIG",
+    "NAT",
+    "GRU",
+    "CNF",
+    "VIX",
+    "FOR",
+    "CGH",
+    "CWB",
+    "BSB",
+    "THE",
+    "BEL",
+    "FLN",
+    "GYN",
+    "MAO",
+    "POA",
+    "PVH",
+    "RBR"
+  ],
+  "niveis": {
+    "REC": 0,
+    "SSA": 1,
+    "JPA": 1,
+    "GIG": 2,
+    "NAT": 2,
+    "GRU": 3,
+    "CNF": 3,
+    "VIX": 3,
+    "FOR": 3,
+    "CGH": 4,
+    "CWB": 4,
+    "BSB": 4,
+    "THE": 4,
+    "BEL": 4,
+    "FLN": 5,
+    "GYN": 5,
+    "MAO": 5,
+    "POA": 6,
+    "PVH": 6,
+    "RBR": 7
+  },
+  "camadas": [
+    [
+      "REC"
+    ],
+    [
+      "SSA",
+      "JPA"
+    ],
+    [
+      "GIG",
+      "NAT"
+    ],
+    [
+      "GRU",
+      "CNF",
+      "VIX",
+      "FOR"
+    ],
+    [
+      "CGH",
+      "CWB",
+      "BSB",
+      "THE",
+      "BEL"
+    ],
+    [
+      "FLN",
+      "GYN",
+      "MAO"
+    ],
+    [
+      "POA",
+      "PVH"
+    ],
+    [
+      "RBR"
+    ]
+  ],
+  "arestas_tipo": {
+    "arvore": 19,
+    "cruzada": 4
+  }
+}
