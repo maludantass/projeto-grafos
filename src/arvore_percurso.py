@@ -5,12 +5,6 @@ import csv
 import heapq
 
 class Grafo:
-    """
-    RÉGUA DE PESOS UTILIZADA:
-    Peso 1.0 (Conexão Regional): Voos intrarregionais (dentro da mesma região).
-    Peso 2.0 (Conexão Inter-regional Curta/Média): Voos conectando Hubs de regiões próximas.
-    Peso 3.0 (Conexão Inter-regional Longa): Voos conectando Hubs de regiões mais distantes.
-    """
 
     def __init__(self):
         self.adj_list = {}
@@ -156,7 +150,7 @@ def reconstruir_caminho(predecessores, origem, destino):
 
 
 def caminho_para_arestas(caminho):
-    # Converte lista de nós em lista de arestas
+
     return [(caminho[i], caminho[i + 1]) for i in range(len(caminho) - 1)]
 
 

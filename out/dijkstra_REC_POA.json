@@ -1,0 +1,17 @@
+{
+  "algoritmo": "DIJKSTRA",
+  "origem": "REC",
+  "destino": "POA",
+  "custo": 9.0,
+  "caminho": [
+    "REC",
+    "SSA",
+    "GIG",
+    "GRU",
+    "CWB",
+    "FLN",
+    "POA"
+  ],
+  "saltos": 6,
+  "tempo_ms": 0.2887
+}

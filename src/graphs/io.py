@@ -12,7 +12,7 @@ def ler_aeroportos(caminho_arquivo):
             regiao = linha.get('regiao', '').strip()
             
             if iata:
-                # Adiciona o nó rotulado com IATA, guardando cidade e regiao como atributos
+
                 grafo.adicionar_no(iata, cidade=cidade, regiao=regiao)
                 
     return grafo
