@@ -1,6 +1,7 @@
 import csv
 from .graph import Grafo
 
+
 def ler_aeroportos(caminho_arquivo):
 
     grafo = Grafo()
@@ -76,4 +77,37 @@ def ler_adjacencias(grafo, caminho_arquivo):
                 peso=peso,
                 tipo_conexao=tipo_conexao,
                 justificativa=justificativa
+            )
+
+
+def ler_musicas(caminho_arquivo):
+    """Lê o CSV de nós do grafo Spotify (musicas_nos.csv)."""
+    grafo = Grafo()
+    with open(caminho_arquivo, mode='r', encoding='utf-8') as f:
+        leitor_csv = csv.DictReader(f)
+        for linha in leitor_csv:
+            track_id = linha.get('track_id', '').strip()
+            if not track_id:
+                continue
+            grafo.adicionar_no(
+                track_id,
+                track_name=linha.get('track_name', ''),
+                artists=linha.get('artists', ''),
+                track_genre=linha.get('track_genre', ''),
+            )
+    return grafo
+
+
+def ler_adjacencias_musicas(grafo, caminho_arquivo):
+    """Lê o CSV de arestas do grafo Spotify (adjacencias_musicas.csv)."""
+    with open(caminho_arquivo, mode='r', encoding='utf-8') as f:
+        leitor_csv = csv.DictReader(f)
+        for linha in leitor_csv:
+            origem = linha.get('origem', '').strip()
+            destino = linha.get('destino', '').strip()
+            peso = float(linha.get('peso', '1.0'))
+            grafo.adicionar_aresta(
+                origem=origem,
+                destino=destino,
+                peso=peso,
             )

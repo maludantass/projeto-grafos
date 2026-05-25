@@ -1,0 +1,157 @@
+DESCRICAO DO DATASET PARTE 2 (Spotify Tracks)
+
+FONTE: Spotify Tracks Dataset (Kaggle)
+https://www.kaggle.com/datasets/maharshipandya/-spotify-tracks-dataset
+
+CONSTRUCAO DO GRAFO:
+  - Dataset original: 114.000 faixas
+  - Amostra utilizada: 500 musicas (estratificada por genero)
+  - Nos: cada musica e um vertice
+  - Arestas: K-vizinhos mais proximos (K=5) por similaridade
+  - Peso: distancia euclidiana entre vetores de atributos normalizados
+  - Atributos usados: danceability, energy, speechiness, acousticness, instrumentalness, liveness, valence, loudness, tempo
+
+PROPRIEDADES DO GRAFO:
+  |V| (vertices)  = 500
+  |E| (arestas)   = 1764
+  Tipo            = Nao dirigido, Ponderado
+  Pesos           = Distancia euclidiana (continuo)
+    Peso minimo   = 0.000000
+    Peso maximo   = 0.981174
+    Peso medio    = 0.304147
+
+DISTRIBUICAO DE GRAUS:
+  Grau minimo  = 5
+  Grau maximo  = 23
+  Grau medio   = 7.07
+
+  Frequencia por grau:
+    Grau    Qtd vertices         %
+  
+       5             116    23.20%
+       6             116    23.20%
+       7             103    20.60%
+       8              67    13.40%
+       9              41     8.20%
+      10              25     5.00%
+      11              18     3.60%
+      12               4     0.80%
+      13               5     1.00%
+      14               3     0.60%
+      23               1     0.20%
+
+GENEROS NA AMOSTRA:
+  acoustic                4 musicas
+  afrobeat                4 musicas
+  alt-rock                4 musicas
+  alternative             4 musicas
+  ambient                 4 musicas
+  anime                   4 musicas
+  black-metal             4 musicas
+  bluegrass               4 musicas
+  blues                   5 musicas
+  brazil                  6 musicas
+  breakbeat               4 musicas
+  british                 4 musicas
+  cantopop                4 musicas
+  chicago-house           4 musicas
+  children                4 musicas
+  chill                   4 musicas
+  classical               5 musicas
+  club                    4 musicas
+  comedy                  4 musicas
+  country                 5 musicas
+  dance                   4 musicas
+  dancehall               4 musicas
+  death-metal             4 musicas
+  deep-house              4 musicas
+  detroit-techno          4 musicas
+  disco                   4 musicas
+  disney                  5 musicas
+  drum-and-bass           5 musicas
+  dub                     4 musicas
+  dubstep                 4 musicas
+  edm                     4 musicas
+  electro                 6 musicas
+  electronic              4 musicas
+  emo                     8 musicas
+  folk                    4 musicas
+  forro                   4 musicas
+  french                  6 musicas
+  funk                    4 musicas
+  garage                  5 musicas
+  german                  4 musicas
+  gospel                  5 musicas
+  goth                    4 musicas
+  grindcore               4 musicas
+  groove                  5 musicas
+  grunge                  5 musicas
+  guitar                  4 musicas
+  happy                   4 musicas
+  hard-rock               4 musicas
+  hardcore                4 musicas
+  hardstyle               4 musicas
+  heavy-metal             4 musicas
+  hip-hop                 5 musicas
+  honky-tonk              4 musicas
+  house                   5 musicas
+  idm                     4 musicas
+  indian                  4 musicas
+  indie                   5 musicas
+  indie-pop               4 musicas
+  industrial              6 musicas
+  iranian                 4 musicas
+  j-dance                 4 musicas
+  j-idol                  4 musicas
+  j-pop                   4 musicas
+  j-rock                  4 musicas
+  jazz                    4 musicas
+  k-pop                   4 musicas
+  kids                    5 musicas
+  latin                   5 musicas
+  latino                  4 musicas
+  malay                   5 musicas
+  mandopop                5 musicas
+  metal                   4 musicas
+  metalcore               5 musicas
+  minimal-techno          4 musicas
+  mpb                     5 musicas
+  new-age                 4 musicas
+  opera                   5 musicas
+  pagode                  4 musicas
+  party                   4 musicas
+  piano                   5 musicas
+  pop                     4 musicas
+  pop-film                4 musicas
+  power-pop               5 musicas
+  progressive-house       4 musicas
+  psych-rock              5 musicas
+  punk                    6 musicas
+  punk-rock               4 musicas
+  r-n-b                   5 musicas
+  reggae                  4 musicas
+  reggaeton               4 musicas
+  rock                    4 musicas
+  rock-n-roll             4 musicas
+  rockabilly              4 musicas
+  romance                 4 musicas
+  sad                     4 musicas
+  salsa                   5 musicas
+  samba                   5 musicas
+  sertanejo               4 musicas
+  show-tunes              4 musicas
+  singer-songwriter       4 musicas
+  ska                     4 musicas
+  sleep                   4 musicas
+  songwriter              4 musicas
+  soul                    5 musicas
+  spanish                 4 musicas
+  study                   4 musicas
+  swedish                 4 musicas
+  synth-pop               4 musicas
+  tango                   4 musicas
+  techno                  5 musicas
+  trance                  4 musicas
+  trip-hop                4 musicas
+  turkish                 5 musicas
+  world-music             6 musicas
