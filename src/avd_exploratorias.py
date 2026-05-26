@@ -134,6 +134,7 @@ def viz10_2_centralidade_grau():
     # cada aeroporto ocupa sua própria linha, rótulo legível à esquerda, comprimento proporcional ao valor.
     # Zero sobreposição possível.
 
+
     aeroportos_raw = ler_csv(os.path.join(DATA, "aeroportos_data.csv"))
     graus_raw      = ler_csv(os.path.join(OUT,  "graus.csv"))
     regiao_map     = {r["iata"]: r["regiao"] for r in aeroportos_raw}
@@ -160,11 +161,11 @@ def viz10_2_centralidade_grau():
     ax.axvspan(0.106,  0.263, alpha=0.10, color="#FF9800", zorder=0)
     ax.axvspan(0.263,  0.42,  alpha=0.10, color="#F44336", zorder=0)
 
-    ax.text(0.053, n - 0.1, "BAIXO", ha="center", fontsize=8,
+    ax.text(0.053, n - 0.1, "BAIXO", ha="center", fontsize=9,
             color="#1565C0", fontweight="bold", alpha=0.7, va="top")
-    ax.text(0.184, n - 0.1, "MÉDIO", ha="center", fontsize=8,
+    ax.text(0.184, n - 0.1, "MÉDIO", ha="center", fontsize=9,
             color="#E65100", fontweight="bold", alpha=0.7, va="top")
-    ax.text(0.340, n - 0.1, "ALTO",  ha="center", fontsize=8,
+    ax.text(0.340, n - 0.1, "ALTO",  ha="center", fontsize=9,
             color="#B71C1C", fontweight="bold", alpha=0.7, va="top")
 
     bars = ax.barh(y_pos, cents, color=cores,
@@ -175,7 +176,7 @@ def viz10_2_centralidade_grau():
         ax.text(c + 0.004,
                 bar.get_y() + bar.get_height() / 2,
                 f"{c:.3f}  (grau {g})",
-                va="center", ha="left", fontsize=8.5, color="#333")
+                va="center", ha="left", fontsize=9.5, color="#333")
 
     # linha de média
     ax.axvline(media, color="#E53935", linestyle="--",
@@ -184,26 +185,29 @@ def viz10_2_centralidade_grau():
     ax.set_yticks(y_pos)
     ax.set_yticklabels(nos, fontsize=10, fontweight="bold")
     ax.set_xlabel("Centralidade Normalizada  [grau / (|V|-1)]",
-                  fontsize=11, labelpad=8)
-    ax.set_ylabel("Aeroporto (código IATA)", fontsize=11)
+                  fontsize=12, labelpad=8) # Aumentado levemente o eixo x
+    ax.set_ylabel("Aeroporto (código IATA)", fontsize=12)
     ax.set_title("Centralidade de Grau por Aeroporto e Região",
-                 fontsize=14, fontweight="bold", pad=12)
+                 fontsize=15, fontweight="bold", pad=12)
     ax.set_xlim(0, max(cents) + 0.12)
     ax.set_ylim(-0.6, n - 0.4)
     ax.grid(axis="x", linestyle="--", alpha=0.35)
 
+    # LEGENDA AUMENTADA
     patches_leg = [mpatches.Patch(color=c, label=r) for r, c in COR_REGIAO.items()]
     ax.legend(handles=patches_leg + [
         mpatches.Patch(color="#E53935", label=f"Média = {media:.3f}")
-    ], title="Região", fontsize=9, title_fontsize=9, loc="lower right")
+    ], title="Região", fontsize=11, title_fontsize=12, loc="lower right")
 
+    # INSIGHT INFERIOR AUMENTADO
     nota = (
         "Insight exploratório: BSB concentra a maior centralidade (0.316), "
         "seguido por GRU, FOR e GIG (0.211).\n"
         "Cerca de 50% dos aeroportos ficam abaixo da média — "
         "dependência crítica de poucos hubs."
     )
-    fig.text(0.5, -0.02, nota, ha="center", fontsize=8.5,
+    # Ajustei a posição em y (-0.05) para não colar muito no gráfico e aumentei a fonte para 11.5
+    fig.text(0.5, -0.05, nota, ha="center", fontsize=11.5,
              color="#555", style="italic")
 
     plt.tight_layout()

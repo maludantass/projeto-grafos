@@ -32,44 +32,94 @@ COR_REGIAO = {
     "Sul":          "#4CAF50",
 }
 
-#Histograma de distribuição de graus
-def viz1_distribuicao_graus():
+def viz1_distribuicao_graus_pizza():
     graus_raw = ler_csv(os.path.join(OUT, "graus.csv"))
     graus = [int(r["grau"]) for r in graus_raw]
 
-    fig, ax = plt.subplots(figsize=(8, 5))
-    bins = range(0, max(graus) + 2)
-    counts, edges, patches = ax.hist(graus, bins=bins, align="left",
-                                     color="#1565C0", edgecolor="white",
-                                     linewidth=0.8, rwidth=0.8)
-    max_count = max(counts)
-    for patch, count in zip(patches, counts):
-        if count == max_count:
-            patch.set_facecolor("#FF6F00")
+    total = len(graus)
+    qtd_1 = sum(1 for g in graus if g == 1)
+    qtd_2_3 = sum(1 for g in graus if 2 <= g <= 3)
+    qtd_4_6 = sum(1 for g in graus if 4 <= g <= 6)
+    qtd_hubs = sum(1 for g in graus if g >= 7)
 
-    ax.set_title("Distribuição de Graus dos Aeroportos", fontsize=14, fontweight="bold", pad=12)
-    ax.set_xlabel("Grau (número de conexões)", fontsize=11)
-    ax.set_ylabel("Quantidade de aeroportos", fontsize=11)
-    ax.set_xticks(list(bins))
-    ax.yaxis.get_major_locator().set_params(integer=True)
-    ax.grid(axis="y", linestyle="--", alpha=0.4)
+    
+    valores_raw = [qtd_1, qtd_2_3, qtd_4_6, qtd_hubs]
+    
+    labels_raw = [
+        f"Periféricos (Grau 1): {qtd_1} aero. ({(qtd_1/total)*100:.1f}%)",
+        f"Pequenos (Grau 2-3): {qtd_2_3} aero. ({(qtd_2_3/total)*100:.1f}%)",
+        f"Médios (Grau 4-6): {qtd_4_6} aero. ({(qtd_4_6/total)*100:.1f}%)",
+        f"Hubs Fortes (Grau 7+): {qtd_hubs} aero. ({(qtd_hubs/total)*100:.1f}%)"
+    ]
+    
+    cores_raw = ["#90CAF9", "#42A5F5", "#1565C0", "#FF6F00"]
 
-    media = np.mean(graus)
-    ax.axvline(media, color="#E53935", linestyle="--", linewidth=1.5,
-               label=f"Média = {media:.1f}")
-    ax.legend(fontsize=10)
+    
+    valores_desenho = []
+    cores_desenho = []
 
-    fig.text(0.5, -0.04,
-        "Insight: A maioria dos aeroportos tem grau baixo (1-2), com poucos hubs centrais.\n"
-        "BSB concentra as conexões inter-regionais — padrão típico de rede scale-free.",
-        ha="center", fontsize=9, style="italic", color="#444")
+    for v, c in zip(valores_raw, cores_raw):
+        if v > 0: 
+            valores_desenho.append(v)
+            cores_desenho.append(c)
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    fig.patch.set_facecolor("#F8F9FA")
+
+    
+    wedges, texts, autotexts = ax.pie(
+        valores_desenho, 
+        autopct="%1.1f%%",         
+        pctdistance=0.75,          
+        startangle=140,            
+        colors=cores_desenho,
+        wedgeprops=dict(width=0.45, edgecolor="white", linewidth=2.5)
+    )
+
+    
+    for autotext in autotexts:
+        autotext.set_fontsize(10)
+        autotext.set_fontweight("bold")
+        autotext.set_color("white")
+
+    
+    elementos_legenda = []
+    idx_desenho = 0
+    
+    for i, v in enumerate(valores_raw):
+        if v > 0:
+            elementos_legenda.append(wedges[idx_desenho])
+            idx_desenho += 1
+        else:
+            elementos_legenda.append(mpatches.Patch(color=cores_raw[i]))
+
+    # Exibe a legenda lateral
+    ax.legend(
+        elementos_legenda, 
+        labels_raw,
+        title="Categorias de Conectividade",
+        title_fontsize=11,
+        loc="center left",
+        bbox_to_anchor=(0.95, 0.5), 
+        frameon=False,
+        fontsize=10
+    )
+
+    ax.set_title("Distribuição de Conectividade da Malha (Graus)", 
+                 fontsize=14, fontweight="bold", pad=15, color="#1A1A2E")
+
+    nota = (
+        "Insight: A imensa maioria da rede é composta por nós com grau baixo (periféricos).\n"
+        "Os Hubs de altíssima conectividade (7+) representam uma parcela nula ou extremamente rara."
+    )
+    fig.text(0.5, 0.02, nota, ha="center", fontsize=9.5, style="italic", color="#444")
 
     plt.tight_layout()
+    
     path = os.path.join(OUT, "viz1_distribuicao_graus.png")
-    plt.savefig(path, dpi=150, bbox_inches="tight")
+    plt.savefig(path, dpi=150, bbox_inches="tight", facecolor=fig.get_facecolor())
     plt.close()
     print(f"[OK] {path}")
-
 #Ranking de aeroportos
 def viz2_ranking_aeroportos():
     aeroportos_raw = ler_csv(os.path.join(DATA, "aeroportos_data.csv"))
@@ -260,7 +310,7 @@ def viz4_bfs_camadas():
 
 def main():
     print("=== Gerando visualizacoes — Parte 8 ===")
-    viz1_distribuicao_graus()
+    viz1_distribuicao_graus_pizza()
     viz2_ranking_aeroportos()
     viz3_comparacao_regioes()
     viz4_bfs_camadas()
