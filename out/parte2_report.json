@@ -1,0 +1,88 @@
+{
+  "descricao": "Métricas de desempenho dos algoritmos de grafos aplicados ao grafo de similaridade musical Spotify (Parte 2).",
+  "grafo": {
+    "dataset": "Spotify Tracks — dataset_parte2",
+    "vertices": 499,
+    "arestas": 1764,
+    "tipo": "não dirigido, ponderado"
+  },
+  "medicoes": [
+    {
+      "tarefa": "Carregamento do grafo",
+      "algoritmo": "leitura de CSV + construção da lista de adjacência",
+      "entrada": "musicas_nos.csv + adjacencias_musicas.csv (|V|=499, |E|=1764)",
+      "tempo_ms": 92.7315,
+      "memoria_pico_kb": 1211.65,
+      "observacoes": "Inclui leitura de arquivo e inserção de todos os nós e arestas."
+    },
+    {
+      "tarefa": "BFS (Busca em Largura)",
+      "algoritmo": "BFS iterativo com fila (deque)",
+      "entrada": "|V|=499, |E|=1764",
+      "origem": "7g96GMqMFfkrzEvDwSIWzQ",
+      "tempo_ms": 12.1054,
+      "memoria_pico_kb": 312.09,
+      "complexidade_teorica": "O(V + E)",
+      "observacoes": "Percorre todo o componente conexo a partir da origem."
+    },
+    {
+      "tarefa": "DFS (Busca em Profundidade)",
+      "algoritmo": "DFS recursivo com coloração BRANCO/CINZA/PRETO",
+      "entrada": "|V|=499, |E|=1764",
+      "origem": "7g96GMqMFfkrzEvDwSIWzQ",
+      "tempo_ms": 33.9393,
+      "memoria_pico_kb": 331.73,
+      "complexidade_teorica": "O(V + E)",
+      "observacoes": "Percorre todos os vértices do grafo (não apenas um componente)."
+    },
+    {
+      "tarefa": "Dijkstra (caminho mínimo)",
+      "algoritmo": "Dijkstra com heap binário (heapq)",
+      "entrada": "|V|=499, |E|=1764",
+      "origem": "7g96GMqMFfkrzEvDwSIWzQ",
+      "tempo_ms": 5.5743,
+      "memoria_pico_kb": 81.84,
+      "complexidade_teorica": "O((V + E) log V)",
+      "observacoes": "Calcula distâncias mínimas de origem para todos os demais vértices."
+    },
+    {
+      "tarefa": "Componentes Conexos",
+      "algoritmo": "DFS global iterativo",
+      "entrada": "|V|=499, |E|=1764",
+      "componentes_encontrados": 1,
+      "tempo_ms": 1.6674,
+      "memoria_pico_kb": 55.45,
+      "complexidade_teorica": "O(V + E)",
+      "observacoes": "Identifica todos os componentes conexos do grafo. Resultado: 1 componente(s)."
+    }
+  ],
+  "resumo_comparativo": {
+    "mais_rapido_ms": 1.6674,
+    "mais_lento_ms": 33.9393,
+    "ordem_por_tempo_crescente": [
+      [
+        "Componentes Conexos",
+        1.6674
+      ],
+      [
+        "Dijkstra",
+        5.5743
+      ],
+      [
+        "BFS",
+        12.1054
+      ],
+      [
+        "DFS",
+        33.9393
+      ]
+    ]
+  },
+  "metadados": {
+    "medicao_de_memoria": true,
+    "unidade_tempo": "milissegundos (ms)",
+    "unidade_memoria": "kilobytes (KB) — pico alocado durante execução",
+    "ferramenta_memoria": "tracemalloc (stdlib Python)",
+    "nota": "Os tempos podem variar entre execuções por fatores do SO (cache, agendador). Recomenda-se repetir e tirar a média para benchmarks rigorosos."
+  }
+}

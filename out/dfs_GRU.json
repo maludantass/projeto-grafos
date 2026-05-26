@@ -1,7 +1,7 @@
 {
   "algoritmo": "DFS",
   "origem": "GRU",
-  "tempo_ms": 0.0446,
+  "tempo_ms": 0.5412,
   "nos_visitados": 20,
   "ordem_visita": [
     "REC",
