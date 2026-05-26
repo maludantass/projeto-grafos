@@ -1,4 +1,4 @@
-#Análise Explanatória
+# Análise Explanatória
 import csv
 import json
 import os
@@ -12,6 +12,9 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import matplotlib.patheffects as pe
 import numpy as np
+
+# --- NOVIDADE: Importando geopandas ---
+import geopandas as gpd
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(BASE, "data")
@@ -43,136 +46,84 @@ COORDS = {
     "FLN": (-48.55, -27.67), "POA": (-51.17, -29.99),
 }
 
-# Radar (spider chart): perfil dos principais aeroportos 
-
-def viz10_3_vulnerabilidade_hubs():
-    #pq dessa escolha para avd
-    #O que mostra: Radar chart (spider) com 4 métricas normalizadas para cada aeroporto: grau, densidade ego-rede, 
-    # ordem ego e tamanho ego. Cada aeroporto é uma linha colorida sobre os eixos radiais. Seleciona os 7 aeroportos
-    #  mais relevantes para manter a leitura limpa.
-
-    #Insight: O radar torna imediatamente visível que BSB tem perfil dominante em todas as dimensões, enquanto aeroportos
-    #  periféricos como RBR e POA tem área mínima comunicando de forma intuitiva a assimetria da rede.
-
-    #Por que radar: Ideal para comparar múltiplas dimensões de poucos itens. A área de cada polígono representa o "poder"
-    #  do aeroporto na rede quanto maior a área, mais central e insubstituível ele é.
-
+def viz10_3_vulnerabilidade_hubs_barras():
     aeroportos_raw = ler_csv(os.path.join(DATA, "aeroportos_data.csv"))
     ego_raw        = ler_csv(os.path.join(OUT,  "ego_aeroportos.csv"))
     regiao_map     = {r["iata"]: r["regiao"] for r in aeroportos_raw}
 
-    ego_sorted  = sorted(ego_raw, key=lambda r: -int(r["grau"]))
-    top5        = [r["aeroporto"] for r in ego_sorted[:5]]
-    perifericos = [r["aeroporto"] for r in ego_sorted
-                   if int(r["grau"]) == 1
-                   and regiao_map.get(r["aeroporto"]) not in
-                       [regiao_map.get(a) for a in top5]][:2]
-    selecionados = top5 + perifericos
+    # Pegamos os 7 aeroportos mais conectados para análise limpa
+    ego_sorted = sorted(ego_raw, key=lambda r: -int(r["grau"]))
+    selecionados = [r for r in ego_sorted[:7]]
+    
+    # Inverter a lista para que o maior valor fique no topo do gráfico de barras horizontais
+    selecionados.reverse()
 
-    dados = {r["aeroporto"]: r for r in ego_raw}
+    aeroportos = [r["aeroporto"] for r in selecionados]
+    cores_barras = [COR_REGIAO.get(regiao_map.get(a, ""), "#888") for a in aeroportos]
 
-    metricas   = ["Grau", "Densidade\nEgo-Rede", "Ordem\nEgo", "Tamanho\nEgo"]
-    max_grau   = max(int(r["grau"])           for r in ego_raw)
-    max_ordem  = max(int(r["ordem_ego"])      for r in ego_raw)
-    max_tam    = max(int(r["tamanho_ego"])    for r in ego_raw)
+    # Extração dos 4 parâmetros
+    val_grau      = [int(r["grau"]) for r in selecionados]
+    val_ordem     = [int(r["ordem_ego"]) for r in selecionados]
+    val_tamanho   = [int(r["tamanho_ego"]) for r in selecionados]
+    val_densidade = [float(r["densidade_ego"]) for r in selecionados]
 
-    def normaliza(no):
-        r = dados[no]
-        return [
-            int(r["grau"])           / max_grau,
-            float(r["densidade_ego"]),         
-            int(r["ordem_ego"])      / max_ordem,
-            int(r["tamanho_ego"])    / max_tam,
-        ]
-
-    N      = len(metricas)
-    angles = np.linspace(0, 2 * np.pi, N, endpoint=False).tolist()
-    angles += angles[:1]  
-
-    fig, ax = plt.subplots(figsize=(9, 9),
-                           subplot_kw=dict(polar=True))
+    # Criação de um painel 2x2 (4 mini-gráficos)
+    fig, axs = plt.subplots(2, 2, figsize=(12, 8))
     fig.patch.set_facecolor("#F8F9FA")
-    ax.set_facecolor("#F0F4F8")
-
-    # grade de fundo
-    ax.set_yticks([0.25, 0.50, 0.75, 1.00])
-    ax.set_yticklabels(["0.25", "0.50", "0.75", "1.00"],
-                       fontsize=8, color="#999")
-    ax.set_ylim(0, 1.15)
-    ax.set_xticks(angles[:-1])
-    ax.set_xticklabels(metricas, fontsize=11, fontweight="bold", color="#333")
-    ax.spines["polar"].set_color("#DDD")
-    ax.grid(color="#DDD", linewidth=0.8)
-
-    CORES_RADAR = [
-        "#9C27B0",  # BSB - Centro-Oeste
-        "#F44336",  # GRU 
-        "#FF9800",  # FOR  
-        "#E91E63",  # GIG  
-        "#2196F3",  # BEL  
-        "#607D8B",  # periférico 1 
-        "#795548",  # periférico 2
+    
+    # Lista para iterar e construir os 4 gráficos magicamente
+    metricas = [
+        (val_grau, "Grau\n(Total de Conexões)", axs[0, 0]),
+        (val_ordem, "Ordem da Ego-Rede\n(Nº de Vizinhos)", axs[0, 1]),
+        (val_tamanho, "Tamanho da Ego-Rede\n(Conexões entre Vizinhos)", axs[1, 0]),
+        (val_densidade, "Densidade da Ego-Rede\n(Nível de Coesão %)", axs[1, 1])
     ]
 
-    for i, no in enumerate(selecionados):
-        vals   = normaliza(no)
-        vals  += vals[:1]
-        cor    = CORES_RADAR[i % len(CORES_RADAR)]
-        reg    = regiao_map.get(no, "")
+    for valores, titulo, ax in metricas:
+        ax.set_facecolor("#FFFFFF")
+        # Desenha as barras
+        barras = ax.barh(aeroportos, valores, color=cores_barras, edgecolor="white", height=0.7)
+        
+        # Adiciona o número no final de cada barra para facilitar a leitura
+        for barra in barras:
+            largura = barra.get_width()
+            formato = f"{largura:.2f}" if isinstance(largura, float) and largura < 2 else f"{int(largura)}"
+            ax.text(
+                largura + (max(valores) * 0.02), # Distância do texto pra barra
+                barra.get_y() + barra.get_height() / 2,
+                formato,
+                va='center', ha='left', fontsize=9, fontweight='bold', color="#444"
+            )
 
-        ax.plot(angles, vals, color=cor, linewidth=2.2, zorder=3)
-        ax.fill(angles, vals, color=cor, alpha=0.12)
+        # Estilização limpa
+        ax.set_title(titulo, fontsize=11, fontweight="bold", color="#222", pad=10)
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.spines['bottom'].set_visible(False)
+        ax.spines['left'].set_color("#DDD")
+        ax.tick_params(axis='x', bottom=False, labelbottom=False) # Esconde eixo X (já temos os números nas barras)
+        ax.tick_params(axis='y', labelsize=10)
 
-        idx_max = np.argmax(vals[:-1])
-        ax.annotate(
-            no,
-            xy=(angles[idx_max], vals[idx_max]),
-            xytext=(angles[idx_max], vals[idx_max] + 0.10),
-            fontsize=9, fontweight="bold", color=cor, ha="center",
-        )
+    # Legenda Global de Regiões
+    legend_items = [mpatches.Patch(color=c, label=r) for r, c in COR_REGIAO.items()]
+    fig.legend(handles=legend_items, title="Região", loc='upper center', 
+               bbox_to_anchor=(0.5, 1.05), ncol=5, frameon=False, fontsize=10)
 
-    ax.set_title(
-        "Perfil Multidimensional dos Aeroportos\n"
-        "(área maior = aeroporto mais central na rede)",
-        fontsize=13, fontweight="bold", pad=24, color="#222"
+    fig.suptitle(
+        "Perfil Multidimensional dos Hubs Principais",
+        fontsize=16, fontweight="bold", y=1.12, color="#1A1A2E"
     )
 
-    legend_items = [
-        mpatches.Patch(color=CORES_RADAR[i],
-                       label=f"{no}  [{regiao_map.get(no,'')}]")
-        for i, no in enumerate(selecionados)
-    ]
-    ax.legend(handles=legend_items, loc="upper right",
-              bbox_to_anchor=(1.35, 1.10),
-              fontsize=9, title="Aeroporto [Região]",
-              title_fontsize=9, framealpha=0.9)
-
-    nota = (
-        "Mensagem principal: BSB domina todas as 4 dimensões é o aeroporto mais central e crítico da rede.\n"
-        "Aeroportos periféricos (ex: RBR, POA) têm área mínima: dependem completamente de hubs para se conectar."
-    )
-    fig.text(0.5, -0.02, nota, ha="center", fontsize=8.5,
-             color="#333", style="italic")
+    nota = "Mensagem: Gráficos de barras revelam instantaneamente a assimetria da rede. BSB domina conexões absolutas (Grau/Tamanho),\nmas aeroportos menores podem ter densidades diferentes dependendo de seus clusters."
+    fig.text(0.5, -0.05, nota, ha="center", fontsize=9.5, color="#444", style="italic")
 
     plt.tight_layout()
-    path = os.path.join(OUT, "viz10_3_vulnerabilidade_hubs.png")
+    path = os.path.join(OUT, "viz10_3_vulnerabilidade_barras.png")
     plt.savefig(path, dpi=150, bbox_inches="tight", facecolor=fig.get_facecolor())
     plt.close()
     print(f"[OK] {path}")
-
 # Mapa Geográfico de Conectividade 
-
 def viz10_4_mapa_conectividade():
-    #pq dessa escolha para avd
-    #O que mostra: Representação geográfica do grafo com aeroportos posicionados por coordenadas reais. 
-    # Rótulos deslocados manualmente para evitar sobreposição nos clusters densos (Nordeste, Sudeste).
-
-    #Insight: O mapa evidencia a concentração de rotas no eixo BSB-GRU-FOR e a escassez de conexões diretas na região Norte.
-
-    #Por que mapa geográfico: Dados com coordenadas reais ganham sentido espacial imediato, o leitor já tem o mapa do Brasil
-    #  como referência mental, o que elimina a necessidade de explicar a disposição dos nós. 
-    # Nenhum outro tipo de gráfico consegue comunicar disparidade territorial de forma tão direta para alguém que não conhece o projeto.
-
     aeroportos_raw = ler_csv(os.path.join(DATA, "aeroportos_data.csv"))
     adj_raw        = ler_csv(os.path.join(DATA, "adjacencias_aeroportos.csv"))
     graus_raw      = ler_csv(os.path.join(OUT,  "graus.csv"))
@@ -206,19 +157,20 @@ def viz10_4_mapa_conectividade():
     fig.patch.set_facecolor("#E8F4F8")
     ax.set_facecolor("#D6EAF8")
 
-    brasil_lon = [
-        -34, -35, -37, -39, -40, -43, -44, -46, -48, -49, -52, -53,
-        -58, -60, -63, -68, -73, -74, -73, -70, -65, -60, -55, -51,
-        -50, -48, -45, -40, -38, -35, -34
-    ]
-    brasil_lat = [
-        -8,  -5,  -3,  -2,  -2,  -3,  -2,  -1,   0,  -1,  -3,  -5,
-        -5,  -3,  -5,  -8, -10, -14, -18, -20, -20, -22, -23, -28,
-        -29, -28, -26, -24, -14,  -8,  -8
-    ]
-    ax.fill(brasil_lon, brasil_lat, color="#ECF0F1", alpha=0.5, zorder=0)
-    ax.plot(brasil_lon, brasil_lat, color="#BDC3C7", linewidth=0.8, zorder=1)
-
+    import warnings
+    warnings.filterwarnings("ignore") 
+    
+    try:
+        
+        url = "https://naciscdn.org/naturalearth/110m/cultural/ne_110m_admin_0_countries.zip"
+        world = gpd.read_file(url)
+        
+       
+        brasil = world[(world["ADMIN"] == "Brazil") | (world["NAME"] == "Brazil")]
+        brasil.plot(ax=ax, color="#ECF0F1", edgecolor="#BDC3C7", linewidth=0.8, zorder=0)
+    except Exception as e:
+        print(f"Aviso: Não foi possível carregar o mapa do Geopandas. Erro: {e}")
+    
     desenhadas = set()
     for row in adj_raw:
         o, d = row["origem"], row["destino"]
@@ -318,7 +270,7 @@ def viz10_4_mapa_conectividade():
 
 def main():
     print("Visualizações Explanatórias")
-    viz10_3_vulnerabilidade_hubs()
+    viz10_3_vulnerabilidade_hubs_barras()
     viz10_4_mapa_conectividade()
     print("\nArquivos salvos em out/")
     print("viz10_3_vulnerabilidade_hubs.png")
