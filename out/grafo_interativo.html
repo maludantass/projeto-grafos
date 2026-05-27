@@ -4,1171 +4,644 @@
 <meta charset="UTF-8"/>
 <title>Rede de Aeroportos do Brasil</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
-<link  href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" rel="stylesheet"/>
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+
 <style>
-*{
- margin:0;
- padding:0;
- box-sizing:border-box;
+* { margin:0; padding:0; box-sizing:border-box; }
+/* Aplicando a fonte globalmente */
+body { font-family: 'Montserrat', sans-serif; background: radial-gradient(circle at top, #132238 0%, #08111f 45%, #050b14 100%); color:white; height:100vh; overflow:hidden; }
+
+/* ---- SISTEMA DE ABAS ---- */
+#top-nav { height: 80px; background: transparent; display: flex; align-items: center; justify-content: center; padding: 15px 24px; gap: 20px; position: relative; z-index: 100; }
+.nav-tab { background: rgba(20,30,45,0.7); border: 1px solid rgba(255,255,255,0.05); border-radius: 14px; color: #8ca0b8; font-size: 15px; font-weight: 700; cursor: pointer; height: 100%; padding: 0 28px; box-shadow: 0 6px 15px rgba(0,0,0,0.2); transition: all 0.3s ease; font-family: 'Montserrat', sans-serif; }
+.nav-tab:hover { color: #fff; background: rgba(30,45,65,0.9); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+.nav-tab.active { background: linear-gradient(135deg, #1f6feb, #388bfd); color: white; border-color: transparent; box-shadow: 0 8px 25px rgba(31,111,235,0.4); transform: translateY(-2px); }
+.aba-content { height: calc(100vh - 80px); width: 100%; }
+
+/* ESTILOS ORIGINAIS DO SEU PROJETO MANTIDOS INTACTOS */
+#header{ height:88px; padding:18px 24px; display:flex; align-items:center; gap:16px; border-bottom:1px solid rgba(255,255,255,.08); background:rgba(8,14,24,.88); backdrop-filter:blur(12px); position:relative; z-index:10; }
+#header::after{ content:""; position:absolute; left:0; bottom:0; width:100%; height:1px; background:linear-gradient(90deg, transparent, rgba(88,166,255,.6), transparent); }
+#header h1{ font-size:24px; font-weight:800; letter-spacing:.5px; color:#ffffff; margin-right:12px; }
+#search-box{ display:flex; align-items:center; gap:10px; flex:1; }
+#search-box input{ height:44px; width:260px; border:none; border-radius:14px; background:#101b2b; color:white; padding:0 16px; font-size:14px; outline:none; border:1px solid rgba(255,255,255,.08); transition:.2s; font-family: 'Montserrat', sans-serif;}
+#search-box input:focus{ border-color:#58a6ff; box-shadow:0 0 0 4px rgba(88,166,255,.15); }
+#search-box input::placeholder{ color:#7d8ca3; }
+#search-box button{ height:44px; padding:0 18px; border:none; border-radius:14px; background:#1f6feb; color:white; font-weight:700; cursor:pointer; transition:.2s; font-family: 'Montserrat', sans-serif;}
+#search-box button:hover{ transform:translateY(-2px); background:#388bfd; }
+#btn-clear{ background:#182537 !important; border:1px solid rgba(255,255,255,.08) !important; color:#9fb3c8 !important; }
+.path-btn{ height:44px; padding:0 18px; border:none; border-radius:14px; cursor:pointer; font-size:13px; font-weight:700; transition:.2s; font-family: 'Montserrat', sans-serif;}
+.path-btn:hover{ transform:translateY(-2px); }
+#btn-rec-poa{ background:linear-gradient(135deg,#ffb347,#ff7b00); color:#111; box-shadow:0 8px 24px rgba(255,140,0,.25); }
+#btn-mao-gru{ background:linear-gradient(135deg,#42a5f5,#1565c0); color:white; box-shadow:0 8px 24px rgba(33,150,243,.25); }
+#btn-reset-paths{ height:44px; padding:0 18px; border:none; border-radius:14px; background:#182537; color:#d0dceb; cursor:pointer; transition:.2s; font-family: 'Montserrat', sans-serif;}
+#btn-reset-paths:hover{ background:#223248; }
+#main{ display:flex; height:calc(100% - 88px); padding:18px; gap:18px; }
+#network{ flex:1; border-radius:28px; background: linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px), #07101d; background-size:40px 40px; border:1px solid rgba(255,255,255,.06); box-shadow: inset 0 0 80px rgba(88,166,255,.04), 0 20px 50px rgba(0,0,0,.45); position:relative; overflow:hidden; }
+#network::before{ content:""; position:absolute; inset:0; background: radial-gradient(circle at center, rgba(88,166,255,.06), transparent 70%); pointer-events:none; }
+#sidebar{ width:300px; border-radius:28px; background:rgba(10,18,30,.92); border:1px solid rgba(255,255,255,.06); padding:22px; display:flex; flex-direction:column; gap:22px; overflow-y:auto; box-shadow: 0 20px 40px rgba(0,0,0,.45); }
+#sidebar h2{ font-size:13px; font-weight: 800; text-transform:uppercase; letter-spacing:1.2px; color:#58a6ff; margin-bottom:12px; }
+#sidebar > div{ background:#0f1a2a; border:1px solid rgba(255,255,255,.05); border-radius:20px; padding:18px; }
+.leg-item, .path-legend{ display:flex; align-items:center; gap:10px; margin-bottom:12px; font-size:13px; font-weight: 600; color:#d8e4f2; }
+.leg-dot{ width:14px; height:14px; border-radius:50%; box-shadow:0 0 12px rgba(255,255,255,.3); }
+.path-line{ width:34px; height:6px; border-radius:999px; }
+#info-box{ background:#09111d; border-radius:16px; padding:16px; line-height:1.8; border:1px solid rgba(255,255,255,.05); color:#d7e4f3; min-height:100px; font-weight: 500; }
+#info-box b{ color:#58a6ff; font-size:16px; font-weight: 800; }
+.dim{ color:#8ca0b8; }
+#stats-box{ line-height:2; color:#c9d7e6; font-size:14px; font-weight: 500; }
+#stats-box span{ color:#58a6ff; font-weight:800; }
+::-webkit-scrollbar{ width:8px; }
+::-webkit-scrollbar-thumb{ background:#1f3047; border-radius:999px; }
+.vis-tooltip{ background:#0f1a2a !important; border:1px solid rgba(88,166,255,.3) !important; border-radius:14px !important; color:white !important; padding:12px !important; font-size:13px !important; font-weight: 600 !important; box-shadow:0 12px 24px rgba(0,0,0,.4); font-family: 'Montserrat', sans-serif !important;}
+@media(max-width:1100px){ #main{ flex-direction:column; } #sidebar{ width:100%; height:320px; } #header{ height:auto; flex-wrap:wrap; } }
+.vis-navigation{ top:18px !important; right:18px !important; display:flex !important; flex-direction:column !important; gap:8px !important; }
+.vis-button{ width:36px !important; height:36px !important; border-radius:12px !important; background:rgba(12,20,32,.92) !important; border:1px solid rgba(255,255,255,.06) !important; backdrop-filter:blur(8px); box-shadow:0 6px 18px rgba(0,0,0,.28); transition:.18s ease !important; display:flex !important; align-items:center !important; justify-content:center !important; color:#6cb6ff !important; font-size:18px !important; font-weight:700 !important; }
+.vis-button:hover{ background:#162235 !important; border-color:rgba(88,166,255,.35) !important; transform:translateY(-1px); }
+div.vis-network div.vis-navigation div.vis-button{ background-image:none !important; }
+.vis-button.vis-up::after{ content:"↑"; } .vis-button.vis-down::after{ content:"↓"; } .vis-button.vis-left::after{ content:"←"; } .vis-button.vis-right::after{ content:"→"; } .vis-button.vis-zoomIn::after{ content:"+"; } .vis-button.vis-zoomOut::after{ content:"−"; } .vis-button.vis-zoomExtends::after{ content:"⤢"; }
+#region-filters{ display:flex; flex-wrap:wrap; gap:10px; margin-top:6px; }
+.region-btn{ flex:1; min-width:95px; border:none; border-radius:12px; padding:10px 12px; background:#1b2636; color:#d6e2f0; font-size:12px; font-weight:700; cursor:pointer; transition:.18s ease; font-family: 'Montserrat', sans-serif;}
+.region-btn:hover{ background:#24364f; transform:translateY(-1px); }
+.region-btn.active{ background:#58a6ff; color:white; box-shadow: 0 0 18px rgba(88,166,255,.28); }
+.region-btn.clear{ background:#2b2024; color:#ffb7c2; } .region-btn.clear:hover{ background:#40272d; }
+
+#intro-screen{ position:fixed; inset:0; background: radial-gradient(circle at top, #132238 0%, #0b1119 60%); display:flex; align-items:center; justify-content:center; z-index:99999; animation:introFadeOut 1.2s ease forwards; animation-delay:2.4s; }
+#intro-content{ text-align:center; animation:introAppear 1.2s ease; }
+#intro-icon{ font-size:64px; margin-bottom:18px; filter:drop-shadow(0 0 18px rgba(88,166,255,.35)); animation:floatPlane 2s ease-in-out infinite alternate; }
+#intro-content h1{ font-size:42px; font-weight:800; color:#f0f6fc; margin-bottom:14px; letter-spacing:.5px; }
+#intro-content p{ font-size:18px; font-weight:500; color:#8ea6c0; line-height:1.8; }
+@keyframes introAppear{ from{ opacity:0; transform:translateY(24px) scale(.96); } to{ opacity:1; transform:translateY(0) scale(1); } }
+@keyframes introFadeOut{ to{ opacity:0; visibility:hidden; } }
+@keyframes floatPlane{ from{ transform:translateY(0px); } to{ transform:translateY(-10px); } }
+
+/* ---- ESTILOS EXCLUSIVOS DA ABA AVD ---- */
+#layout-avd { display: flex; height: 100%; padding: 18px; gap: 18px; }
+#avd-sidebar { width: 320px; background: rgba(10,18,30,.92); border-radius: 28px; border: 1px solid rgba(255,255,255,.06); padding: 22px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 20px 40px rgba(0,0,0,.45); overflow-y: auto; }
+#avd-sidebar h2 { font-size: 16px; font-weight: 800; color: #58a6ff; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 5px; }
+#avd-filter { width: 100%; padding: 12px; border-radius: 12px; background: #101b2b; color: white; border: 1px solid rgba(88,166,255,.3); margin-bottom: 15px; font-size: 15px; font-weight: 700; outline: none; font-family: 'Montserrat', sans-serif;}
+.avd-btn { background: #1b2636; border: none; border-radius: 12px; padding: 14px 16px; color: #d6e2f0; font-size: 14px; font-weight: 700; text-align: left; cursor: pointer; transition: 0.2s; font-family: 'Montserrat', sans-serif;}
+.avd-btn:hover { background: #24364f; transform: translateX(4px); }
+.avd-btn.active { background: #1f6feb; color: white; box-shadow: 0 0 15px rgba(31,111,235,.4); }
+
+#avd-main { flex: 1; background: #0f1a2a; border-radius: 28px; border: 1px solid rgba(255,255,255,.06); position: relative; overflow: hidden; padding: 20px; box-shadow: inset 0 0 80px rgba(0,0,0,.2); }
+#avd-plot-container { width: 100%; height: 100%; }
+#avd-map-container { width: 100%; height: 100%; display: none; position: relative; }
+
+/* MAPA PREMIUM COM GRID DE RADAR */
+#network-avd { 
+  width: 100%; height: 100%; border-radius: 18px; 
+  background-color: #0b1423;
+  background-image: 
+    linear-gradient(rgba(88, 166, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(88, 166, 255, 0.05) 1px, transparent 1px);
+  background-size: 50px 50px;
+  box-shadow: inset 0 0 100px rgba(0,0,0,0.8);
 }
 
+/* Painel de Controle reposicionado para não sobrepor RBR (canto inferior esquerdo) */
+#map-controls { position: absolute; bottom: 20px; left: 20px; background: rgba(10,18,30,.95); padding: 15px; border-radius: 16px; border: 1px solid rgba(255,255,255,.1); display: flex; flex-direction: column; gap: 10px; z-index: 10; box-shadow: 0 10px 30px rgba(0,0,0,0.5); backdrop-filter: blur(10px); }
+.map-btn { padding: 10px 15px; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; color: white; transition: 0.2s; font-size: 13px; font-family: 'Montserrat', sans-serif;}
+.btn-bfs { background: linear-gradient(135deg, #9C27B0, #7B1FA2); } .btn-bfs:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(156, 39, 176, 0.4); }
+.btn-dfs { background: linear-gradient(135deg, #E65100, #BF360C); } .btn-dfs:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(230, 81, 0, 0.4); }
+.btn-reset { background: #263238; border: 1px solid rgba(255,255,255,0.1); } .btn-reset:hover { background: #37474F; }
 
-body{
- font-family: Inter, sans-serif;
- background:
-   radial-gradient(circle at top, #132238 0%, #08111f 45%, #050b14 100%);
- color:white;
- height:100vh;
- overflow:hidden;
+/* Forçando peso da fonte dentro do Plotly */
+.js-plotly-plot .plotly text {
+    font-weight: 600 !important;
 }
-
-
-
-
-#header{
- height:88px;
- padding:18px 24px;
- display:flex;
- align-items:center;
- gap:16px;
- border-bottom:1px solid rgba(255,255,255,.08);
- background:rgba(8,14,24,.88);
- backdrop-filter:blur(12px);
- position:relative;
- z-index:10;
-}
-
-
-#header::after{
- content:"";
- position:absolute;
- left:0;
- bottom:0;
- width:100%;
- height:1px;
- background:linear-gradient(
-   90deg,
-   transparent,
-   rgba(88,166,255,.6),
-   transparent
- );
-}
-
-
-#header h1{
- font-size:24px;
- font-weight:800;
- letter-spacing:.5px;
- color:#ffffff;
- margin-right:12px;
-}
-
-
-#search-box{
- display:flex;
- align-items:center;
- gap:10px;
- flex:1;
-}
-
-
-#search-box input{
- height:44px;
- width:260px;
- border:none;
- border-radius:14px;
- background:#101b2b;
- color:white;
- padding:0 16px;
- font-size:14px;
- outline:none;
- border:1px solid rgba(255,255,255,.08);
- transition:.2s;
-}
-
-
-#search-box input:focus{
- border-color:#58a6ff;
- box-shadow:0 0 0 4px rgba(88,166,255,.15);
-}
-
-
-#search-box input::placeholder{
- color:#7d8ca3;
-}
-
-
-#search-box button{
- height:44px;
- padding:0 18px;
- border:none;
- border-radius:14px;
- background:#1f6feb;
- color:white;
- font-weight:600;
- cursor:pointer;
- transition:.2s;
-}
-
-
-#search-box button:hover{
- transform:translateY(-2px);
- background:#388bfd;
-}
-
-
-#btn-clear{
- background:#182537 !important;
- border:1px solid rgba(255,255,255,.08) !important;
- color:#9fb3c8 !important;
-}
-
-
-
-
-.path-btn{
- height:44px;
- padding:0 18px;
- border:none;
- border-radius:14px;
- cursor:pointer;
- font-size:13px;
- font-weight:700;
- transition:.2s;
-}
-
-
-.path-btn:hover{
- transform:translateY(-2px);
-}
-
-
-#btn-rec-poa{
- background:linear-gradient(135deg,#ffb347,#ff7b00);
- color:#111;
- box-shadow:0 8px 24px rgba(255,140,0,.25);
-}
-
-
-#btn-mao-gru{
- background:linear-gradient(135deg,#42a5f5,#1565c0);
- color:white;
- box-shadow:0 8px 24px rgba(33,150,243,.25);
-}
-
-
-#btn-reset-paths{
- height:44px;
- padding:0 18px;
- border:none;
- border-radius:14px;
- background:#182537;
- color:#d0dceb;
- cursor:pointer;
- transition:.2s;
-}
-
-
-#btn-reset-paths:hover{
- background:#223248;
-}
-
-
-#main{
- display:flex;
- height:calc(100vh - 88px);
- padding:18px;
- gap:18px;
-}
-
-
-#network{
- flex:1;
- border-radius:28px;
- background:
-   linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
-   linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px),
-   #07101d;
- background-size:40px 40px;
- border:1px solid rgba(255,255,255,.06);
- box-shadow:
-   inset 0 0 80px rgba(88,166,255,.04),
-   0 20px 50px rgba(0,0,0,.45);
- position:relative;
- overflow:hidden;
-}
-
-
-#network::before{
- content:"";
- position:absolute;
- inset:0;
- background:
-   radial-gradient(circle at center,
-   rgba(88,166,255,.06),
-   transparent 70%);
- pointer-events:none;
-}
-
-
-#sidebar{
- width:300px;
- border-radius:28px;
- background:rgba(10,18,30,.92);
- border:1px solid rgba(255,255,255,.06);
- padding:22px;
- display:flex;
- flex-direction:column;
- gap:22px;
- overflow-y:auto;
- box-shadow:
-   0 20px 40px rgba(0,0,0,.45);
-}
-
-
-#sidebar h2{
- font-size:13px;
- text-transform:uppercase;
- letter-spacing:1.2px;
- color:#58a6ff;
- margin-bottom:12px;
-}
-
-
-#sidebar > div{
- background:#0f1a2a;
- border:1px solid rgba(255,255,255,.05);
- border-radius:20px;
- padding:18px;
-}
-
-
-.leg-item,
-.path-legend{
- display:flex;
- align-items:center;
- gap:10px;
- margin-bottom:12px;
- font-size:13px;
- color:#d8e4f2;
-}
-
-
-.leg-dot{
- width:14px;
- height:14px;
- border-radius:50%;
- box-shadow:0 0 12px rgba(255,255,255,.3);
-}
-
-
-.path-line{
- width:34px;
- height:6px;
- border-radius:999px;
-}
-
-
-#info-box{
- background:#09111d;
- border-radius:16px;
- padding:16px;
- line-height:1.8;
- border:1px solid rgba(255,255,255,.05);
- color:#d7e4f3;
- min-height:100px;
-}
-
-
-#info-box b{
- color:#58a6ff;
- font-size:16px;
-}
-
-
-.dim{
- color:#8ca0b8;
-}
-
-
-#stats-box{
- line-height:2;
- color:#c9d7e6;
- font-size:14px;
-}
-
-
-#stats-box span{
- color:#58a6ff;
- font-weight:700;
-}
-
-
-::-webkit-scrollbar{
- width:8px;
-}
-
-
-::-webkit-scrollbar-thumb{
- background:#1f3047;
- border-radius:999px;
-}
-
-
-.vis-tooltip{
- background:#0f1a2a !important;
- border:1px solid rgba(88,166,255,.3) !important;
- border-radius:14px !important;
- color:white !important;
- padding:12px !important;
- font-size:13px !important;
- box-shadow:0 12px 24px rgba(0,0,0,.4);
-}
-
-
-@media(max-width:1100px){
-
-
- #main{
-   flex-direction:column;
- }
-
-
- #sidebar{
-   width:100%;
-   height:320px;
- }
-
-
- #header{
-   height:auto;
-   flex-wrap:wrap;
- }
-}
-
-
-.vis-navigation{
- top:18px !important;
- right:18px !important;
- display:flex !important;
- flex-direction:column !important;
- gap:8px !important;
-}
-
-
-.vis-button{
- width:36px !important;
- height:36px !important;
- border-radius:12px !important;
- background:rgba(12,20,32,.92) !important;
- border:1px solid rgba(255,255,255,.06) !important;
- backdrop-filter:blur(8px);
- box-shadow:0 6px 18px rgba(0,0,0,.28);
- transition:.18s ease !important;
-
-
- display:flex !important;
- align-items:center !important;
- justify-content:center !important;
-
-
- color:#6cb6ff !important;
- font-size:18px !important;
- font-weight:700 !important;
-}
-
-
-.vis-button:hover{
- background:#162235 !important;
- border-color:rgba(88,166,255,.35) !important;
- transform:translateY(-1px);
-}
-
-
-div.vis-network div.vis-navigation div.vis-button{
- background-image:none !important;
-}
-
-
-.vis-button.vis-up::after{
- content:"↑";
-}
-
-
-.vis-button.vis-down::after{
- content:"↓";
-}
-
-
-.vis-button.vis-left::after{
- content:"←";
-}
-
-
-.vis-button.vis-right::after{
- content:"→";
-}
-
-
-.vis-button.vis-zoomIn::after{
- content:"+";
-}
-
-
-.vis-button.vis-zoomOut::after{
- content:"−";
-}
-
-
-.vis-button.vis-zoomExtends::after{
- content:"⤢";
-}
-
-
-#region-filters{
- display:flex;
- flex-wrap:wrap;
- gap:10px;
- margin-top:6px;
-}
-
-
-.region-btn{
- flex:1;
-
-
- min-width:95px;
-
-
- border:none;
- border-radius:12px;
-
-
- padding:10px 12px;
-
-
- background:#1b2636;
-
-
- color:#d6e2f0;
-
-
- font-size:12px;
- font-weight:600;
-
-
- cursor:pointer;
-
-
- transition:.18s ease;
-}
-
-
-.region-btn:hover{
- background:#24364f;
- transform:translateY(-1px);
-}
-
-
-.region-btn.active{
- background:#58a6ff;
- color:white;
-
-
- box-shadow:
-   0 0 18px rgba(88,166,255,.28);
-}
-
-
-.region-btn.clear{
- background:#2b2024;
- color:#ffb7c2;
-}
-
-
-.region-btn.clear:hover{
- background:#40272d;
-}
-#intro-screen{
- position:fixed;
- inset:0;
-
-
- background:
-   radial-gradient(circle at top, #132238 0%, #0b1119 60%);
-
-
- display:flex;
- align-items:center;
- justify-content:center;
-
-
- z-index:99999;
-
-
- animation:introFadeOut 1.2s ease forwards;
- animation-delay:2.4s;
-}
-
-
-#intro-content{
- text-align:center;
-
-
- animation:introAppear 1.2s ease;
-}
-
-
-#intro-icon{
- font-size:64px;
- margin-bottom:18px;
-
-
- filter:drop-shadow(0 0 18px rgba(88,166,255,.35));
-
-
- animation:floatPlane 2s ease-in-out infinite alternate;
-}
-
-
-#intro-content h1{
- font-size:42px;
- font-weight:800;
-
-
- color:#f0f6fc;
-
-
- margin-bottom:14px;
-
-
- letter-spacing:.5px;
-}
-
-
-#intro-content p{
- font-size:18px;
- color:#8ea6c0;
-
-
- line-height:1.8;
-}
-
-
-@keyframes introAppear{
- from{
-   opacity:0;
-   transform:translateY(24px) scale(.96);
- }
-
-
- to{
-   opacity:1;
-   transform:translateY(0) scale(1);
- }
-}
-
-
-@keyframes introFadeOut{
- to{
-   opacity:0;
-   visibility:hidden;
- }
-}
-
-
-@keyframes floatPlane{
- from{
-   transform:translateY(0px);
- }
-
-
- to{
-   transform:translateY(-10px);
- }
-}
+.js-plotly-plot .plotly .g-gtitle { fill: white !important; }
+.js-plotly-plot .plotly .xtick text, .js-plotly-plot .plotly .ytick text { fill: #8ca0b8 !important; }
 </style>
 </head>
 <body>
+
 <div id="intro-screen">
-
-
- <div id="intro-content">
-
-
-   <div id="intro-icon">✈</div>
-
-
-   <h1>Rede de Aeroportos do Brasil</h1>
-
-
-   <p>
-     19 aeroportos conectados<br>
-     23 rotas aéreas
-   </p>
-
-
- </div>
-
-
-</div>
-<div id="header">
- <h1>Rede de Aeroportos do Brasil</h1>
-
-
- <div id="search-box">
-   <input id="search-input" type="text" placeholder="Buscar aeroporto (ex: REC)..." onkeydown="if(event.key==='Enter') buscar()"/>
-   <button onclick="buscar()">Buscar</button>
-   <button id="btn-clear" onclick="limparBusca()">✕</button>
- </div>
-
-
-
-
- <button class="path-btn" id="btn-rec-poa" onclick="destacarCaminho('rec-poa')">
-    Recife → Porto Alegre
- </button>
- <button class="path-btn" id="btn-mao-gru" onclick="destacarCaminho('mao-gru')">
-    Manaus → São Paulo
- </button>
- <button id="btn-reset-paths" onclick="resetarCaminhos()">Limpar destaque</button>
+  <div id="intro-content">
+    <div id="intro-icon">✈</div>
+    <h1>Rede de Aeroportos do Brasil</h1>
+    <p>19 aeroportos conectados<br>23 rotas aéreas</p>
+  </div>
 </div>
 
-
-<div id="main">
- <div id="network"></div>
-
-
- <div id="sidebar">
-   <div>
-     <h2>Legenda — Regiões</h2>
-     <span class="leg-item"><span class="leg-dot" style="background:#2196F3"></span>Norte</span><span class="leg-item"><span class="leg-dot" style="background:#FF9800"></span>Nordeste</span><span class="leg-item"><span class="leg-dot" style="background:#9C27B0"></span>Centro-Oeste</span><span class="leg-item"><span class="leg-dot" style="background:#F44336"></span>Sudeste</span><span class="leg-item"><span class="leg-dot" style="background:#4CAF50"></span>Sul</span>
-   </div>
-<div>
-
-
- <h2>Filtrar Região</h2>
-
-
- <div id="region-filters">
-
-
-   <button class="region-btn"
-     onclick="filtrarRegiao('Norte')">
-     Norte
-   </button>
-
-
-   <button class="region-btn"
-     onclick="filtrarRegiao('Nordeste')">
-     Nordeste
-   </button>
-
-
-   <button class="region-btn"
-     onclick="filtrarRegiao('Centro-Oeste')">
-     Centro-Oeste
-   </button>
-
-
-   <button class="region-btn"
-     onclick="filtrarRegiao('Sudeste')">
-     Sudeste
-   </button>
-
-
-   <button class="region-btn"
-     onclick="filtrarRegiao('Sul')">
-     Sul
-   </button>
-
-
-   <button class="region-btn clear"
-     onclick="limparFiltroRegiao()">
-     Limpar
-   </button>
-
-
- </div>
-
-
-</div>
-   <div>
-     <h2>Caminhos Obrigatórios</h2>
-     <div class="path-legend">
-       <div class="path-line" style="background:#FF9800"></div>
-       <span>Recife → Porto Alegre</span>
-     </div>
-     <div class="path-legend">
-       <div class="path-line" style="background:#2196F3"></div>
-       <span>Manaus → São Paulo</span>
-     </div>
-     <div class="path-legend">
-       <div class="path-line" style="background:#9C27B0"></div>
-       <span>Ambos os caminhos</span>
-     </div>
-   </div>
-
-
-   <div>
-     <h2>Nó selecionado</h2>
-     <div id="info-box">
-       <span class="dim">Clique em um aeroporto para ver detalhes.</span>
-     </div>
-   </div>
-
-
-   <div>
-     <h2>Estatísticas</h2>
-     <div id="stats-box" id="stats-box"></div>
-   </div>
- </div>
+<div id="top-nav">
+  <button class="nav-tab active" id="tab-grafos" onclick="switchAba('grafos')">Módulo Grafos</button>
+  <button class="nav-tab" id="tab-avd" onclick="switchAba('avd')">Módulo AVD (Análise Exploratória)</button>
 </div>
 
+<div id="aba-grafos" class="aba-content" style="display: block;">
+    <div id="header">
+      <h1>Rede de Aeroportos do Brasil</h1>
+      <div id="search-box">
+        <input id="search-input" type="text" placeholder="Buscar aeroporto (ex: REC)..." onkeydown="if(event.key==='Enter') buscar()"/>
+        <button onclick="buscar()">Buscar</button>
+        <button id="btn-clear" onclick="limparBusca()">✕</button>
+      </div>
+      <button class="path-btn" id="btn-rec-poa" onclick="destacarCaminho('rec-poa')">Recife → Porto Alegre</button>
+      <button class="path-btn" id="btn-mao-gru" onclick="destacarCaminho('mao-gru')">Manaus → São Paulo</button>
+      <button id="btn-reset-paths" onclick="resetarCaminhos()">Limpar destaque</button>
+    </div>
+
+    <div id="main">
+      <div id="network"></div>
+      <div id="sidebar">
+        <div>
+          <h2>Legenda — Regiões</h2>
+          <span class="leg-item"><span class="leg-dot" style="background:#2196F3"></span>Norte</span>
+          <span class="leg-item"><span class="leg-dot" style="background:#FF9800"></span>Nordeste</span>
+          <span class="leg-item"><span class="leg-dot" style="background:#9C27B0"></span>Centro-Oeste</span>
+          <span class="leg-item"><span class="leg-dot" style="background:#F44336"></span>Sudeste</span>
+          <span class="leg-item"><span class="leg-dot" style="background:#4CAF50"></span>Sul</span>
+        </div>
+        <div>
+          <h2>Filtrar Região</h2>
+          <div id="region-filters">
+            <button class="region-btn" onclick="filtrarRegiao('Norte')">Norte</button>
+            <button class="region-btn" onclick="filtrarRegiao('Nordeste')">Nordeste</button>
+            <button class="region-btn" onclick="filtrarRegiao('Centro-Oeste')">Centro-Oeste</button>
+            <button class="region-btn" onclick="filtrarRegiao('Sudeste')">Sudeste</button>
+            <button class="region-btn" onclick="filtrarRegiao('Sul')">Sul</button>
+            <button class="region-btn clear" onclick="limparFiltroRegiao()">Limpar</button>
+          </div>
+        </div>
+        <div>
+          <h2>Caminhos Obrigatórios</h2>
+          <div class="path-legend"><div class="path-line" style="background:#FF9800"></div><span>Recife → Porto Alegre</span></div>
+          <div class="path-legend"><div class="path-line" style="background:#2196F3"></div><span>Manaus → São Paulo</span></div>
+          <div class="path-legend"><div class="path-line" style="background:#9C27B0"></div><span>Ambos os caminhos</span></div>
+        </div>
+        <div>
+          <h2>Nó selecionado</h2>
+          <div id="info-box"><span class="dim">Clique em um aeroporto para ver detalhes.</span></div>
+        </div>
+        <div>
+          <h2>Estatísticas</h2>
+          <div id="stats-box"></div>
+        </div>
+      </div>
+    </div>
+</div>
+
+<div id="aba-avd" class="aba-content" style="display: none;">
+  <div id="layout-avd">
+    <div id="avd-sidebar">
+      <h2>Filtro de Dados</h2>
+      <select id="avd-filter" onchange="applyAvdFilter()">
+        <option value="Todas">Todas as Regiões</option>
+        <option value="Norte">Norte</option>
+        <option value="Nordeste">Nordeste</option>
+        <option value="Centro-Oeste">Centro-Oeste</option>
+        <option value="Sudeste">Sudeste</option>
+        <option value="Sul">Sul</option>
+      </select>
+
+      <h2 style="margin-top: 10px;">Painel de AVD</h2>
+      <button class="avd-btn active" id="btn-chart-1" onclick="loadChart(1)">1. Distribuição de Graus</button>
+      <button class="avd-btn" id="btn-chart-2" onclick="loadChart(2)">2. Ranking de Aeroportos</button>
+      <button class="avd-btn" id="btn-chart-3" onclick="loadChart(3)">3. Centralidade de Grau</button>
+      <button class="avd-btn" id="btn-chart-4" onclick="loadChart(4)">4. Comparação por Região</button>
+      <button class="avd-btn" id="btn-chart-5" onclick="loadChart(5)">5. Heatmap de Adjacências</button>
+      <button class="avd-btn" id="btn-chart-6" onclick="loadChart(6)">6. Multidimensional Hubs</button>
+      <button class="avd-btn" id="btn-chart-7" onclick="loadChart(7)">7. Camadas BFS (BSB)</button>
+      <button class="avd-btn" id="btn-chart-8" onclick="loadChart(8)">8. Mapa de Conectividade</button>
+    </div>
+    
+    <div id="avd-main">
+      <div id="avd-plot-container"></div>
+      
+      <div id="avd-map-container">
+        <div id="network-avd"></div>
+        <div id="map-controls">
+          <h3 style="color:white; font-size:15px; font-weight:800; text-align:center;">Algoritmos de Busca</h3>
+          <button class="map-btn btn-bfs" onclick="animarBusca('BFS')">▶ Animar BFS (Origem: BSB)</button>
+          <button class="map-btn btn-dfs" onclick="animarBusca('DFS')">▶ Animar DFS (Origem: BSB)</button>
+          <button class="map-btn btn-reset" onclick="resetarMapaAVD()">⟲ Resetar Mapa</button>
+          <p id="map-status" style="color:#FFD600; font-size:13px; font-weight:800; margin-top:5px; text-align:center; height:15px;"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
+// =====================================================================
+// DADOS ORIGINAIS
+// =====================================================================
 const NODES_DATA = [{"id": "REC", "label": "REC", "title": "<b>REC</b> — Recife<br>Região: Nordeste<br>Grau: 2<br>Densidade ego: 0.667", "color": {"background": "#FF9800", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 20, "x": 455.0, "y": -130.0, "region": "Nordeste", "cidade": "Recife", "grau": 2, "densidade": 0.667}, {"id": "SSA", "label": "SSA", "title": "<b>SSA</b> — Salvador<br>Região: Nordeste<br>Grau: 2<br>Densidade ego: 0.667", "color": {"background": "#FF9800", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 20, "x": 364.0, "y": -39.0, "region": "Nordeste", "cidade": "Salvador", "grau": 2, "densidade": 0.667}, {"id": "FOR", "label": "FOR", "title": "<b>FOR</b> — Fortaleza<br>Região: Nordeste<br>Grau: 4<br>Densidade ego: 0.500", "color": {"background": "#FF9800", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 28, "x": 299.0, "y": -351.0, "region": "Nordeste", "cidade": "Fortaleza", "grau": 4, "densidade": 0.5}, {"id": "NAT", "label": "NAT", "title": "<b>NAT</b> — Natal<br>Região: Nordeste<br>Grau: 2<br>Densidade ego: 0.667", "color": {"background": "#FF9800", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 20, "x": 403.0, "y": -299.0, "region": "Nordeste", "cidade": "Natal", "grau": 2, "densidade": 0.667}, {"id": "JPA", "label": "JPA", "title": "<b>JPA</b> — João Pessoa<br>Região: Nordeste<br>Grau: 2<br>Densidade ego: 0.667", "color": {"background": "#FF9800", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 20, "x": 442.0, "y": -221.0, "region": "Nordeste", "cidade": "João Pessoa", "grau": 2, "densidade": 0.667}, {"id": "GRU", "label": "GRU", "title": "<b>GRU</b> — São Paulo<br>Região: Sudeste<br>Grau: 4<br>Densidade ego: 0.400", "color": {"background": "#F44336", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 28, "x": 65.0, "y": 195.0, "region": "Sudeste", "cidade": "São Paulo", "grau": 4, "densidade": 0.4}, {"id": "CGH", "label": "CGH", "title": "<b>CGH</b> — São Paulo<br>Região: Sudeste<br>Grau: 1<br>Densidade ego: 1.000", "color": {"background": "#F44336", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 16, "x": 104.0, "y": 260.0, "region": "Sudeste", "cidade": "São Paulo", "grau": 1, "densidade": 1.0}, {"id": "GIG", "label": "GIG", "title": "<b>GIG</b> — Rio de Janeiro<br>Região: Sudeste<br>Grau: 4<br>Densidade ego: 0.400", "color": {"background": "#F44336", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 28, "x": 234.0, "y": 130.0, "region": "Sudeste", "cidade": "Rio de Janeiro", "grau": 4, "densidade": 0.4}, {"id": "CNF", "label": "CNF", "title": "<b>CNF</b> — Belo Horizonte<br>Região: Sudeste<br>Grau: 2<br>Densidade ego: 0.667", "color": {"background": "#F44336", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 20, "x": 130.0, "y": 104.0, "region": "Sudeste", "cidade": "Belo Horizonte", "grau": 2, "densidade": 0.667}, {"id": "VIX", "label": "VIX", "title": "<b>VIX</b> — Vitória<br>Região: Sudeste<br>Grau: 1<br>Densidade ego: 1.000", "color": {"background": "#F44336", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 16, "x": 325.0, "y": 65.0, "region": "Sudeste", "cidade": "Vitória", "grau": 1, "densidade": 1.0}, {"id": "BSB", "label": "BSB", "title": "<b>BSB</b> — Brasília<br>Região: Centro-Oeste<br>Grau: 6<br>Densidade ego: 0.381", "color": {"background": "#9C27B0", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 36, "x": -78.0, "y": -104.0, "region": "Centro-Oeste", "cidade": "Brasília", "grau": 6, "densidade": 0.381}, {"id": "GYN", "label": "GYN", "title": "<b>GYN</b> — Goiânia<br>Região: Centro-Oeste<br>Grau: 1<br>Densidade ego: 1.000", "color": {"background": "#9C27B0", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 16, "x": -169.0, "y": -39.0, "region": "Centro-Oeste", "cidade": "Goiânia", "grau": 1, "densidade": 1.0}, {"id": "CWB", "label": "CWB", "title": "<b>CWB</b> — Curitiba<br>Região: Sul<br>Grau: 2<br>Densidade ego: 0.667", "color": {"background": "#4CAF50", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 20, "x": -65.0, "y": 325.0, "region": "Sul", "cidade": "Curitiba", "grau": 2, "densidade": 0.667}, {"id": "FLN", "label": "FLN", "title": "<b>FLN</b> — Florianópolis<br>Região: Sul<br>Grau: 2<br>Densidade ego: 0.667", "color": {"background": "#4CAF50", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 20, "x": 39.0, "y": 403.0, "region": "Sul", "cidade": "Florianópolis", "grau": 2, "densidade": 0.667}, {"id": "POA", "label": "POA", "title": "<b>POA</b> — Porto Alegre<br>Região: Sul<br>Grau: 1<br>Densidade ego: 1.000", "color": {"background": "#4CAF50", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 16, "x": -78.0, "y": 494.0, "region": "Sul", "cidade": "Porto Alegre", "grau": 1, "densidade": 1.0}, {"id": "MAO", "label": "MAO", "title": "<b>MAO</b> — Manaus<br>Região: Norte<br>Grau: 3<br>Densidade ego: 0.667", "color": {"background": "#2196F3", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 24, "x": -455.0, "y": -260.0, "region": "Norte", "cidade": "Manaus", "grau": 3, "densidade": 0.667}, {"id": "BEL", "label": "BEL", "title": "<b>BEL</b> — Belém<br>Região: Norte<br>Grau: 3<br>Densidade ego: 0.833", "color": {"background": "#2196F3", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 24, "x": -104.0, "y": -325.0, "region": "Norte", "cidade": "Belém", "grau": 3, "densidade": 0.833}, {"id": "PVH", "label": "PVH", "title": "<b>PVH</b> — Porto Velho<br>Região: Norte<br>Grau: 2<br>Densidade ego: 0.667", "color": {"background": "#2196F3", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 20, "x": -546.0, "y": -130.0, "region": "Norte", "cidade": "Porto Velho", "grau": 2, "densidade": 0.667}, {"id": "RBR", "label": "RBR", "title": "<b>RBR</b> — Rio Branco<br>Região: Norte<br>Grau: 1<br>Densidade ego: 1.000", "color": {"background": "#2196F3", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 16, "x": -650.0, "y": -65.0, "region": "Norte", "cidade": "Rio Branco", "grau": 1, "densidade": 1.0}, {"id": "THE", "label": "THE", "title": "<b>THE</b> — Teresina<br>Região: Nordeste<br>Grau: 1<br>Densidade ego: 1.000", "color": {"background": "#FF9800", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 16, "x": 156.0, "y": -390.0, "region": "Nordeste", "cidade": "Teresina", "grau": 1, "densidade": 1.0}];
-const EDGES_DATA = [{"id": 0, "from": "MAO", "to": "BEL", "weight": 1.0, "tipo": "regional", "label": "1.0", "title": "regional<br>Peso: 1.0<br>fluxo intrarregional norte", "color": {"color": "#aaaaaa", "highlight": "#FFD600"}, "width": 1.0, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 1, "from": "MAO", "to": "PVH", "weight": 1.0, "tipo": "regional", "label": "1.0", "title": "regional<br>Peso: 1.0<br>fluxo intrarregional norte", "color": {"color": "#aaaaaa", "highlight": "#FFD600"}, "width": 1.0, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 2, "from": "PVH", "to": "RBR", "weight": 1.0, "tipo": "regional", "label": "1.0", "title": "regional<br>Peso: 1.0<br>fluxo intrarregional norte", "color": {"color": "#aaaaaa", "highlight": "#FFD600"}, "width": 1.0, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 3, "from": "SSA", "to": "REC", "weight": 1.0, "tipo": "regional", "label": "1.0", "title": "regional<br>Peso: 1.0<br>fluxo intrarregional nordeste", "color": {"color": "#FF9800", "highlight": "#FFD600"}, "width": 4, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 4, "from": "REC", "to": "JPA", "weight": 1.0, "tipo": "regional", "label": "1.0", "title": "regional<br>Peso: 1.0<br>fluxo intrarregional nordeste", "color": {"color": "#aaaaaa", "highlight": "#FFD600"}, "width": 1.0, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 5, "from": "JPA", "to": "NAT", "weight": 1.0, "tipo": "regional", "label": "1.0", "title": "regional<br>Peso: 1.0<br>fluxo intrarregional nordeste", "color": {"color": "#aaaaaa", "highlight": "#FFD600"}, "width": 1.0, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 6, "from": "NAT", "to": "FOR", "weight": 1.0, "tipo": "regional", "label": "1.0", "title": "regional<br>Peso: 1.0<br>fluxo intrarregional nordeste", "color": {"color": "#aaaaaa", "highlight": "#FFD600"}, "width": 1.0, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 7, "from": "FOR", "to": "THE", "weight": 1.0, "tipo": "regional", "label": "1.0", "title": "regional<br>Peso: 1.0<br>fluxo intrarregional nordeste", "color": {"color": "#aaaaaa", "highlight": "#FFD600"}, "width": 1.0, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 8, "from": "BSB", "to": "GYN", "weight": 1.0, "tipo": "regional", "label": "1.0", "title": "regional<br>Peso: 1.0<br>fluxo intrarregional centro-oeste", "color": {"color": "#aaaaaa", "highlight": "#FFD600"}, "width": 1.0, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 9, "from": "GRU", "to": "CGH", "weight": 1.0, "tipo": "regional", "label": "1.0", "title": "regional<br>Peso: 1.0<br>fluxo intrarregional sudeste", "color": {"color": "#aaaaaa", "highlight": "#FFD600"}, "width": 1.0, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 10, "from": "GRU", "to": "GIG", "weight": 1.0, "tipo": "regional", "label": "1.0", "title": "regional<br>Peso: 1.0<br>fluxo intrarregional sudeste", "color": {"color": "#FF9800", "highlight": "#FFD600"}, "width": 4, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 11, "from": "GIG", "to": "CNF", "weight": 1.0, "tipo": "regional", "label": "1.0", "title": "regional<br>Peso: 1.0<br>fluxo intrarregional sudeste", "color": {"color": "#aaaaaa", "highlight": "#FFD600"}, "width": 1.0, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 12, "from": "GIG", "to": "VIX", "weight": 1.0, "tipo": "regional", "label": "1.0", "title": "regional<br>Peso: 1.0<br>fluxo intrarregional sudeste", "color": {"color": "#aaaaaa", "highlight": "#FFD600"}, "width": 1.0, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 13, "from": "CWB", "to": "FLN", "weight": 1.0, "tipo": "regional", "label": "1.0", "title": "regional<br>Peso: 1.0<br>fluxo intrarregional sul", "color": {"color": "#FF9800", "highlight": "#FFD600"}, "width": 4, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 14, "from": "FLN", "to": "POA", "weight": 1.0, "tipo": "regional", "label": "1.0", "title": "regional<br>Peso: 1.0<br>fluxo intrarregional sul", "color": {"color": "#FF9800", "highlight": "#FFD600"}, "width": 4, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 15, "from": "GRU", "to": "CWB", "weight": 2.0, "tipo": "hub", "label": "2.0", "title": "hub<br>Peso: 2.0<br>conexao inter-regional sudeste-sul", "color": {"color": "#FF9800", "highlight": "#FFD600"}, "width": 4, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 16, "from": "GRU", "to": "BSB", "weight": 2.0, "tipo": "hub", "label": "2.0", "title": "hub<br>Peso: 2.0<br>conexao inter-regional sudeste-centro-oeste", "color": {"color": "#2196F3", "highlight": "#FFD600"}, "width": 4, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 17, "from": "GIG", "to": "SSA", "weight": 3.0, "tipo": "hub", "label": "3.0", "title": "hub<br>Peso: 3.0<br>conexao inter-regional sudeste-nordeste", "color": {"color": "#FF9800", "highlight": "#FFD600"}, "width": 4, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 18, "from": "CNF", "to": "BSB", "weight": 2.0, "tipo": "hub", "label": "2.0", "title": "hub<br>Peso: 2.0<br>conexao inter-regional sudeste-centro-oeste", "color": {"color": "#aaaaaa", "highlight": "#FFD600"}, "width": 1.8, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 19, "from": "BSB", "to": "BEL", "weight": 3.0, "tipo": "hub", "label": "3.0", "title": "hub<br>Peso: 3.0<br>conexao inter-regional centro-oeste-norte", "color": {"color": "#aaaaaa", "highlight": "#FFD600"}, "width": 2.6, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 20, "from": "BSB", "to": "MAO", "weight": 3.0, "tipo": "hub", "label": "3.0", "title": "hub<br>Peso: 3.0<br>conexao inter-regional centro-oeste-norte", "color": {"color": "#2196F3", "highlight": "#FFD600"}, "width": 4, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 21, "from": "BSB", "to": "FOR", "weight": 3.0, "tipo": "hub", "label": "3.0", "title": "hub<br>Peso: 3.0<br>conexao inter-regional centro-oeste-nordeste", "color": {"color": "#aaaaaa", "highlight": "#FFD600"}, "width": 2.6, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}, {"id": 22, "from": "FOR", "to": "BEL", "weight": 2.0, "tipo": "hub", "label": "2.0", "title": "hub<br>Peso: 2.0<br>conexao inter-regional nordeste-norte", "color": {"color": "#aaaaaa", "highlight": "#FFD600"}, "width": 1.8, "font": {"size": 10, "color": "#555"}, "smooth": {"type": "curvedCW", "roundness": 0.1}}];
+const EDGES_DATA = [{"id": 0, "from": "MAO", "to": "BEL", "weight": 1.0, "tipo": "regional"}, {"id": 1, "from": "MAO", "to": "PVH", "weight": 1.0, "tipo": "regional"}, {"id": 2, "from": "PVH", "to": "RBR", "weight": 1.0, "tipo": "regional"}, {"id": 3, "from": "SSA", "to": "REC", "weight": 1.0, "tipo": "regional"}, {"id": 4, "from": "REC", "to": "JPA", "weight": 1.0, "tipo": "regional"}, {"id": 5, "from": "JPA", "to": "NAT", "weight": 1.0, "tipo": "regional"}, {"id": 6, "from": "NAT", "to": "FOR", "weight": 1.0, "tipo": "regional"}, {"id": 7, "from": "FOR", "to": "THE", "weight": 1.0, "tipo": "regional"}, {"id": 8, "from": "BSB", "to": "GYN", "weight": 1.0, "tipo": "regional"}, {"id": 9, "from": "GRU", "to": "CGH", "weight": 1.0, "tipo": "regional"}, {"id": 10, "from": "GRU", "to": "GIG", "weight": 1.0, "tipo": "regional"}, {"id": 11, "from": "GIG", "to": "CNF", "weight": 1.0, "tipo": "regional"}, {"id": 12, "from": "GIG", "to": "VIX", "weight": 1.0, "tipo": "regional"}, {"id": 13, "from": "CWB", "to": "FLN", "weight": 1.0, "tipo": "regional"}, {"id": 14, "from": "FLN", "to": "POA", "weight": 1.0, "tipo": "regional"}, {"id": 15, "from": "GRU", "to": "CWB", "weight": 2.0, "tipo": "hub"}, {"id": 16, "from": "GRU", "to": "BSB", "weight": 2.0, "tipo": "hub"}, {"id": 17, "from": "GIG", "to": "SSA", "weight": 3.0, "tipo": "hub"}, {"id": 18, "from": "CNF", "to": "BSB", "weight": 2.0, "tipo": "hub"}, {"id": 19, "from": "BSB", "to": "BEL", "weight": 3.0, "tipo": "hub"}, {"id": 20, "from": "BSB", "to": "MAO", "weight": 3.0, "tipo": "hub"}, {"id": 21, "from": "BSB", "to": "FOR", "weight": 3.0, "tipo": "hub"}, {"id": 22, "from": "FOR", "to": "BEL", "weight": 2.0, "tipo": "hub"}];
 
+EDGES_DATA.forEach(e => {
+    let cor = e.tipo === "regional" ? "#aaaaaa" : "#FF9800";
+    if(e.id===3) cor="#FF9800"; if(e.id===10) cor="#FF9800"; if(e.id===13) cor="#FF9800"; if(e.id===14) cor="#FF9800";
+    if(e.id===16) cor="#2196F3"; if(e.id===20) cor="#2196F3";
+    e.color = { color: cor, highlight: "#FFD600" };
+    e.width = e.weight === 1 ? 1 : (e.weight * 1.5);
+});
 
+const COR_REGIAO = { "Norte": "#2196F3", "Nordeste": "#FF9800", "Centro-Oeste": "#9C27B0", "Sudeste": "#F44336", "Sul": "#4CAF50" };
+
+// =====================================================================
+// LÓGICA DO MÓDULO ORIGINAL (GRAFOS)
+// =====================================================================
 const CAMINHO_REC_POA = ["REC", "SSA", "GIG", "GRU", "CWB", "FLN", "POA"];
 const CAMINHO_MAO_GRU = ["MAO", "BSB", "GRU"];
-
-
-const ORIG_EDGE_COLORS = {};
-const ORIG_EDGE_WIDTHS = {};
-
+const ORIG_EDGE_COLORS = {}; const ORIG_EDGE_WIDTHS = {};
 
 const nodesDS = new vis.DataSet(NODES_DATA);
 const edgesDS = new vis.DataSet(EDGES_DATA);
-EDGES_DATA.forEach(e => {
- ORIG_EDGE_COLORS[e.id] = e.color.color;
- ORIG_EDGE_WIDTHS[e.id] = e.width;
-});
-
+EDGES_DATA.forEach(e => { ORIG_EDGE_COLORS[e.id] = e.color.color; ORIG_EDGE_WIDTHS[e.id] = e.width; });
 
 const container = document.getElementById("network");
 const network = new vis.Network(container, { nodes: nodesDS, edges: edgesDS }, {
- physics: {
-   enabled: false,
- },
- interaction: {
-   hover: true,
-   tooltipDelay: 150,
-   navigationButtons: true,
-   keyboard: true,
- },
- nodes: {
-   shape: "dot",
-   borderWidth: 2,
- },
- edges: {
-   arrows: { to: { enabled: false } },
- },
+  physics: { enabled: false }, interaction: { hover: true, tooltipDelay: 150, navigationButtons: true, keyboard: true }, nodes: { shape: "dot", borderWidth: 2 }, edges: { arrows: { to: { enabled: false } } },
 });
-
 
 const totalNos = NODES_DATA.length;
 const totalArestas = EDGES_DATA.length;
 const grauMax = Math.max(...NODES_DATA.map(n => n.grau));
 const hubNode = NODES_DATA.find(n => n.grau === grauMax);
-const statsBox = document.getElementById("stats-box");
-statsBox.innerHTML = `
- Aeroportos: <span>${totalNos}</span><br>
- Conexões: <span>${totalArestas}</span><br>
- Hub principal: <span>${hubNode ? hubNode.id : "-"}</span><br>
- Maior grau: <span>${grauMax}</span>
-`;
+document.getElementById("stats-box").innerHTML = `Aeroportos: <span>${totalNos}</span><br>Conexões: <span>${totalArestas}</span><br>Hub principal: <span>${hubNode ? hubNode.id : "-"}</span><br>Maior grau: <span>${grauMax}</span>`;
 
-
-
+let hoverTimeout = null; let modoAtivo = null; let noSelecionado = null; let regiaoAtiva = null;
 
 network.on("click", function(params) {
-
-
- if (params.nodes.length === 0) {
-
-
-   if (!modoAtivo) {
-     noSelecionado = null;
-
-
-     nodesDS.update(
-       NODES_DATA.map(n => ({
-         id: n.id,
-         opacity: 1
-       }))
-     );
-
-
-     edgesDS.update(
-       EDGES_DATA.map(e => ({
-         id: e.id,
-         color: {
-           color: ORIG_EDGE_COLORS[e.id]
-         },
-         width: ORIG_EDGE_WIDTHS[e.id]
-       }))
-     );
-   }
-
-
-   return;
- }
-
-
- const id = params.nodes[0];
-
-
- noSelecionado = id;
-
-
- const n = NODES_DATA.find(x => x.id === id);
-
-
- if (!n) return;
-
-
- const connectedNodes = network.getConnectedNodes(id);
-
-
- nodesDS.update(
-   NODES_DATA.map(node => ({
-     id: node.id,
-
-
-     opacity:
-       node.id === id || connectedNodes.includes(node.id)
-         ? 1
-         : 0.12
-   }))
- );
-
-
- edgesDS.update(
-   EDGES_DATA.map(e => ({
-     id: e.id,
-
-
-     color: {
-       color:
-         e.from === id || e.to === id
-           ? ORIG_EDGE_COLORS[e.id]
-           : "#243041"
-     },
-
-
-     width:
-       e.from === id || e.to === id
-         ? ORIG_EDGE_WIDTHS[e.id] + 2
-         : 1
-   }))
- );
-
-
- document.getElementById("info-box").innerHTML = `
-   <b>${n.id}</b> — ${n.cidade}<br>
-   <span class="dim">Região:</span> ${n.region}<br>
-   <span class="dim">Grau:</span> ${n.grau}<br>
-   <span class="dim">Densidade ego:</span> ${n.densidade}
- `;
-
-
+  if (params.nodes.length === 0) {
+    if (!modoAtivo) {
+      noSelecionado = null;
+      nodesDS.update(NODES_DATA.map(n => ({ id: n.id, opacity: 1 })));
+      edgesDS.update(EDGES_DATA.map(e => ({ id: e.id, color: { color: ORIG_EDGE_COLORS[e.id] }, width: ORIG_EDGE_WIDTHS[e.id] })));
+    }
+    return;
+  }
+  const id = params.nodes[0]; noSelecionado = id; const n = NODES_DATA.find(x => x.id === id); if (!n) return;
+  const connectedNodes = network.getConnectedNodes(id);
+  nodesDS.update(NODES_DATA.map(node => ({ id: node.id, opacity: node.id === id || connectedNodes.includes(node.id) ? 1 : 0.12 })));
+  edgesDS.update(EDGES_DATA.map(e => ({ id: e.id, color: { color: e.from === id || e.to === id ? ORIG_EDGE_COLORS[e.id] : "#243041" }, width: e.from === id || e.to === id ? ORIG_EDGE_WIDTHS[e.id] + 2 : 1 })));
+  document.getElementById("info-box").innerHTML = `<b>${n.id}</b> — ${n.cidade}<br><span class="dim">Região:</span> ${n.region}<br><span class="dim">Grau:</span> ${n.grau}<br><span class="dim">Densidade ego:</span> ${n.densidade}`;
 });
-
-
-
-
-let hoverTimeout = null;
-
 
 network.on("hoverNode", function(params) {
-
-
-if (modoAtivo || noSelecionado) return;
-
-
- clearTimeout(hoverTimeout);
-
-
- hoverTimeout = setTimeout(() => {
-
-
-   const nodeId = params.node;
-
-
-   const connectedNodes = network.getConnectedNodes(nodeId);
-
-
-   nodesDS.update(
-     NODES_DATA.map(n => ({
-       id: n.id,
-
-
-       opacity:
-         n.id === nodeId || connectedNodes.includes(n.id)
-           ? 1
-           : 0.12
-     }))
-   );
-
-
-   edgesDS.update(
-     EDGES_DATA.map(e => ({
-       id: e.id,
-
-
-       color: {
-         color:
-           e.from === nodeId || e.to === nodeId
-             ? ORIG_EDGE_COLORS[e.id]
-             : "#243041"
-       },
-
-
-       width:
-         e.from === nodeId || e.to === nodeId
-           ? ORIG_EDGE_WIDTHS[e.id] + 2
-           : 1
-     }))
-   );
-
-
- }, 20);
-
-
+  if (modoAtivo || noSelecionado) return; clearTimeout(hoverTimeout);
+  hoverTimeout = setTimeout(() => {
+    const nodeId = params.node; const connectedNodes = network.getConnectedNodes(nodeId);
+    nodesDS.update(NODES_DATA.map(n => ({ id: n.id, opacity: n.id === nodeId || connectedNodes.includes(n.id) ? 1 : 0.12 })));
+    edgesDS.update(EDGES_DATA.map(e => ({ id: e.id, color: { color: e.from === nodeId || e.to === nodeId ? ORIG_EDGE_COLORS[e.id] : "#243041" }, width: e.from === nodeId || e.to === nodeId ? ORIG_EDGE_WIDTHS[e.id] + 2 : 1 })));
+  }, 20);
 });
-
 
 network.on("blurNode", function() {
-
-
-if (modoAtivo || noSelecionado) return;
-
-
- nodesDS.update(
-   NODES_DATA.map(n => ({
-     id: n.id,
-     opacity: 1
-   }))
- );
-
-
- edgesDS.update(
-   EDGES_DATA.map(e => ({
-     id: e.id,
-
-
-     color: {
-       color: ORIG_EDGE_COLORS[e.id]
-     },
-
-
-     width: ORIG_EDGE_WIDTHS[e.id]
-   }))
- );
-
-
+  if (modoAtivo || noSelecionado) return;
+  nodesDS.update(NODES_DATA.map(n => ({ id: n.id, opacity: 1 })));
+  edgesDS.update(EDGES_DATA.map(e => ({ id: e.id, color: { color: ORIG_EDGE_COLORS[e.id] }, width: ORIG_EDGE_WIDTHS[e.id] })));
 });
 
-
 function buscar() {
- const q = document.getElementById("search-input").value.trim().toUpperCase();
- if (!q) return;
- const n = NODES_DATA.find(x => x.id === q || x.cidade.toUpperCase().includes(q));
- if (!n) { alert("Aeroporto não encontrado: " + q); return; }
- network.selectNodes([n.id]);
- network.focus(n.id, { scale: 1.6, animation: { duration: 600, easingFunction: "easeInOutQuad" } });
-  document.getElementById("info-box").innerHTML = `
-   <b>${n.id}</b> — ${n.cidade}<br>
-   <span class="dim">Região:</span> ${n.region}<br>
-   <span class="dim">Grau:</span> ${n.grau}<br>
-   <span class="dim">Densidade ego:</span> ${n.densidade}
- `;
+  const q = document.getElementById("search-input").value.trim().toUpperCase(); if (!q) return;
+  const n = NODES_DATA.find(x => x.id === q || x.cidade.toUpperCase().includes(q));
+  if (!n) { alert("Aeroporto não encontrado: " + q); return; }
+  network.selectNodes([n.id]); network.focus(n.id, { scale: 1.6, animation: { duration: 600, easingFunction: "easeInOutQuad" } });
+  document.getElementById("info-box").innerHTML = `<b>${n.id}</b> — ${n.cidade}<br><span class="dim">Região:</span> ${n.region}<br><span class="dim">Grau:</span> ${n.grau}<br><span class="dim">Densidade ego:</span> ${n.densidade}`;
 }
-
-
-function limparBusca() {
- document.getElementById("search-input").value = "";
- network.unselectAll();
- network.fit({ animation: true });
- document.getElementById("info-box").innerHTML = '<span class="dim">Clique em um aeroporto para ver detalhes.</span>';
-}
-
-
-let modoAtivo = null;
-let noSelecionado = null;
-let regiaoAtiva = null;
-
-
-function edgesNoCaminho(caminho) {
- const set = new Set();
- for (let i = 0; i < caminho.length - 1; i++) {
-   const a = caminho[i], b = caminho[i+1];
-   EDGES_DATA.forEach(e => {
-     if ((e.from===a && e.to===b) || (e.from===b && e.to===a)) set.add(e.id);
-   });
- }
- return set;
-}
-
-
-const ARESTAS_REC_POA = edgesNoCaminho(CAMINHO_REC_POA);
-const ARESTAS_MAO_GRU = edgesNoCaminho(CAMINHO_MAO_GRU);
-
-
+function limparBusca() { document.getElementById("search-input").value = ""; network.unselectAll(); network.fit({ animation: true }); document.getElementById("info-box").innerHTML = '<span class="dim">Clique em um aeroporto para ver detalhes.</span>'; }
+function edgesNoCaminho(caminho) { const set = new Set(); for (let i = 0; i < caminho.length - 1; i++) { const a = caminho[i], b = caminho[i+1]; EDGES_DATA.forEach(e => { if ((e.from===a && e.to===b) || (e.from===b && e.to===a)) set.add(e.id); }); } return set; }
+const ARESTAS_REC_POA = edgesNoCaminho(CAMINHO_REC_POA); const ARESTAS_MAO_GRU = edgesNoCaminho(CAMINHO_MAO_GRU);
 function destacarCaminho(modo) {
- if (modoAtivo === modo) { resetarCaminhos(); return; }
- modoAtivo = modo;
-
-
- document.getElementById("btn-rec-poa").classList.toggle("active", modo==="rec-poa");
- document.getElementById("btn-mao-gru").classList.toggle("active", modo==="mao-gru");
-
-
- const caminho  = modo === "rec-poa" ? CAMINHO_REC_POA : CAMINHO_MAO_GRU;
- const arestas  = modo === "rec-poa" ? ARESTAS_REC_POA : ARESTAS_MAO_GRU;
- const corDest  = modo === "rec-poa" ? "#FF9800" : "#2196F3";
-
-
- nodesDS.update(NODES_DATA.map(n => ({ id: n.id, opacity: 0.15 })));
- edgesDS.update(EDGES_DATA.map(e => ({ id: e.id, color: { color: "#333" }, width: 1 })));
-
-
- caminho.forEach(id => nodesDS.update([{ id, opacity: 1.0 }]));
-
-
- [...arestas].forEach(eid => edgesDS.update([{ id: eid, color: { color: corDest }, width: 5 }]));
-
-
+  if (modoAtivo === modo) { resetarCaminhos(); return; } modoAtivo = modo;
+  document.getElementById("btn-rec-poa").classList.toggle("active", modo==="rec-poa"); document.getElementById("btn-mao-gru").classList.toggle("active", modo==="mao-gru");
+  const caminho = modo === "rec-poa" ? CAMINHO_REC_POA : CAMINHO_MAO_GRU; const arestas = modo === "rec-poa" ? ARESTAS_REC_POA : ARESTAS_MAO_GRU; const corDest = modo === "rec-poa" ? "#FF9800" : "#2196F3";
+  nodesDS.update(NODES_DATA.map(n => ({ id: n.id, opacity: 0.15 }))); edgesDS.update(EDGES_DATA.map(e => ({ id: e.id, color: { color: "#333" }, width: 1 })));
+  caminho.forEach(id => nodesDS.update([{ id, opacity: 1.0 }])); [...arestas].forEach(eid => edgesDS.update([{ id: eid, color: { color: corDest }, width: 5 }]));
 }
-
-
 function filtrarRegiao(regiao) {
-
-
- regiaoAtiva = regiao;
-
-
- document.querySelectorAll(".region-btn")
-   .forEach(btn => btn.classList.remove("active"));
-
-
- const btn = [...document.querySelectorAll(".region-btn")]
-   .find(b => b.innerText === regiao);
-
-
- if(btn) btn.classList.add("active");
-
-
- nodesDS.update(
-   NODES_DATA.map(n => ({
-     id: n.id,
-     opacity: n.region === regiao ? 1 : 0.08
-   }))
- );
-
-
- edgesDS.update(
-   EDGES_DATA.map(e => {
-
-
-     const fromNode = NODES_DATA.find(n => n.id === e.from);
-     const toNode   = NODES_DATA.find(n => n.id === e.to);
-
-
-     const ativa =
-       fromNode?.region === regiao &&
-       toNode?.region === regiao;
-
-
-     return {
-       id: e.id,
-
-
-       color: {
-         color: ativa
-           ? ORIG_EDGE_COLORS[e.id]
-           : "rgba(80,80,80,.08)"
-       },
-
-
-       width: ativa
-         ? ORIG_EDGE_WIDTHS[e.id]
-         : 0.5
-     };
-
-
-   })
- );
-
-
+  regiaoAtiva = regiao; document.querySelectorAll(".region-btn").forEach(btn => btn.classList.remove("active"));
+  const btn = [...document.querySelectorAll(".region-btn")].find(b => b.innerText === regiao); if(btn) btn.classList.add("active");
+  nodesDS.update(NODES_DATA.map(n => ({ id: n.id, opacity: n.region === regiao ? 1 : 0.08 })));
+  edgesDS.update(EDGES_DATA.map(e => { const fromNode = NODES_DATA.find(n => n.id === e.from); const toNode = NODES_DATA.find(n => n.id === e.to); const ativa = fromNode?.region === regiao && toNode?.region === regiao; return { id: e.id, color: { color: ativa ? ORIG_EDGE_COLORS[e.id] : "rgba(80,80,80,.08)" }, width: ativa ? ORIG_EDGE_WIDTHS[e.id] : 0.5 }; }));
 }
 function limparFiltroRegiao() {
-
-
- regiaoAtiva = null;
-
-
- document.querySelectorAll(".region-btn")
-   .forEach(btn => btn.classList.remove("active"));
-
-
- nodesDS.update(
-   NODES_DATA.map(n => ({
-     id: n.id,
-     opacity: 1
-   }))
- );
-
-
- edgesDS.update(
-   EDGES_DATA.map(e => ({
-     id: e.id,
-
-
-     color: {
-       color: ORIG_EDGE_COLORS[e.id]
-     },
-
-
-     width: ORIG_EDGE_WIDTHS[e.id]
-   }))
- );
-
-
+  regiaoAtiva = null; document.querySelectorAll(".region-btn").forEach(btn => btn.classList.remove("active"));
+  nodesDS.update(NODES_DATA.map(n => ({ id: n.id, opacity: 1 }))); edgesDS.update(EDGES_DATA.map(e => ({ id: e.id, color: { color: ORIG_EDGE_COLORS[e.id] }, width: ORIG_EDGE_WIDTHS[e.id] })));
+}
+function resetarCaminhos() {
+  modoAtivo = null; noSelecionado = null; document.getElementById("btn-rec-poa").classList.remove("active"); document.getElementById("btn-mao-gru").classList.remove("active");
+  nodesDS.update(NODES_DATA.map(n => ({ id: n.id, opacity: 1.0 }))); edgesDS.update(EDGES_DATA.map(e => ({ id: e.id, color: { color: ORIG_EDGE_COLORS[e.id] }, width: ORIG_EDGE_WIDTHS[e.id], }))); network.unselectAll(); document.getElementById("info-box").innerHTML = '<span class="dim">Clique em um aeroporto para ver detalhes.</span>';
 }
 
 
-function resetarCaminhos() {
- modoAtivo = null;
- noSelecionado = null;
+// =====================================================================
+// LÓGICA DO NOVO MÓDULO AVD (INTERATIVIDADE E FILTROS)
+// =====================================================================
 
+let currentAvdChart = 1;
 
- document.getElementById("btn-rec-poa").classList.remove("active");
- document.getElementById("btn-mao-gru").classList.remove("active");
+function switchAba(abaId) {
+  document.getElementById('aba-grafos').style.display = abaId === 'grafos' ? 'block' : 'none';
+  document.getElementById('aba-avd').style.display = abaId === 'avd' ? 'block' : 'none';
+  document.getElementById('tab-grafos').classList.toggle('active', abaId === 'grafos');
+  document.getElementById('tab-avd').classList.toggle('active', abaId === 'avd');
+  if(abaId === 'avd') loadChart(1);
+}
 
+function applyAvdFilter() {
+  loadChart(currentAvdChart);
+}
 
- nodesDS.update(NODES_DATA.map(n => ({
-   id: n.id,
-   opacity: 1.0
- })));
+const plotLayout = {
+  paper_bgcolor: 'rgba(0,0,0,0)',
+  plot_bgcolor: 'rgba(0,0,0,0)',
+  font: { color: '#8ca0b8', family: 'Montserrat, sans-serif', size: 15 }, /* Alterado para Montserrat */
+  margin: { t: 70, l: 80, r: 40, b: 70 }
+};
 
+function loadChart(chartNum) {
+  currentAvdChart = chartNum;
+  document.querySelectorAll('.avd-btn').forEach(btn => btn.classList.remove('active'));
+  document.getElementById('btn-chart-' + chartNum).classList.add('active');
 
- edgesDS.update(EDGES_DATA.map(e => ({
-   id: e.id,
-   color: { color: ORIG_EDGE_COLORS[e.id] },
-   width: ORIG_EDGE_WIDTHS[e.id],
- })));
+  const plotDiv = document.getElementById('avd-plot-container');
+  const mapDiv = document.getElementById('avd-map-container');
+  
+  if(chartNum === 8) {
+    plotDiv.style.display = 'none';
+    mapDiv.style.display = 'block';
+    if(!networkAVD) initMapaAVD();
+    return;
+  } else {
+    plotDiv.style.display = 'block';
+    mapDiv.style.display = 'none';
+  }
 
+  // APPLICAÇÃO DO FILTRO
+  const filterVal = document.getElementById('avd-filter').value;
+  let activeNodes = NODES_DATA;
+  if(filterVal !== "Todas") {
+      activeNodes = NODES_DATA.filter(n => n.region === filterVal);
+  }
 
- network.unselectAll();
+  let data = [];
+  let layout = JSON.parse(JSON.stringify(plotLayout));
 
+  switch(chartNum) {
+    case 1: // Pizza
+      let gr1 = 0, gr2_3 = 0, gr4_6 = 0, gr7 = 0;
+      activeNodes.forEach(n => {
+        if(n.grau === 1) gr1++; else if(n.grau <= 3) gr2_3++; else if(n.grau <= 6) gr4_6++; else gr7++;
+      });
+      data = [{
+        values: [gr1, gr2_3, gr4_6, gr7].filter(v => v>0),
+        labels: ['Grau 1 (Periféricos)', 'Grau 2-3 (Pequenos)', 'Grau 4-6 (Médios)', 'Grau 7+ (Hubs)'].filter((_,i) => [gr1, gr2_3, gr4_6, gr7][i]>0),
+        type: 'pie', hole: 0.4,
+        marker: { colors: ['#90CAF9', '#42A5F5', '#1565C0', '#FF6F00'] },
+        textinfo: 'label+percent',
+        textfont: { size: 16, weight: 'bold', family: 'Montserrat, sans-serif' }
+      }];
+      layout.title = { text: "Distribuição de Conectividade " + (filterVal !== "Todas" ? `(${filterVal})` : ""), font: {color: 'white', size: 22, family: 'Montserrat, sans-serif', weight: 'bold'} };
+      break;
 
- document.getElementById("info-box").innerHTML =
-   '<span class="dim">Clique em um aeroporto para ver detalhes.</span>';
+    case 2: // Ranking Barras
+      let sortedNodes = [...activeNodes].sort((a,b) => a.grau - b.grau);
+      data = [{
+        type: 'bar', orientation: 'h',
+        x: sortedNodes.map(n => n.grau), y: sortedNodes.map(n => n.id),
+        marker: { color: sortedNodes.map(n => COR_REGIAO[n.region] || '#888') },
+        text: sortedNodes.map(n => String(n.grau)), textposition: 'auto', textfont: { size: 15, weight: 'bold', family: 'Montserrat, sans-serif' }
+      }];
+      layout.title = { text: "Ranking de Aeroportos " + (filterVal !== "Todas" ? `(${filterVal})` : ""), font: {color: 'white', size: 22, family: 'Montserrat, sans-serif'} };
+      layout.xaxis = { title: "Grau", gridcolor: '#1f3047', tickfont: {family: 'Montserrat, sans-serif', weight: 600} }; 
+      layout.yaxis = { title: "IATA", tickfont: {family: 'Montserrat, sans-serif', weight: 600} };
+      break;
+
+    case 3: // Centralidade
+      let sortedCent = [...activeNodes].sort((a,b) => a.grau - b.grau);
+      let N_1 = NODES_DATA.length - 1; 
+      let centValues = sortedCent.map(n => n.grau / N_1);
+      
+      data = [{
+        type: 'bar', orientation: 'h',
+        x: centValues.map(v => v.toFixed(3)), y: sortedCent.map(n => n.id),
+        marker: { 
+          color: centValues, 
+          colorscale: [[0, '#162b4d'], [1, '#00d2ff']],
+          showscale: true,
+          colorbar: { title: 'Centralidade', tickfont: {color: '#8ca0b8', family: 'Montserrat'}, titlefont: {color: '#8ca0b8', family: 'Montserrat', weight: 'bold'} }
+        }
+      }];
+      layout.title = { text: "Centralidade de Grau " + (filterVal !== "Todas" ? `(${filterVal})` : ""), font: {color: 'white', size: 22, family: 'Montserrat, sans-serif'} };
+      layout.xaxis = { title: "Centralidade Normalizada [grau / (|V|-1)]", gridcolor: '#1f3047', tickfont: {family: 'Montserrat, sans-serif', weight: 600} };
+      layout.yaxis = { tickfont: {family: 'Montserrat, sans-serif', weight: 600} };
+      break;
+
+    case 4: // Comparação Regiões
+      if(filterVal !== "Todas") {
+          layout.title = { text: "⚠️ Filtro desativado para comparação entre regiões", font: {color: '#FF9800', size: 20, family: 'Montserrat, sans-serif'} };
+      } else {
+          layout.title = { text: "Comparação de Métricas por Região", font: {color: 'white', size: 22, family: 'Montserrat, sans-serif'} };
+      }
+      let regioes = ["Norte", "Nordeste", "Centro-Oeste", "Sudeste", "Sul"];
+      let stats = regioes.map(r => {
+        let ns = NODES_DATA.filter(n => n.region === r).map(n => n.id);
+        let es = EDGES_DATA.filter(e => ns.includes(e.from) && ns.includes(e.to));
+        let o = ns.length; let t = es.length;
+        let d = o > 1 ? (2 * t) / (o * (o - 1)) : 0;
+        return {r, o, t, d};
+      });
+      data = [
+        { x: regioes, y: stats.map(s => s.o), type: 'bar', name: 'Ordem (|V|)', marker: {color: '#1976D2'} },
+        { x: regioes, y: stats.map(s => s.t), type: 'bar', name: 'Tamanho (|E|)', marker: {color: '#388E3C'} },
+        { x: regioes, y: stats.map(s => s.d), type: 'scatter', mode: 'lines+markers', name: 'Densidade', yaxis: 'y2', line: {color: '#F57C00', width: 4} }
+      ];
+      layout.xaxis = { tickfont: {family: 'Montserrat, sans-serif', weight: 600} };
+      layout.yaxis = { title: 'Quantidade', gridcolor: '#1f3047', tickfont: {family: 'Montserrat, sans-serif', weight: 600} };
+      layout.yaxis2 = { title: 'Densidade', overlaying: 'y', side: 'right', range: [0, 1.2], tickfont: {family: 'Montserrat, sans-serif', weight: 600} };
+      layout.barmode = 'group';
+      break;
+
+    case 5: // Heatmap 
+      let idxR = {"Norte":0, "Nordeste":1, "Centro-Oeste":2, "Sudeste":3, "Sul":4};
+      let mat = [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]];
+      EDGES_DATA.forEach(e => {
+        let r1 = NODES_DATA.find(n => n.id === e.from)?.region;
+        let r2 = NODES_DATA.find(n => n.id === e.to)?.region;
+        if(r1 && r2) { mat[idxR[r1]][idxR[r2]]++; if(r1 !== r2) mat[idxR[r2]][idxR[r1]]++; }
+      });
+      data = [{ 
+        z: mat, x: Object.keys(idxR), y: Object.keys(idxR), 
+        type: 'heatmap', colorscale: 'Blues', showscale: true, textTemplate: "%{z}", 
+        textfont: { family: 'Montserrat, sans-serif', size: 18, weight: 'bold' } 
+      }];
+      layout.title = { text: "Heatmap de Adjacências entre Regiões", font: {color: 'white', size: 22, family: 'Montserrat, sans-serif'} };
+      if(filterVal !== "Todas") layout.title.text = "⚠️ Filtro desativado para matriz completa";
+      layout.xaxis = { tickfont: {family: 'Montserrat, sans-serif', weight: 600, size: 14} };
+      layout.yaxis = { tickfont: {family: 'Montserrat, sans-serif', weight: 600, size: 14} };
+      break;
+
+    case 6: // Hubs Multidimensionais
+      let topNodes = [...activeNodes].sort((a,b) => b.grau - a.grau).slice(0, 7).reverse();
+      data = [{ 
+        y: topNodes.map(n=>n.id), x: topNodes.map(n=>n.grau), type: 'bar', orientation: 'h', name: 'Grau', 
+        marker:{color: topNodes.map(n=>COR_REGIAO[n.region])},
+        text: topNodes.map(n => String(n.grau)), textposition: 'auto', textfont: { size: 15, weight: 'bold', family: 'Montserrat, sans-serif' }
+      }];
+      layout.title = { text: "Multidimensional Hubs " + (filterVal !== "Todas" ? `(${filterVal})` : ""), font: {color: 'white', size: 22, family: 'Montserrat, sans-serif'} };
+      layout.xaxis = { gridcolor: '#1f3047', tickfont: {family: 'Montserrat, sans-serif', weight: 600} };
+      layout.yaxis = { tickfont: {family: 'Montserrat, sans-serif', weight: 600} };
+      break;
+
+    case 7: // BFS Layers from BSB
+      let adj = {}; NODES_DATA.forEach(n => adj[n.id] = []);
+      EDGES_DATA.forEach(e => { adj[e.from].push(e.to); adj[e.to].push(e.from); });
+      let start = filterVal === "Todas" ? "BSB" : (activeNodes.length > 0 ? activeNodes.sort((a,b)=>b.grau - a.grau)[0].id : null);
+      if(!start) return; 
+      let visited = { [start]: 0 }; let q = [start];
+      while(q.length > 0) {
+        let curr = q.shift();
+        adj[curr].forEach(v => { 
+          let vNode = NODES_DATA.find(n=>n.id===v);
+          if(visited[v] === undefined && (filterVal === "Todas" || vNode.region === filterVal)) { 
+             visited[v] = visited[curr] + 1; q.push(v); 
+          } 
+        });
+      }
+      let levels = {}; let maxLvl = 0;
+      Object.entries(visited).forEach(([no, lvl]) => { if(!levels[lvl]) levels[lvl]=[]; levels[lvl].push(no); if(lvl>maxLvl) maxLvl=lvl; });
+      let scatterX = [], scatterY = [], scatterText = [], scatterColor = [];
+      Object.entries(levels).forEach(([lvl, nos]) => {
+        let y = maxLvl - parseInt(lvl);
+        nos.forEach((no, i) => {
+          let x = nos.length > 1 ? (i * (10 / (nos.length - 1))) : 5;
+          scatterX.push(x); scatterY.push(y); scatterText.push(no);
+          scatterColor.push(COR_REGIAO[NODES_DATA.find(n=>n.id===no).region]);
+        });
+      });
+      data = [{
+        x: scatterX, y: scatterY, text: scatterText, mode: 'markers+text', textposition: 'bottom center',
+        marker: { size: 35, color: scatterColor, line: {color: 'white', width: 2} },
+        textfont: { size: 16, color: '#fff', weight: 'bold', family: 'Montserrat, sans-serif' }
+      }];
+      layout.title = { text: `Camadas BFS a partir de ${start} ` + (filterVal !== "Todas" ? `(${filterVal})` : ""), font: {color: 'white', size: 22, family: 'Montserrat, sans-serif'} };
+      layout.xaxis = { showgrid: false, zeroline: false, showticklabels: false };
+      layout.yaxis = { showgrid: true, gridcolor: '#1f3047', zeroline: false, tickvals: Array.from({length:maxLvl+1}, (_,i)=>i), ticktext: Array.from({length:maxLvl+1}, (_,i)=>`Nível ${maxLvl-i}`), tickfont: {family: 'Montserrat, sans-serif', weight: 600} };
+      break;
+  }
+  
+  Plotly.newPlot('avd-plot-container', data, layout, {responsive: true, displayModeBar: false});
+}
+
+// =====================================================================
+// MAPA INTERATIVO (VIS.JS) COM COORDENADAS ESPALHADAS
+// =====================================================================
+let networkAVD = null;
+let nodesMapDS, edgesMapDS;
+let animTimer = null;
+
+const COORDS_SPREAD = {
+  "MAO": {x:-60.05, y:-3.04}, "BEL": {x:-48.48, y:-1.38}, "PVH": {x:-63.90, y:-8.71}, "RBR": {x:-67.90, y:-9.87},
+  "FOR": {x:-38.53, y:-3.78}, "NAT": {x:-34.0, y:-5.0}, "JPA": {x:-32.5, y:-7.5}, "REC": {x:-35.0, y:-10.0},
+  "SSA": {x:-38.33, y:-12.91}, "THE": {x:-42.82, y:-5.06}, 
+  "BSB": {x:-47.92, y:-15.87}, "GYN": {x:-50.5, y:-17.5}, 
+  "GRU": {x:-45.0,  y:-22.5}, "CGH": {x:-48.0,  y:-24.5}, 
+  "GIG": {x:-42.0,  y:-24.0}, "CNF": {x:-44.0,  y:-19.0}, "VIX": {x:-39.0,  y:-20.5},
+  "CWB": {x:-50.0,  y:-26.5}, "FLN": {x:-47.5,  y:-28.5}, "POA": {x:-52.0,  y:-31.0}
+};
+
+function initMapaAVD() {
+  const mapNodes = NODES_DATA.map(n => ({
+    id: n.id, label: n.id, title: n.title,
+    x: COORDS_SPREAD[n.id].x * 35,
+    y: -COORDS_SPREAD[n.id].y * 35, 
+    color: { background: COR_REGIAO[n.region], border: "rgba(255,255,255,0.8)" },
+    font: { color: "#FFF", face: "Montserrat", size: 16, bold: true, background: "rgba(10,18,30,0.8)", strokeWidth: 0, multi: true },
+    size: 25 + n.grau * 4, 
+    shadow: { enabled: true, color: 'rgba(0,0,0,0.6)', size: 15, x: 0, y: 5 }, 
+    fixed: { x: true, y: true } 
+  }));
+
+  const mapEdges = EDGES_DATA.map(e => {
+    let r1 = NODES_DATA.find(n => n.id === e.from)?.region; let r2 = NODES_DATA.find(n => n.id === e.to)?.region;
+    let isInter = r1 !== r2;
+    return {
+      id: e.id, from: e.from, to: e.to,
+      color: { color: isInter ? "#E53935" : "#78909C" },
+      dashes: !isInter, width: isInter ? 4 : 2,
+      smooth: { type: "curvedCW", roundness: 0.1 }
+    };
+  });
+
+  nodesMapDS = new vis.DataSet(mapNodes);
+  edgesMapDS = new vis.DataSet(mapEdges);
+
+  networkAVD = new vis.Network(document.getElementById('network-avd'), { nodes: nodesMapDS, edges: edgesMapDS }, {
+    physics: false, interaction: { dragNodes: false, zoomView: true, hover: true }
+  });
+}
+
+function resetarMapaAVD() {
+  clearInterval(animTimer);
+  document.getElementById('map-status').innerText = "";
+  nodesMapDS.update(nodesMapDS.get().map(n => ({ id: n.id, color: { background: COR_REGIAO[NODES_DATA.find(x=>x.id===n.id).region], border: "rgba(255,255,255,0.8)" }, opacity: 1 })));
+  edgesMapDS.update(edgesMapDS.get().map(e => {
+    let r1 = NODES_DATA.find(n => n.id === e.from)?.region; let r2 = NODES_DATA.find(n => n.id === e.to)?.region;
+    return { id: e.id, color: { color: r1 !== r2 ? "#E53935" : "#78909C" }, width: r1 !== r2 ? 4 : 2 };
+  }));
+}
+
+function animarBusca(tipo) {
+  resetarMapaAVD();
+  document.getElementById('map-status').innerText = `Calculando ${tipo}...`;
+  
+  let adj = {}; NODES_DATA.forEach(n => adj[n.id] = []);
+  EDGES_DATA.forEach(e => { adj[e.from].push({to: e.to, eid: e.id}); adj[e.to].push({to: e.from, eid: e.id}); });
+
+  let visitados = new Set();
+  let ordemAnimacao = []; 
+  
+  if(tipo === 'BFS') {
+    let fila = ["BSB"]; visitados.add("BSB");
+    ordemAnimacao.push({type: 'node', id: "BSB"});
+    while(fila.length > 0) {
+      let curr = fila.shift();
+      adj[curr].forEach(viz => {
+        if(!visitados.has(viz.to)) {
+          visitados.add(viz.to);
+          ordemAnimacao.push({type: 'edge', id: viz.eid});
+          ordemAnimacao.push({type: 'node', id: viz.to});
+          fila.push(viz.to);
+        }
+      });
+    }
+  } else if (tipo === 'DFS') {
+    function dfs(curr) {
+      visitados.add(curr);
+      ordemAnimacao.push({type: 'node', id: curr});
+      adj[curr].forEach(viz => {
+        if(!visitados.has(viz.to)) {
+          ordemAnimacao.push({type: 'edge', id: viz.eid});
+          dfs(viz.to);
+        }
+      });
+    }
+    dfs("BSB");
+  }
+
+  nodesMapDS.update(nodesMapDS.get().map(n => ({ id: n.id, color: { background: "#1b2636", border: "#24364f" } })));
+  edgesMapDS.update(edgesMapDS.get().map(e => ({ id: e.id, color: { color: "#111a26" } })));
+
+  let i = 0;
+  document.getElementById('map-status').innerText = `Executando ${tipo}...`;
+  animTimer = setInterval(() => {
+    if(i >= ordemAnimacao.length) { clearInterval(animTimer); document.getElementById('map-status').innerText = `${tipo} Finalizado!`; return; }
+    let step = ordemAnimacao[i];
+    if(step.type === 'node') {
+      nodesMapDS.update({ id: step.id, color: { background: "#58a6ff", border: "#fff" } });
+    } else {
+      edgesMapDS.update({ id: step.id, color: { color: "#00E676" }, width: 6 });
+    }
+    i++;
+  }, 400); 
 }
 </script>
 </body>
 </html>
-
