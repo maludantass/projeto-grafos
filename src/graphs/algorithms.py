@@ -84,8 +84,9 @@ def dfs(grafo, origem):
                 arestas_tipo.append((u, v, "arvore"))
                 _visitar(v)
             elif cor[v] == CINZA:
-                arestas_tipo.append((u, v, "retorno"))
-                tem_ciclo = True
+                if predecessores[u] != v:
+                    arestas_tipo.append((u, v, "retorno"))
+                    tem_ciclo = True
             elif cor[v] == PRETO:
                 if tempo_entrada.get(u, 0) < tempo_entrada.get(v, 0):
                     arestas_tipo.append((u, v, "avanco"))
