@@ -13,7 +13,6 @@
 
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-/* Aplicando a fonte globalmente */
 body { font-family: 'Montserrat', sans-serif; background: radial-gradient(circle at top, #132238 0%, #08111f 45%, #050b14 100%); color:white; height:100vh; overflow:hidden; }
 
 /* ---- SISTEMA DE ABAS ---- */
@@ -23,7 +22,7 @@ body { font-family: 'Montserrat', sans-serif; background: radial-gradient(circle
 .nav-tab.active { background: linear-gradient(135deg, #1f6feb, #388bfd); color: white; border-color: transparent; box-shadow: 0 8px 25px rgba(31,111,235,0.4); transform: translateY(-2px); }
 .aba-content { height: calc(100vh - 80px); width: 100%; }
 
-/* ESTILOS ORIGINAIS DO SEU PROJETO MANTIDOS INTACTOS */
+/* ESTILOS ORIGINAIS DO MÓDULO GRAFOS */
 #header{ height:88px; padding:18px 24px; display:flex; align-items:center; gap:16px; border-bottom:1px solid rgba(255,255,255,.08); background:rgba(8,14,24,.88); backdrop-filter:blur(12px); position:relative; z-index:10; }
 #header::after{ content:""; position:absolute; left:0; bottom:0; width:100%; height:1px; background:linear-gradient(90deg, transparent, rgba(88,166,255,.6), transparent); }
 #header h1{ font-size:24px; font-weight:800; letter-spacing:.5px; color:#ffffff; margin-right:12px; }
@@ -86,10 +85,13 @@ div.vis-network div.vis-navigation div.vis-button{ background-image:none !import
 .avd-btn { background: #1b2636; border: none; border-radius: 12px; padding: 14px 16px; color: #d6e2f0; font-size: 14px; font-weight: 700; text-align: left; cursor: pointer; transition: 0.2s; font-family: 'Montserrat', sans-serif;}
 .avd-btn:hover { background: #24364f; transform: translateX(4px); }
 .avd-btn.active { background: #1f6feb; color: white; box-shadow: 0 0 15px rgba(31,111,235,.4); }
+#btn-chart-9 { background: linear-gradient(135deg, #10b981, #059669); color: white; border: 1px solid rgba(255,255,255,0.2); }
+#btn-chart-9:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4); }
 
 #avd-main { flex: 1; background: #0f1a2a; border-radius: 28px; border: 1px solid rgba(255,255,255,.06); position: relative; overflow: hidden; padding: 20px; box-shadow: inset 0 0 80px rgba(0,0,0,.2); }
 #avd-plot-container { width: 100%; height: 100%; }
 #avd-map-container { width: 100%; height: 100%; display: none; position: relative; }
+#avd-insights-container { width: 100%; height: 100%; display: none; position: relative; overflow-y: auto; }
 
 /* MAPA PREMIUM COM GRID DE RADAR */
 #network-avd { 
@@ -102,19 +104,19 @@ div.vis-network div.vis-navigation div.vis-button{ background-image:none !import
   box-shadow: inset 0 0 100px rgba(0,0,0,0.8);
 }
 
-/* Painel de Controle reposicionado para não sobrepor RBR (canto inferior esquerdo) */
 #map-controls { position: absolute; bottom: 20px; left: 20px; background: rgba(10,18,30,.95); padding: 15px; border-radius: 16px; border: 1px solid rgba(255,255,255,.1); display: flex; flex-direction: column; gap: 10px; z-index: 10; box-shadow: 0 10px 30px rgba(0,0,0,0.5); backdrop-filter: blur(10px); }
 .map-btn { padding: 10px 15px; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; color: white; transition: 0.2s; font-size: 13px; font-family: 'Montserrat', sans-serif;}
 .btn-bfs { background: linear-gradient(135deg, #9C27B0, #7B1FA2); } .btn-bfs:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(156, 39, 176, 0.4); }
 .btn-dfs { background: linear-gradient(135deg, #E65100, #BF360C); } .btn-dfs:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(230, 81, 0, 0.4); }
 .btn-reset { background: #263238; border: 1px solid rgba(255,255,255,0.1); } .btn-reset:hover { background: #37474F; }
 
-/* Forçando peso da fonte dentro do Plotly */
-.js-plotly-plot .plotly text {
-    font-weight: 600 !important;
-}
+.js-plotly-plot .plotly text { font-weight: 600 !important; }
 .js-plotly-plot .plotly .g-gtitle { fill: white !important; }
 .js-plotly-plot .plotly .xtick text, .js-plotly-plot .plotly .ytick text { fill: #8ca0b8 !important; }
+
+/* EFEITOS CARDS INSIGHTS */
+.insight-card { transition: all 0.3s ease; }
+.insight-card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(88,166,255,0.2) !important; border-color: rgba(88,166,255,0.5) !important; }
 </style>
 </head>
 <body>
@@ -207,6 +209,10 @@ div.vis-network div.vis-navigation div.vis-button{ background-image:none !import
       <button class="avd-btn" id="btn-chart-6" onclick="loadChart(6)">6. Multidimensional Hubs</button>
       <button class="avd-btn" id="btn-chart-7" onclick="loadChart(7)">7. Camadas BFS (BSB)</button>
       <button class="avd-btn" id="btn-chart-8" onclick="loadChart(8)">8. Mapa de Conectividade</button>
+      
+      <hr style="border: 0; height: 1px; background: rgba(255,255,255,0.1); margin: 5px 0;">
+      
+      <button class="avd-btn" id="btn-chart-9" onclick="loadChart(9)">9. Insights & Dados ANAC</button>
     </div>
     
     <div id="avd-main">
@@ -222,26 +228,84 @@ div.vis-network div.vis-navigation div.vis-button{ background-image:none !import
           <p id="map-status" style="color:#FFD600; font-size:13px; font-weight:800; margin-top:5px; text-align:center; height:15px;"></p>
         </div>
       </div>
+
+      <div id="avd-insights-container">
+        <div class="insights-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h2 style="font-size: 24px; font-weight: 800; color: #58a6ff;">Integração Dinâmica ANAC x Redes</h2>
+          <div style="display: flex; gap: 10px;">
+             <input type="text" id="insight-search" placeholder="Pesquisar IATA ou Cidade..." oninput="renderInsights()" style="padding: 10px 15px; font-family: 'Montserrat', sans-serif; border-radius: 8px; border: 1px solid #1f6feb; background: #101b2b; color: white; width: 220px; outline: none;">
+             <select id="insight-sort" onchange="renderInsights()" style="padding: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; border-radius: 8px; border: 1px solid #1f6feb; background: #101b2b; color: white; cursor: pointer; outline: none;">
+               <option value="pax">Ordenar: Volume de Passageiros (ANAC)</option>
+               <option value="grau">Ordenar: Relevância na Rede (Grau)</option>
+               <option value="rank">Ordenar: Posição Nacional (Ranking)</option>
+             </select>
+          </div>
+        </div>
+        
+        <div id="insights-kpis" style="display: flex; gap: 15px; margin-bottom: 25px;">
+          <div class="kpi-card" style="flex: 1; background: #162235; padding: 20px; border-radius: 12px; border-left: 5px solid #58a6ff; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+             <h3 style="font-size: 14px; font-weight: 700; color: #8ca0b8; text-transform: uppercase;">Amostra: Total Passageiros/Ano</h3>
+             <p style="font-size: 28px; font-weight: 800; color: white; margin-top: 5px;">~154 Milhões</p>
+          </div>
+          <div class="kpi-card" style="flex: 1; background: #162235; padding: 20px; border-radius: 12px; border-left: 5px solid #FF9800; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+             <h3 style="font-size: 14px; font-weight: 700; color: #8ca0b8; text-transform: uppercase;">Dissonância (Volume x Conexão)</h3>
+             <p style="font-size: 18px; font-weight: 800; color: white; margin-top: 5px;">CGH (Grau 1, mas 22.1M Pax)</p>
+          </div>
+          <div class="kpi-card" style="flex: 1; background: #162235; padding: 20px; border-radius: 12px; border-left: 5px solid #4CAF50; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+             <h3 style="font-size: 14px; font-weight: 700; color: #8ca0b8; text-transform: uppercase;">Hub de Alta Eficiência (Rede)</h3>
+             <p style="font-size: 18px; font-weight: 800; color: white; margin-top: 5px;">BSB (Grau 6 / Hub Geográfico)</p>
+          </div>
+        </div>
+
+        <div id="insights-list" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding-bottom: 20px;">
+           </div>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
 // =====================================================================
-// DADOS ORIGINAIS
+// DADOS ORIGINAIS DO GRAFO
 // =====================================================================
 const NODES_DATA = [{"id": "REC", "label": "REC", "title": "<b>REC</b> — Recife<br>Região: Nordeste<br>Grau: 2<br>Densidade ego: 0.667", "color": {"background": "#FF9800", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 20, "x": 455.0, "y": -130.0, "region": "Nordeste", "cidade": "Recife", "grau": 2, "densidade": 0.667}, {"id": "SSA", "label": "SSA", "title": "<b>SSA</b> — Salvador<br>Região: Nordeste<br>Grau: 2<br>Densidade ego: 0.667", "color": {"background": "#FF9800", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 20, "x": 364.0, "y": -39.0, "region": "Nordeste", "cidade": "Salvador", "grau": 2, "densidade": 0.667}, {"id": "FOR", "label": "FOR", "title": "<b>FOR</b> — Fortaleza<br>Região: Nordeste<br>Grau: 4<br>Densidade ego: 0.500", "color": {"background": "#FF9800", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 28, "x": 299.0, "y": -351.0, "region": "Nordeste", "cidade": "Fortaleza", "grau": 4, "densidade": 0.5}, {"id": "NAT", "label": "NAT", "title": "<b>NAT</b> — Natal<br>Região: Nordeste<br>Grau: 2<br>Densidade ego: 0.667", "color": {"background": "#FF9800", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 20, "x": 403.0, "y": -299.0, "region": "Nordeste", "cidade": "Natal", "grau": 2, "densidade": 0.667}, {"id": "JPA", "label": "JPA", "title": "<b>JPA</b> — João Pessoa<br>Região: Nordeste<br>Grau: 2<br>Densidade ego: 0.667", "color": {"background": "#FF9800", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 20, "x": 442.0, "y": -221.0, "region": "Nordeste", "cidade": "João Pessoa", "grau": 2, "densidade": 0.667}, {"id": "GRU", "label": "GRU", "title": "<b>GRU</b> — São Paulo<br>Região: Sudeste<br>Grau: 4<br>Densidade ego: 0.400", "color": {"background": "#F44336", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 28, "x": 65.0, "y": 195.0, "region": "Sudeste", "cidade": "São Paulo", "grau": 4, "densidade": 0.4}, {"id": "CGH", "label": "CGH", "title": "<b>CGH</b> — São Paulo<br>Região: Sudeste<br>Grau: 1<br>Densidade ego: 1.000", "color": {"background": "#F44336", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 16, "x": 104.0, "y": 260.0, "region": "Sudeste", "cidade": "São Paulo", "grau": 1, "densidade": 1.0}, {"id": "GIG", "label": "GIG", "title": "<b>GIG</b> — Rio de Janeiro<br>Região: Sudeste<br>Grau: 4<br>Densidade ego: 0.400", "color": {"background": "#F44336", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 28, "x": 234.0, "y": 130.0, "region": "Sudeste", "cidade": "Rio de Janeiro", "grau": 4, "densidade": 0.4}, {"id": "CNF", "label": "CNF", "title": "<b>CNF</b> — Belo Horizonte<br>Região: Sudeste<br>Grau: 2<br>Densidade ego: 0.667", "color": {"background": "#F44336", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 20, "x": 130.0, "y": 104.0, "region": "Sudeste", "cidade": "Belo Horizonte", "grau": 2, "densidade": 0.667}, {"id": "VIX", "label": "VIX", "title": "<b>VIX</b> — Vitória<br>Região: Sudeste<br>Grau: 1<br>Densidade ego: 1.000", "color": {"background": "#F44336", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 16, "x": 325.0, "y": 65.0, "region": "Sudeste", "cidade": "Vitória", "grau": 1, "densidade": 1.0}, {"id": "BSB", "label": "BSB", "title": "<b>BSB</b> — Brasília<br>Região: Centro-Oeste<br>Grau: 6<br>Densidade ego: 0.381", "color": {"background": "#9C27B0", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 36, "x": -78.0, "y": -104.0, "region": "Centro-Oeste", "cidade": "Brasília", "grau": 6, "densidade": 0.381}, {"id": "GYN", "label": "GYN", "title": "<b>GYN</b> — Goiânia<br>Região: Centro-Oeste<br>Grau: 1<br>Densidade ego: 1.000", "color": {"background": "#9C27B0", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 16, "x": -169.0, "y": -39.0, "region": "Centro-Oeste", "cidade": "Goiânia", "grau": 1, "densidade": 1.0}, {"id": "CWB", "label": "CWB", "title": "<b>CWB</b> — Curitiba<br>Região: Sul<br>Grau: 2<br>Densidade ego: 0.667", "color": {"background": "#4CAF50", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 20, "x": -65.0, "y": 325.0, "region": "Sul", "cidade": "Curitiba", "grau": 2, "densidade": 0.667}, {"id": "FLN", "label": "FLN", "title": "<b>FLN</b> — Florianópolis<br>Região: Sul<br>Grau: 2<br>Densidade ego: 0.667", "color": {"background": "#4CAF50", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 20, "x": 39.0, "y": 403.0, "region": "Sul", "cidade": "Florianópolis", "grau": 2, "densidade": 0.667}, {"id": "POA", "label": "POA", "title": "<b>POA</b> — Porto Alegre<br>Região: Sul<br>Grau: 1<br>Densidade ego: 1.000", "color": {"background": "#4CAF50", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 16, "x": -78.0, "y": 494.0, "region": "Sul", "cidade": "Porto Alegre", "grau": 1, "densidade": 1.0}, {"id": "MAO", "label": "MAO", "title": "<b>MAO</b> — Manaus<br>Região: Norte<br>Grau: 3<br>Densidade ego: 0.667", "color": {"background": "#2196F3", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 24, "x": -455.0, "y": -260.0, "region": "Norte", "cidade": "Manaus", "grau": 3, "densidade": 0.667}, {"id": "BEL", "label": "BEL", "title": "<b>BEL</b> — Belém<br>Região: Norte<br>Grau: 3<br>Densidade ego: 0.833", "color": {"background": "#2196F3", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 24, "x": -104.0, "y": -325.0, "region": "Norte", "cidade": "Belém", "grau": 3, "densidade": 0.833}, {"id": "PVH", "label": "PVH", "title": "<b>PVH</b> — Porto Velho<br>Região: Norte<br>Grau: 2<br>Densidade ego: 0.667", "color": {"background": "#2196F3", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 20, "x": -546.0, "y": -130.0, "region": "Norte", "cidade": "Porto Velho", "grau": 2, "densidade": 0.667}, {"id": "RBR", "label": "RBR", "title": "<b>RBR</b> — Rio Branco<br>Região: Norte<br>Grau: 1<br>Densidade ego: 1.000", "color": {"background": "#2196F3", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 16, "x": -650.0, "y": -65.0, "region": "Norte", "cidade": "Rio Branco", "grau": 1, "densidade": 1.0}, {"id": "THE", "label": "THE", "title": "<b>THE</b> — Teresina<br>Região: Nordeste<br>Grau: 1<br>Densidade ego: 1.000", "color": {"background": "#FF9800", "border": "#222", "highlight": {"background": "#FFD600", "border": "#FF6F00"}}, "font": {"color": "#fff", "size": 14, "face": "Arial"}, "size": 16, "x": 156.0, "y": -390.0, "region": "Nordeste", "cidade": "Teresina", "grau": 1, "densidade": 1.0}];
 const EDGES_DATA = [{"id": 0, "from": "MAO", "to": "BEL", "weight": 1.0, "tipo": "regional"}, {"id": 1, "from": "MAO", "to": "PVH", "weight": 1.0, "tipo": "regional"}, {"id": 2, "from": "PVH", "to": "RBR", "weight": 1.0, "tipo": "regional"}, {"id": 3, "from": "SSA", "to": "REC", "weight": 1.0, "tipo": "regional"}, {"id": 4, "from": "REC", "to": "JPA", "weight": 1.0, "tipo": "regional"}, {"id": 5, "from": "JPA", "to": "NAT", "weight": 1.0, "tipo": "regional"}, {"id": 6, "from": "NAT", "to": "FOR", "weight": 1.0, "tipo": "regional"}, {"id": 7, "from": "FOR", "to": "THE", "weight": 1.0, "tipo": "regional"}, {"id": 8, "from": "BSB", "to": "GYN", "weight": 1.0, "tipo": "regional"}, {"id": 9, "from": "GRU", "to": "CGH", "weight": 1.0, "tipo": "regional"}, {"id": 10, "from": "GRU", "to": "GIG", "weight": 1.0, "tipo": "regional"}, {"id": 11, "from": "GIG", "to": "CNF", "weight": 1.0, "tipo": "regional"}, {"id": 12, "from": "GIG", "to": "VIX", "weight": 1.0, "tipo": "regional"}, {"id": 13, "from": "CWB", "to": "FLN", "weight": 1.0, "tipo": "regional"}, {"id": 14, "from": "FLN", "to": "POA", "weight": 1.0, "tipo": "regional"}, {"id": 15, "from": "GRU", "to": "CWB", "weight": 2.0, "tipo": "hub"}, {"id": 16, "from": "GRU", "to": "BSB", "weight": 2.0, "tipo": "hub"}, {"id": 17, "from": "GIG", "to": "SSA", "weight": 3.0, "tipo": "hub"}, {"id": 18, "from": "CNF", "to": "BSB", "weight": 2.0, "tipo": "hub"}, {"id": 19, "from": "BSB", "to": "BEL", "weight": 3.0, "tipo": "hub"}, {"id": 20, "from": "BSB", "to": "MAO", "weight": 3.0, "tipo": "hub"}, {"id": 21, "from": "BSB", "to": "FOR", "weight": 3.0, "tipo": "hub"}, {"id": 22, "from": "FOR", "to": "BEL", "weight": 2.0, "tipo": "hub"}];
 
 EDGES_DATA.forEach(e => {
-    let cor = e.tipo === "regional" ? "#aaaaaa" : "#FF9800";
-    if(e.id===3) cor="#FF9800"; if(e.id===10) cor="#FF9800"; if(e.id===13) cor="#FF9800"; if(e.id===14) cor="#FF9800";
-    if(e.id===16) cor="#2196F3"; if(e.id===20) cor="#2196F3";
-    e.color = { color: cor, highlight: "#FFD600" };
-    e.width = e.weight === 1 ? 1 : (e.weight * 1.5);
+  let cor = e.tipo === "regional" ? "#aaaaaa" : "#FF9800";
+  if(e.id===3) cor="#FF9800"; if(e.id===10) cor="#FF9800"; if(e.id===13) cor="#FF9800"; if(e.id===14) cor="#FF9800";
+  if(e.id===16) cor="#2196F3"; if(e.id===20) cor="#2196F3";
+  e.color = { color: cor, highlight: "#FFD600" };
+  e.width = e.weight === 1 ? 1 : (e.weight * 1.5);
 });
 
 const COR_REGIAO = { "Norte": "#2196F3", "Nordeste": "#FF9800", "Centro-Oeste": "#9C27B0", "Sudeste": "#F44336", "Sul": "#4CAF50" };
+
+// =====================================================================
+// DADOS "REAIS" DA ANAC (BASEADOS EM PASSAGEIROS - 2023 APROX.) PARA INSIGHTS
+// =====================================================================
+const ANAC_DATA = {
+  "GRU": { pax: 41.3, cargo: "Alta", rank: 1, type: "Internacional e Hub Master" },
+  "CGH": { pax: 22.1, cargo: "Baixa", rank: 2, type: "Doméstico Executivo (Ponto a Ponto)" },
+  "BSB": { pax: 14.8, cargo: "Média", rank: 3, type: "Hub Nacional Geográfico" },
+  "GIG": { pax: 11.5, cargo: "Alta", rank: 4, type: "Internacional e Turismo" },
+  "CNF": { pax: 10.5, cargo: "Média", rank: 5, type: "Hub Regional Sudeste" },
+  "REC": { pax: 9.0, cargo: "Média", rank: 6, type: "Hub Principal Nordeste" },
+  "POA": { pax: 7.5, cargo: "Média", rank: 7, type: "Polo Regional Sul" },
+  "SSA": { pax: 7.3, cargo: "Média", rank: 8, type: "Turismo Nordeste" },
+  "FOR": { pax: 5.6, cargo: "Média", rank: 9, type: "Turismo e Hub Secundário" },
+  "CWB": { pax: 5.5, cargo: "Média", rank: 10, type: "Negócios Sul" },
+  "FLN": { pax: 3.9, cargo: "Baixa", rank: 11, type: "Turismo Sul" },
+  "BEL": { pax: 3.5, cargo: "Média", rank: 12, type: "Hub Principal Norte" },
+  "VIX": { pax: 3.2, cargo: "Baixa", rank: 13, type: "Regional Sudeste" },
+  "GYN": { pax: 3.2, cargo: "Baixa", rank: 14, type: "Regional Centro-Oeste" },
+  "MAO": { pax: 2.8, cargo: "Alta", rank: 15, type: "Polo Industrial (Carga) Norte" },
+  "NAT": { pax: 2.3, cargo: "Baixa", rank: 16, type: "Turismo Nordeste" },
+  "JPA": { pax: 1.4, cargo: "Baixa", rank: 17, type: "Turismo Nordeste" },
+  "THE": { pax: 1.1, cargo: "Baixa", rank: 18, type: "Regional Nordeste" },
+  "PVH": { pax: 0.8, cargo: "Baixa", rank: 19, type: "Regional Norte" },
+  "RBR": { pax: 0.4, cargo: "Baixa", rank: 20, type: "Regional Norte" }
+};
 
 // =====================================================================
 // LÓGICA DO MÓDULO ORIGINAL (GRAFOS)
@@ -346,13 +410,14 @@ function switchAba(abaId) {
 }
 
 function applyAvdFilter() {
-  loadChart(currentAvdChart);
+  if (currentAvdChart === 9) renderInsights();
+  else loadChart(currentAvdChart);
 }
 
 const plotLayout = {
   paper_bgcolor: 'rgba(0,0,0,0)',
   plot_bgcolor: 'rgba(0,0,0,0)',
-  font: { color: '#8ca0b8', family: 'Montserrat, sans-serif', size: 15 }, /* Alterado para Montserrat */
+  font: { color: '#8ca0b8', family: 'Montserrat, sans-serif', size: 15 },
   margin: { t: 70, l: 80, r: 40, b: 70 }
 };
 
@@ -363,18 +428,27 @@ function loadChart(chartNum) {
 
   const plotDiv = document.getElementById('avd-plot-container');
   const mapDiv = document.getElementById('avd-map-container');
+  const insightsDiv = document.getElementById('avd-insights-container');
   
-  if(chartNum === 8) {
+  if (chartNum === 9) {
+    plotDiv.style.display = 'none';
+    mapDiv.style.display = 'none';
+    insightsDiv.style.display = 'block';
+    renderInsights();
+    return;
+  } else if (chartNum === 8) {
     plotDiv.style.display = 'none';
     mapDiv.style.display = 'block';
+    insightsDiv.style.display = 'none';
     if(!networkAVD) initMapaAVD();
     return;
   } else {
     plotDiv.style.display = 'block';
     mapDiv.style.display = 'none';
+    insightsDiv.style.display = 'none';
   }
 
-  // APPLICAÇÃO DO FILTRO
+  // APPLICAÇÃO DO FILTRO (Gráficos Ploly 1 a 7)
   const filterVal = document.getElementById('avd-filter').value;
   let activeNodes = NODES_DATA;
   if(filterVal !== "Todas") {
@@ -528,6 +602,76 @@ function loadChart(chartNum) {
   }
   
   Plotly.newPlot('avd-plot-container', data, layout, {responsive: true, displayModeBar: false});
+}
+
+// Renderização dinâmica do painel de Insights
+function renderInsights() {
+  const search = document.getElementById('insight-search').value.toLowerCase();
+  const sort = document.getElementById('insight-sort').value;
+  const filterVal = document.getElementById('avd-filter').value;
+  const container = document.getElementById('insights-list');
+  
+  // Mescla dados da Rede + ANAC
+  let mergedData = NODES_DATA.map(n => {
+    return { ...n, ...ANAC_DATA[n.id] };
+  });
+
+  // Aplica filtro de região (herdado do avd-filter global)
+  if (filterVal !== "Todas") {
+    mergedData = mergedData.filter(d => d.region === filterVal);
+  }
+
+  // Aplica pesquisa (IATA ou Cidade)
+  if (search) {
+    mergedData = mergedData.filter(d => d.id.toLowerCase().includes(search) || d.cidade.toLowerCase().includes(search));
+  }
+
+  // Ordenação
+  if (sort === 'pax') {
+    mergedData.sort((a, b) => b.pax - a.pax);
+  } else if (sort === 'grau') {
+    mergedData.sort((a, b) => b.grau - a.grau);
+  } else if (sort === 'rank') {
+    mergedData.sort((a, b) => a.rank - b.rank);
+  }
+
+  container.innerHTML = '';
+
+  if (mergedData.length === 0) {
+     container.innerHTML = '<p style="color:#8ca0b8; padding: 20px;">Nenhum aeroporto encontrado para esta busca ou filtro.</p>';
+     return;
+  }
+
+  mergedData.forEach(d => {
+    let insightText = "";
+    if (d.grau >= 4 && d.pax > 10) {
+       insightText = "🔥 <b>Super Hub:</b> Altíssima conectividade (grau elevado) suportada por demanda massiva (Pax alto).";
+    } else if (d.grau >= 4 && d.pax <= 10) {
+       insightText = "🌐 <b>Hub Estratégico de Conexões:</b> Mais importante pela rede que cria do que pelo próprio destino final.";
+    } else if (d.grau < 4 && d.pax > 10) {
+       insightText = "📈 <b>Demanda Ponto-a-Ponto Intensa:</b> Conexões escassas no modelo, mas seus poucos voos são lotados e densos.";
+    } else {
+       insightText = "✈️ <b>Alimentador Regional:</b> Direciona fluxo para os hubs. Desempenho equilibrado com sua infraestrutura.";
+    }
+
+    container.innerHTML += `
+      <div class="insight-card" style="background: rgba(20,30,45,0.85); border: 1px solid rgba(88,166,255,0.15); border-radius: 14px; padding: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; margin-bottom: 12px;">
+           <h3 style="font-size: 20px; color: ${COR_REGIAO[d.region]}; font-weight: 800; margin:0;">${d.id} <span style="color:#fff; font-size:16px;">— ${d.cidade}</span></h3>
+           <span style="background: #1f6feb; padding: 5px 10px; border-radius: 8px; font-size: 12px; font-weight: 800; color:white; box-shadow: 0 4px 10px rgba(31,111,235,0.3);">Top ANAC #${d.rank}</span>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 14px; font-weight: 600; color: #d0dceb;">
+           <div><span style="color:#8ca0b8;">Passageiros/Ano:</span> <br><b style="font-size:18px; color:white;">${d.pax} Milhões</b></div>
+           <div><span style="color:#8ca0b8;">Grau (Rede):</span> <br><b style="font-size:18px; color:white;">${d.grau} conexões</b></div>
+           <div><span style="color:#8ca0b8;">Perfil:</span> <br>${d.type}</div>
+           <div><span style="color:#8ca0b8;">Mov. Carga:</span> <br>${d.cargo}</div>
+        </div>
+        <div style="margin-top: 15px; padding: 12px; background: rgba(0,0,0,0.3); border-radius: 8px; border-left: 4px solid ${COR_REGIAO[d.region]}; font-size: 13px; color: #a4b9ce;">
+           ${insightText}
+        </div>
+      </div>
+    `;
+  });
 }
 
 // =====================================================================

@@ -139,7 +139,6 @@ def viz10_2_centralidade_grau():
     graus_raw      = ler_csv(os.path.join(OUT,  "graus.csv"))
     regiao_map     = {r["iata"]: r["regiao"] for r in aeroportos_raw}
 
-    # em caso de empate coloca como alfabetica 
     graus_sorted = sorted(graus_raw,
                           key=lambda r: (-int(r["grau"]), r["aeroporto"]))
 
@@ -178,14 +177,14 @@ def viz10_2_centralidade_grau():
                 f"{c:.3f}  (grau {g})",
                 va="center", ha="left", fontsize=9.5, color="#333")
 
-    # linha de média
+   
     ax.axvline(media, color="#E53935", linestyle="--",
                linewidth=1.8, zorder=3, label=f"Média = {media:.3f}")
 
     ax.set_yticks(y_pos)
     ax.set_yticklabels(nos, fontsize=10, fontweight="bold")
     ax.set_xlabel("Centralidade Normalizada  [grau / (|V|-1)]",
-                  fontsize=12, labelpad=8) # Aumentado levemente o eixo x
+                  fontsize=12, labelpad=8) 
     ax.set_ylabel("Aeroporto (código IATA)", fontsize=12)
     ax.set_title("Centralidade de Grau por Aeroporto e Região",
                  fontsize=15, fontweight="bold", pad=12)
@@ -193,20 +192,17 @@ def viz10_2_centralidade_grau():
     ax.set_ylim(-0.6, n - 0.4)
     ax.grid(axis="x", linestyle="--", alpha=0.35)
 
-    # LEGENDA AUMENTADA
     patches_leg = [mpatches.Patch(color=c, label=r) for r, c in COR_REGIAO.items()]
     ax.legend(handles=patches_leg + [
         mpatches.Patch(color="#E53935", label=f"Média = {media:.3f}")
     ], title="Região", fontsize=11, title_fontsize=12, loc="lower right")
 
-    # INSIGHT INFERIOR AUMENTADO
     nota = (
         "Insight exploratório: BSB concentra a maior centralidade (0.316), "
         "seguido por GRU, FOR e GIG (0.211).\n"
         "Cerca de 50% dos aeroportos ficam abaixo da média — "
         "dependência crítica de poucos hubs."
     )
-    # Ajustei a posição em y (-0.05) para não colar muito no gráfico e aumentei a fonte para 11.5
     fig.text(0.5, -0.05, nota, ha="center", fontsize=11.5,
              color="#555", style="italic")
 

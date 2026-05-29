@@ -13,7 +13,6 @@ import matplotlib.patches as mpatches
 import matplotlib.patheffects as pe
 import numpy as np
 
-# --- NOVIDADE: Importando geopandas ---
 import geopandas as gpd
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -51,27 +50,25 @@ def viz10_3_vulnerabilidade_hubs_barras():
     ego_raw        = ler_csv(os.path.join(OUT,  "ego_aeroportos.csv"))
     regiao_map     = {r["iata"]: r["regiao"] for r in aeroportos_raw}
 
-    # Pegamos os 7 aeroportos mais conectados para análise limpa
     ego_sorted = sorted(ego_raw, key=lambda r: -int(r["grau"]))
     selecionados = [r for r in ego_sorted[:7]]
     
-    # Inverter a lista para que o maior valor fique no topo do gráfico de barras horizontais
     selecionados.reverse()
 
     aeroportos = [r["aeroporto"] for r in selecionados]
     cores_barras = [COR_REGIAO.get(regiao_map.get(a, ""), "#888") for a in aeroportos]
 
-    # Extração dos 4 parâmetros
+    
     val_grau      = [int(r["grau"]) for r in selecionados]
     val_ordem     = [int(r["ordem_ego"]) for r in selecionados]
     val_tamanho   = [int(r["tamanho_ego"]) for r in selecionados]
     val_densidade = [float(r["densidade_ego"]) for r in selecionados]
 
-    # Criação de um painel 2x2 (4 mini-gráficos)
+
     fig, axs = plt.subplots(2, 2, figsize=(12, 8))
     fig.patch.set_facecolor("#F8F9FA")
     
-    # Lista para iterar e construir os 4 gráficos magicamente
+    
     metricas = [
         (val_grau, "Grau\n(Total de Conexões)", axs[0, 0]),
         (val_ordem, "Ordem da Ego-Rede\n(Nº de Vizinhos)", axs[0, 1]),
@@ -81,30 +78,28 @@ def viz10_3_vulnerabilidade_hubs_barras():
 
     for valores, titulo, ax in metricas:
         ax.set_facecolor("#FFFFFF")
-        # Desenha as barras
+        
         barras = ax.barh(aeroportos, valores, color=cores_barras, edgecolor="white", height=0.7)
         
-        # Adiciona o número no final de cada barra para facilitar a leitura
         for barra in barras:
             largura = barra.get_width()
             formato = f"{largura:.2f}" if isinstance(largura, float) and largura < 2 else f"{int(largura)}"
             ax.text(
-                largura + (max(valores) * 0.02), # Distância do texto pra barra
+                largura + (max(valores) * 0.02), 
                 barra.get_y() + barra.get_height() / 2,
                 formato,
                 va='center', ha='left', fontsize=9, fontweight='bold', color="#444"
             )
 
-        # Estilização limpa
+        
         ax.set_title(titulo, fontsize=11, fontweight="bold", color="#222", pad=10)
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
         ax.spines['bottom'].set_visible(False)
         ax.spines['left'].set_color("#DDD")
-        ax.tick_params(axis='x', bottom=False, labelbottom=False) # Esconde eixo X (já temos os números nas barras)
+        ax.tick_params(axis='x', bottom=False, labelbottom=False) 
         ax.tick_params(axis='y', labelsize=10)
 
-    # Legenda Global de Regiões
     legend_items = [mpatches.Patch(color=c, label=r) for r, c in COR_REGIAO.items()]
     fig.legend(handles=legend_items, title="Região", loc='upper center', 
                bbox_to_anchor=(0.5, 1.05), ncol=5, frameon=False, fontsize=10)
@@ -122,6 +117,7 @@ def viz10_3_vulnerabilidade_hubs_barras():
     plt.savefig(path, dpi=150, bbox_inches="tight", facecolor=fig.get_facecolor())
     plt.close()
     print(f"[OK] {path}")
+
 # Mapa Geográfico de Conectividade 
 def viz10_4_mapa_conectividade():
     aeroportos_raw = ler_csv(os.path.join(DATA, "aeroportos_data.csv"))
@@ -205,7 +201,7 @@ def viz10_4_mapa_conectividade():
                     bbox=dict(boxstyle="round,pad=0.2", fc="white",
                               ec="none", alpha=0.8))
 
-    # nós
+    
     for no, (x, y) in COORDS.items():
         reg  = regiao_map.get(no, "")
         cor  = COR_REGIAO.get(reg, "#888")
