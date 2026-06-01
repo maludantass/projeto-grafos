@@ -26,6 +26,7 @@ def _salvar_json(dados, caminho):
 
 
 def _is_parte2(dataset_path):
+    # Parte 2 é sempre um diretório; Parte 1 é um arquivo CSV
     return os.path.isdir(dataset_path)
 
 
@@ -87,6 +88,8 @@ def executar_bfs(grafo, origem, out_dir):
     if len(camadas) > 10:
         print(f"  ... ({len(camadas)} níveis no total)")
 
+    # Grafo não-direcionado: cada aresta aparece duas vezes em arestas_tipo (u→v e v→u)
+    # Usamos o par ordenado (min, max) para contar cada aresta apenas uma vez
     tipos_contagem = {}
     vistas = set()
     for u, v, tipo in arestas_tipo:
@@ -123,6 +126,7 @@ def executar_dfs(grafo, origem, out_dir):
     print(f"\nOrdem de visita ({len(ordem_visita)} nós):")
     print("  " + " => ".join(ordem_visita[:20]) + (" ..." if len(ordem_visita) > 20 else ""))
 
+    # Mesma deduplicação do BFS: evita contar a mesma aresta duas vezes
     tipos_contagem = {}
     vistas = set()
     for u, v, tipo in arestas_tipo:
@@ -308,7 +312,7 @@ def main():
     if parte2:
         adj_path = os.path.abspath(args.adj) if args.adj else None
         grafo = _carregar_grafo_parte2(dataset_path, adj_path)
-        source = args.source.strip()
+        source = args.source.strip()  # track IDs são case-sensitive
     else:
         if args.adj:
             adj_path = os.path.abspath(args.adj)
@@ -316,7 +320,7 @@ def main():
             data_dir = os.path.dirname(dataset_path)
             adj_path = os.path.join(data_dir, "adjacencias_aeroportos.csv")
         grafo = _carregar_grafo_parte1(dataset_path, adj_path)
-        source = args.source.strip().upper()
+        source = args.source.strip().upper()  # códigos IATA sempre em maiúsculas
 
     print(f"\n{grafo}")
 

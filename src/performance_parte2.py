@@ -19,10 +19,11 @@ REPORT_OUT = OUT_DIR / "parte2_report.json"
 NOS_CSV = DATA_DIR / "musicas_nos.csv"
 ADJ_CSV = DATA_DIR / "adjacencias_musicas.csv"
 
-N_RUNS = 5
+N_RUNS = 5  # número de repetições para calcular a média dos tempos
 
 
 def _medir(fn, *args, **kwargs):
+    """Executa fn N_RUNS vezes e retorna (resultado, tempo_medio_ms, tempo_min_ms, memoria_pico_kb)."""
     tempos = []
     resultado = None
 
@@ -43,6 +44,7 @@ def _medir(fn, *args, **kwargs):
 
 
 def _medir_unico(fn, *args, **kwargs):
+    # Bellman-Ford é O(V*E); repetir N_RUNS vezes seria muito lento no dataset real
     tracemalloc.start()
     t0 = time.perf_counter()
     resultado = fn(*args, **kwargs)
@@ -59,6 +61,8 @@ def carregar_grafo():
 
 
 def _benchmark_bf_negativo_sem_ciclo():
+    # Grafo sintético para demonstrar que Bellman-Ford lida com peso negativo
+    # sem ciclo negativo — Dijkstra rejeitaria a aresta B→C(-2)
     g = GrafoDirecionado()
     for no in ["A", "B", "C", "D"]:
         g.adicionar_no(no)
@@ -86,6 +90,7 @@ def _benchmark_bf_negativo_sem_ciclo():
 
 
 def _benchmark_bf_ciclo_negativo():
+    # Grafo sintético com ciclo A→B→C→A de custo -1; espera-se ValueError
     g = GrafoDirecionado()
     for no in ["A", "B", "C"]:
         g.adicionar_no(no)
@@ -328,7 +333,7 @@ def main():
     print(f"{'='*60}")
     print(f"  {'Algoritmo':<22} {'Médio (ms)':>12}  {'Mín (ms)':>10}  {'Mem (KB)':>10}")
     print(f"  {'-'*22} {'-'*12}  {'-'*10}  {'-'*10}")
-    for m in relatorio["medicoes"][1:]:  # pula carregamento
+    for m in relatorio["medicoes"][1:]:  # índice 0 é o carregamento, não um algoritmo
         print(
             f"  {m['tarefa'][:22]:<22} "
             f"{m['tempo_medio_ms']:>12.4f}  "
