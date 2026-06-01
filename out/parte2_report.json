@@ -11,8 +11,8 @@
       "tarefa": "Carregamento do grafo",
       "algoritmo": "leitura de CSV + construção da lista de adjacência",
       "entrada": "musicas_nos.csv + adjacencias_musicas.csv (|V|=499, |E|=1764)",
-      "tempo_ms": 92.7315,
-      "memoria_pico_kb": 1211.65,
+      "tempo_ms": 25.542,
+      "memoria_pico_kb": 1262.29,
       "observacoes": "Inclui leitura de arquivo e inserção de todos os nós e arestas."
     },
     {
@@ -20,8 +20,8 @@
       "algoritmo": "BFS iterativo com fila (deque)",
       "entrada": "|V|=499, |E|=1764",
       "origem": "7g96GMqMFfkrzEvDwSIWzQ",
-      "tempo_ms": 12.1054,
-      "memoria_pico_kb": 312.09,
+      "tempo_ms": 5.572,
+      "memoria_pico_kb": 312.21,
       "complexidade_teorica": "O(V + E)",
       "observacoes": "Percorre todo o componente conexo a partir da origem."
     },
@@ -30,8 +30,8 @@
       "algoritmo": "DFS recursivo com coloração BRANCO/CINZA/PRETO",
       "entrada": "|V|=499, |E|=1764",
       "origem": "7g96GMqMFfkrzEvDwSIWzQ",
-      "tempo_ms": 33.9393,
-      "memoria_pico_kb": 331.73,
+      "tempo_ms": 11.8883,
+      "memoria_pico_kb": 297.25,
       "complexidade_teorica": "O(V + E)",
       "observacoes": "Percorre todos os vértices do grafo (não apenas um componente)."
     },
@@ -40,41 +40,55 @@
       "algoritmo": "Dijkstra com heap binário (heapq)",
       "entrada": "|V|=499, |E|=1764",
       "origem": "7g96GMqMFfkrzEvDwSIWzQ",
-      "tempo_ms": 5.5743,
+      "tempo_ms": 5.4288,
       "memoria_pico_kb": 81.84,
       "complexidade_teorica": "O((V + E) log V)",
       "observacoes": "Calcula distâncias mínimas de origem para todos os demais vértices."
+    },
+    {
+      "tarefa": "Bellman-Ford (caminho mínimo)",
+      "algoritmo": "Bellman-Ford iterativo (V-1 relaxamentos)",
+      "entrada": "|V|=499, |E|=1764",
+      "origem": "7g96GMqMFfkrzEvDwSIWzQ",
+      "tempo_ms": 88.7019,
+      "memoria_pico_kb": 290.86,
+      "complexidade_teorica": "O(V * E)",
+      "observacoes": "Aceita pesos negativos e detecta ciclos negativos. Neste dataset os pesos são distâncias euclidianas (≥ 0), portanto Dijkstra e Bellman-Ford produzem os mesmos caminhos."
     },
     {
       "tarefa": "Componentes Conexos",
       "algoritmo": "DFS global iterativo",
       "entrada": "|V|=499, |E|=1764",
       "componentes_encontrados": 1,
-      "tempo_ms": 1.6674,
+      "tempo_ms": 1.0181,
       "memoria_pico_kb": 55.45,
       "complexidade_teorica": "O(V + E)",
       "observacoes": "Identifica todos os componentes conexos do grafo. Resultado: 1 componente(s)."
     }
   ],
   "resumo_comparativo": {
-    "mais_rapido_ms": 1.6674,
-    "mais_lento_ms": 33.9393,
+    "mais_rapido_ms": 1.0181,
+    "mais_lento_ms": 88.7019,
     "ordem_por_tempo_crescente": [
       [
         "Componentes Conexos",
-        1.6674
+        1.0181
       ],
       [
         "Dijkstra",
-        5.5743
+        5.4288
       ],
       [
         "BFS",
-        12.1054
+        5.572
       ],
       [
         "DFS",
-        33.9393
+        11.8883
+      ],
+      [
+        "Bellman-Ford",
+        88.7019
       ]
     ]
   },

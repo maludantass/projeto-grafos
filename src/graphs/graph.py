@@ -48,3 +48,23 @@ class Grafo:
         # grafo é não direcionado
         num_arestas = sum(len(v) for v in self.adj_list.values()) // 2
         return f"Grafo(nós={len(self.nodes)}, arestas={num_arestas})"
+
+
+class GrafoDirecionado(Grafo):
+
+    def adicionar_aresta(self, origem, destino, peso=1.0, tipo_conexao='', justificativa=''):
+        if origem not in self.adj_list:
+            self.adicionar_no(origem)
+        if destino not in self.adj_list:
+            self.adicionar_no(destino)
+
+        self.adj_list[origem].append({
+            'vizinho': destino,
+            'peso': float(peso),
+            'tipo_conexao': tipo_conexao,
+            'justificativa': justificativa,
+        })
+
+    def __str__(self):
+        num_arestas = sum(len(v) for v in self.adj_list.values())
+        return f"GrafoDirecionado(nós={len(self.nodes)}, arestas={num_arestas})"

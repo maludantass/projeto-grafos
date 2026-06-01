@@ -1,4 +1,4 @@
-#BFS, DFS e Dijikstra implementados (parte 1)
+#BFS, DFS, Dijkstra (parte 1) e Bellman-Ford (parte 2)
 
 import heapq
 from collections import deque
@@ -136,7 +136,7 @@ def dfs_componentes_conexos(grafo):
     return componentes
 
 
-# Dijkstra 
+# dijkstra 
 def dijkstra(grafo, origem):
     
     if origem not in grafo.adj_list:
@@ -194,3 +194,77 @@ def _reconstruir_caminho(predecessores, origem, destino):
     if not caminho or caminho[0] != origem:
         return None
     return caminho
+
+
+# bellman-ford
+def bellman_ford(grafo, origem):
+
+    if origem not in grafo.adj_list:
+        raise ValueError(f"Nó de origem '{origem}' não foi encontrado no grafo.")
+
+    nos = grafo.get_nos()
+    V   = len(nos)
+
+    distancias    = {no: float("inf") for no in nos}
+    predecessores = {no: None         for no in nos}
+    distancias[origem] = 0.0
+
+    from src.graphs.graph import GrafoDirecionado
+    direcionado = isinstance(grafo, GrafoDirecionado)
+
+    if direcionado:
+        arestas = []
+        for u in nos:
+            for aresta in grafo.adj_list.get(u, []):
+                arestas.append((u, aresta["vizinho"], aresta["peso"]))
+    else:
+        arestas_vistas = set()
+        arestas = []
+        for u in nos:
+            for aresta in grafo.adj_list.get(u, []):
+                v    = aresta["vizinho"]
+                peso = aresta["peso"]
+                chave = (min(u, v), max(u, v))
+                if chave not in arestas_vistas:
+                    arestas_vistas.add(chave)
+                    if peso < 0:
+                        raise ValueError(
+                            f"Ciclo de peso negativo detectado: aresta não direcionada "
+                            f"{u}↔{v} com peso {peso} forma ciclo negativo de comprimento 2."
+                        )
+                    arestas.append((u, v, peso))
+
+    for _ in range(V - 1):
+        atualizado = False
+        for u, v, peso in arestas:
+            # relaxa u → v
+            if distancias[u] != float("inf") and distancias[u] + peso < distancias[v]:
+                distancias[v]    = distancias[u] + peso
+                predecessores[v] = u
+                atualizado = True
+            if not direcionado:
+                if distancias[v] != float("inf") and distancias[v] + peso < distancias[u]:
+                    distancias[u]    = distancias[v] + peso
+                    predecessores[u] = v
+                    atualizado = True
+        if not atualizado:
+            break  
+
+    for u, v, peso in arestas:
+        if distancias[u] != float("inf") and distancias[u] + peso < distancias[v]:
+            raise ValueError(
+                f"Ciclo de peso negativo detectado envolvendo a aresta {u}→{v}."
+            )
+        if not direcionado and distancias[v] != float("inf") and distancias[v] + peso < distancias[u]:
+            raise ValueError(
+                f"Ciclo de peso negativo detectado envolvendo a aresta {v}→{u}."
+            )
+
+    return distancias, predecessores
+
+
+def bellman_ford_caminho(grafo, origem, destino):
+    distancias, predecessores = bellman_ford(grafo, origem)
+    custo   = distancias.get(destino, float("inf"))
+    caminho = _reconstruir_caminho(predecessores, origem, destino)
+    return custo, caminho

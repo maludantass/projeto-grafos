@@ -1,0 +1,23 @@
+{
+  "algoritmo": "Bellman-Ford",
+  "dataset": "Spotify Tracks — dataset_parte2",
+  "origem": "7g96GMqMFfkrzEvDwSIWzQ",
+  "musica_origem": "Failing, Flailing – Streetlight Manifesto (ska)",
+  "destino": "2l2zYplvdjpRDEAmoHKX0t",
+  "musica_destino": "Just Can't Get Enough - Radio Edit – Charly Lownoise & Mental Theo (happy)",
+  "custo": 1.489436,
+  "caminho": [
+    "7g96GMqMFfkrzEvDwSIWzQ",
+    "0lNdaHuRYi0YVNPWW0F7X2",
+    "2ZICF8SFI5tHttaLJKMY1X",
+    "0Ki1LxOG8z8ywTCcUT3ugq",
+    "5JEx7HbmvHQQswJCsoo9rA",
+    "4UZifG6wVTl3dFIeHKLi8y",
+    "2l2zYplvdjpRDEAmoHKX0t"
+  ],
+  "saltos": 6,
+  "ciclo_negativo": false,
+  "tempo_ms": 7.6378,
+  "complexidade": "O(V * E)",
+  "observacoes": "Aceita pesos negativos (não há neste dataset). Peso = distância euclidiana entre vetores de atributos musicais. Caminho mínimo = sequência de músicas mais similares entre origem e destino."
+}

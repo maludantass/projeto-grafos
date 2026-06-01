@@ -1,0 +1,22 @@
+{
+  "algoritmo": "Dijkstra",
+  "dataset": "Spotify Tracks — dataset_parte2",
+  "origem": "3D4J0o9w44QKFrBrYrSVJY",
+  "musica_origem": "What Comes Next? – Jonathan Groff (show-tunes)",
+  "destino": "7g96GMqMFfkrzEvDwSIWzQ",
+  "musica_destino": "Failing, Flailing – Streetlight Manifesto (ska)",
+  "custo": 1.828692,
+  "caminho": [
+    "3D4J0o9w44QKFrBrYrSVJY",
+    "5vSqKl0SxirLoaO3802hs7",
+    "48b3btPS19LeSIgOsA8q2c",
+    "2Ey6v4Sekh3Z0RUSISRosD",
+    "1BweuW1Vx7eP6VUSXijezL",
+    "2hGPfCRMjK2haWM6ja11XP",
+    "7g96GMqMFfkrzEvDwSIWzQ"
+  ],
+  "saltos": 6,
+  "tempo_ms": 1.1739,
+  "complexidade": "O((V + E) log V)",
+  "observacoes": "Peso = distância euclidiana entre vetores de atributos musicais. Caminho mínimo = sequência de músicas mais similares entre origem e destino."
+}

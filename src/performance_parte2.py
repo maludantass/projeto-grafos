@@ -1,11 +1,3 @@
-"""
-Parte 2 — Métricas de Desempenho
-Mede tempo de execução (e memória opcional) de cada algoritmo/tarefa
-no grafo de músicas do Spotify (dataset_parte2).
-
-Saída: out/parte2_report.json
-"""
-
 import os
 import sys
 import json
@@ -16,11 +8,8 @@ from pathlib import Path
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 from graphs.io import ler_musicas, ler_adjacencias_musicas
-from graphs.algorithms import bfs, dfs, dijkstra, dfs_componentes_conexos
+from graphs.algorithms import bfs, dfs, dijkstra, bellman_ford, dfs_componentes_conexos
 
-# ──────────────────────────────────────────────
-# Configurações
-# ──────────────────────────────────────────────
 BASE_DIR   = Path(__file__).resolve().parent.parent
 DATA_DIR   = BASE_DIR / "data" / "dataset_parte2"
 OUT_DIR    = BASE_DIR / "out"
@@ -29,13 +18,9 @@ REPORT_OUT = OUT_DIR / "parte2_report.json"
 NOS_CSV    = DATA_DIR / "musicas_nos.csv"
 ADJ_CSV    = DATA_DIR / "adjacencias_musicas.csv"
 
-# Coleta memória? (True = sim, usa tracemalloc)
 MEDIR_MEMORIA = True
 
 
-# ──────────────────────────────────────────────
-# Helpers de medição
-# ──────────────────────────────────────────────
 def medir(fn, *args, **kwargs):
     """
     Executa fn(*args, **kwargs) e retorna:
@@ -61,15 +46,11 @@ def medir(fn, *args, **kwargs):
 
 
 def entrada_para_str(grafo):
-    """Resumo do grafo usado como entrada de cada tarefa."""
     n = len(grafo.get_nos())
     m = sum(len(v) for v in grafo.adj_list.values()) // 2
     return f"|V|={n}, |E|={m}"
 
 
-# ──────────────────────────────────────────────
-# Carregamento do grafo
-# ──────────────────────────────────────────────
 def carregar_grafo():
     print("Carregando grafo Spotify...")
     grafo = ler_musicas(str(NOS_CSV))
@@ -79,9 +60,6 @@ def carregar_grafo():
     return grafo, nos
 
 
-# ──────────────────────────────────────────────
-# Tarefas a medir
-# ──────────────────────────────────────────────
 def tarefa_carregamento(nos_csv, adj_csv):
     """Leitura completa dos CSVs e construção do grafo."""
     g = ler_musicas(str(nos_csv))
@@ -101,13 +79,13 @@ def tarefa_dijkstra(grafo, origem):
     return dijkstra(grafo, origem)
 
 
+def tarefa_bellman_ford(grafo, origem):
+    return bellman_ford(grafo, origem)
+
+
 def tarefa_componentes(grafo):
     return dfs_componentes_conexos(grafo)
 
-
-# ──────────────────────────────────────────────
-# Execução principal
-# ──────────────────────────────────────────────
 def main():
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -120,32 +98,38 @@ def main():
 
     print(f"    tempo: {t_load} ms  |  memória pico: {m_load} KB")
 
-    # ── 1. BFS ───────────────────────────────
+    # bfs
     print("\n[1] Medindo BFS...")
     _, t_bfs, m_bfs = medir(tarefa_bfs, grafo, origem)
     print(f"    origem: {origem}")
     print(f"    tempo: {t_bfs} ms  |  memória pico: {m_bfs} KB")
 
-    # ── 2. DFS ───────────────────────────────
+    # dfs
     print("\n[2] Medindo DFS...")
     _, t_dfs, m_dfs = medir(tarefa_dfs, grafo, origem)
     print(f"    origem: {origem}")
     print(f"    tempo: {t_dfs} ms  |  memória pico: {m_dfs} KB")
 
-    # ── 3. Dijkstra ──────────────────────────
+    #- dijkstra
     print("\n[3] Medindo Dijkstra...")
     _, t_dij, m_dij = medir(tarefa_dijkstra, grafo, origem)
     print(f"    origem: {origem}")
     print(f"    tempo: {t_dij} ms  |  memória pico: {m_dij} KB")
 
-    # ── 4. Componentes conexos ───────────────
-    print("\n[4] Medindo Componentes Conexos (DFS global)...")
+    # bellman-ford
+    print("\n[4] Medindo Bellman-Ford...")
+    _, t_bf, m_bf = medir(tarefa_bellman_ford, grafo, origem)
+    print(f"    origem: {origem}")
+    print(f"    tempo: {t_bf} ms  |  memória pico: {m_bf} KB")
+
+    # os componentes conexos
+    print("\n[5] Medindo Componentes Conexos (DFS global)...")
     resultado_comp, t_comp, m_comp = medir(tarefa_componentes, grafo)
     num_comp = len(resultado_comp)
     print(f"    componentes encontrados: {num_comp}")
     print(f"    tempo: {t_comp} ms  |  memória pico: {m_comp} KB")
 
-    # ── Monta relatório ──────────────────────
+    #  Monta relatório 
     relatorio = {
         "descricao": (
             "Métricas de desempenho dos algoritmos de grafos aplicados "
@@ -197,6 +181,20 @@ def main():
                 "observacoes": "Calcula distâncias mínimas de origem para todos os demais vértices.",
             },
             {
+                "tarefa": "Bellman-Ford (caminho mínimo)",
+                "algoritmo": "Bellman-Ford iterativo (V-1 relaxamentos)",
+                "entrada": desc_entrada,
+                "origem": origem,
+                "tempo_ms": t_bf,
+                "memoria_pico_kb": m_bf,
+                "complexidade_teorica": "O(V * E)",
+                "observacoes": (
+                    "Aceita pesos negativos e detecta ciclos negativos. "
+                    "Neste dataset os pesos são distâncias euclidianas (≥ 0), "
+                    "portanto Dijkstra e Bellman-Ford produzem os mesmos caminhos."
+                ),
+            },
+            {
                 "tarefa": "Componentes Conexos",
                 "algoritmo": "DFS global iterativo",
                 "entrada": desc_entrada,
@@ -211,13 +209,14 @@ def main():
             },
         ],
         "resumo_comparativo": {
-            "mais_rapido_ms": min(t_bfs, t_dfs, t_dij, t_comp),
-            "mais_lento_ms":  max(t_bfs, t_dfs, t_dij, t_comp),
+            "mais_rapido_ms": min(t_bfs, t_dfs, t_dij, t_bf, t_comp),
+            "mais_lento_ms":  max(t_bfs, t_dfs, t_dij, t_bf, t_comp),
             "ordem_por_tempo_crescente": sorted(
                 [
                     ("BFS",                t_bfs),
                     ("DFS",                t_dfs),
                     ("Dijkstra",           t_dij),
+                    ("Bellman-Ford",       t_bf),
                     ("Componentes Conexos",t_comp),
                 ],
                 key=lambda x: x[1],
@@ -235,7 +234,6 @@ def main():
         },
     }
 
-    # ── Salva JSON ───────────────────────────
     with open(REPORT_OUT, "w", encoding="utf-8") as f:
         json.dump(relatorio, f, ensure_ascii=False, indent=2)
 

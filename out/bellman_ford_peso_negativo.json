@@ -1,0 +1,46 @@
+{
+  "algoritmo": "Bellman-Ford",
+  "tipo_caso": "peso_negativo_sem_ciclo",
+  "descricao": "Grafo direcionado sintético com aresta de peso negativo (B→C = -2) mas sem ciclo negativo. Bellman-Ford resolve corretamente; Dijkstra rejeita pesos negativos.",
+  "grafo": {
+    "tipo": "direcionado",
+    "arestas": [
+      {
+        "u": "A",
+        "v": "B",
+        "peso": 5.0
+      },
+      {
+        "u": "B",
+        "v": "C",
+        "peso": -2.0
+      },
+      {
+        "u": "C",
+        "v": "D",
+        "peso": 1.0
+      },
+      {
+        "u": "B",
+        "v": "D",
+        "peso": 4.0
+      }
+    ]
+  },
+  "origem": "A",
+  "destino": "D",
+  "bellman_ford": {
+    "custo": 4.0,
+    "caminho": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "ciclo_negativo_detectado": false
+  },
+  "dijkstra": {
+    "erro": "Dijkstra não aceita pesos negativos. Aresta B→C tem peso -2.0."
+  },
+  "observacao": "Caminho mínimo A→B→C→D = 5 + (-2) + 1 = 4 (melhor que A→B→D = 5 + 4 = 9)"
+}

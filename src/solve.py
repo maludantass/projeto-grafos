@@ -1,22 +1,3 @@
-"""
-Parte 2 — Execução de BFS e DFS no grafo de similaridade musical Spotify.
-
-Carrega o dataset_parte2, roda BFS e DFS a partir de 3 fontes distintas
-(critério obrigatório: BFS/DFS executados a partir de pelo menos 3 fontes).
-
-Arquivos gerados:
-  out/bfs_dataset2.json      — BFS a partir da Fonte 1 (referência principal)
-  out/dfs_dataset2.json      — DFS a partir da Fonte 1 (referência principal)
-  out/bfs_dataset2_f2.json   — BFS a partir da Fonte 2
-  out/dfs_dataset2_f2.json   — DFS a partir da Fonte 2
-  out/bfs_dataset2_f3.json   — BFS a partir da Fonte 3
-  out/dfs_dataset2_f3.json   — DFS a partir da Fonte 3
-
-Uso:
-    python -m src.solve                        # roda as 3 fontes padrão
-    python -m src.solve --source <track_id>    # roda apenas 1 fonte específica
-"""
-
 import argparse
 import json
 import os
@@ -26,7 +7,7 @@ import time
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 from graphs.io import ler_musicas, ler_adjacencias_musicas
-from graphs.algorithms import bfs, bfs_por_niveis, dfs
+from graphs.algorithms import bfs, bfs_por_niveis, dfs, dijkstra, dijkstra_caminho, bellman_ford, bellman_ford_caminho
 
 # Caminhos
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -152,6 +133,211 @@ def executar_dfs(grafo, origem, nome_arquivo, out_dir):
     _salvar_json(resultado, os.path.join(out_dir, nome_arquivo))
     return resultado
 
+# dijkstra
+def executar_dijkstra_spotify(grafo, origem, destino, nome_arquivo, out_dir):
+    """Executa Dijkstra entre dois nós do grafo Spotify e salva o resultado."""
+    print(f"\n[DIJKSTRA] Origem : {origem}")
+    print(f"           Música : {_nome_musica(grafo, origem)}")
+    print(f"           Destino: {destino}")
+    print(f"           Música : {_nome_musica(grafo, destino)}")
+
+    t0 = time.perf_counter()
+    custo, caminho = dijkstra_caminho(grafo, origem, destino)
+    elapsed = time.perf_counter() - t0
+
+    if caminho is None:
+        print(f"      Destino inacessível a partir da origem.")
+    else:
+        print(f"      Caminho ({len(caminho) - 1} saltos): {' => '.join(caminho)}")
+        print(f"      Custo total (distância euclidiana): {custo:.6f}")
+
+    print(f"      Tempo: {elapsed * 1000:.4f} ms")
+
+    resultado = {
+        "algoritmo"     : "Dijkstra",
+        "dataset"       : "Spotify Tracks — dataset_parte2",
+        "origem"        : origem,
+        "musica_origem" : _nome_musica(grafo, origem),
+        "destino"       : destino,
+        "musica_destino": _nome_musica(grafo, destino),
+        "custo"         : round(custo, 6) if custo != float("inf") else None,
+        "caminho"       : caminho,
+        "saltos"        : len(caminho) - 1 if caminho else None,
+        "tempo_ms"      : round(elapsed * 1000, 4),
+        "complexidade"  : "O((V + E) log V)",
+        "observacoes"   : (
+            "Peso = distância euclidiana entre vetores de atributos musicais. "
+            "Caminho mínimo = sequência de músicas mais similares entre origem e destino."
+        ),
+    }
+
+    _salvar_json(resultado, os.path.join(out_dir, nome_arquivo))
+    return resultado
+
+
+# bellman-ford
+def executar_bellman_ford_spotify(grafo, origem, destino, nome_arquivo, out_dir):
+    print(f"\n[BELLMAN-FORD] Origem : {origem}")
+    print(f"               Música : {_nome_musica(grafo, origem)}")
+    print(f"               Destino: {destino}")
+    print(f"               Música : {_nome_musica(grafo, destino)}")
+
+    t0 = time.perf_counter()
+    try:
+        custo, caminho = bellman_ford_caminho(grafo, origem, destino)
+        ciclo_negativo = False
+    except ValueError as e:
+        elapsed = time.perf_counter() - t0
+        print(f"      ERRO: {e}")
+        resultado = {
+            "algoritmo"     : "Bellman-Ford",
+            "dataset"       : "Spotify Tracks — dataset_parte2",
+            "origem"        : origem,
+            "destino"       : destino,
+            "erro"          : str(e),
+            "ciclo_negativo": True,
+            "tempo_ms"      : round(elapsed * 1000, 4),
+        }
+        _salvar_json(resultado, os.path.join(out_dir, nome_arquivo))
+        return resultado
+
+    elapsed = time.perf_counter() - t0
+
+    if caminho is None:
+        print(f"      Destino inacessível a partir da origem.")
+    else:
+        print(f"      Caminho ({len(caminho) - 1} saltos): {' => '.join(caminho)}")
+        print(f"      Custo total (distância euclidiana): {custo:.6f}")
+
+    print(f"      Tempo: {elapsed * 1000:.4f} ms")
+
+    resultado = {
+        "algoritmo"     : "Bellman-Ford",
+        "dataset"       : "Spotify Tracks — dataset_parte2",
+        "origem"        : origem,
+        "musica_origem" : _nome_musica(grafo, origem),
+        "destino"       : destino,
+        "musica_destino": _nome_musica(grafo, destino),
+        "custo"         : round(custo, 6) if custo != float("inf") else None,
+        "caminho"       : caminho,
+        "saltos"        : len(caminho) - 1 if caminho else None,
+        "ciclo_negativo": ciclo_negativo,
+        "tempo_ms"      : round(elapsed * 1000, 4),
+        "complexidade"  : "O(V * E)",
+        "observacoes"   : (
+            "Aceita pesos negativos (não há neste dataset). "
+            "Peso = distância euclidiana entre vetores de atributos musicais. "
+            "Caminho mínimo = sequência de músicas mais similares entre origem e destino."
+        ),
+    }
+
+    _salvar_json(resultado, os.path.join(out_dir, nome_arquivo))
+    return resultado
+
+# casos especiais bellman-ford
+def _executar_bf_peso_negativo_sem_ciclo(out_dir):
+    from src.graphs.graph import GrafoDirecionado
+    from src.graphs.algorithms import bellman_ford_caminho, dijkstra_caminho
+
+    g = GrafoDirecionado()
+    for no in ["A", "B", "C", "D"]:
+        g.adicionar_no(no)
+    g.adicionar_aresta("A", "B", peso=5.0)
+    g.adicionar_aresta("B", "C", peso=-2.0)
+    g.adicionar_aresta("C", "D", peso=1.0)
+    g.adicionar_aresta("B", "D", peso=4.0)
+
+    custo_bf, caminho_bf = bellman_ford_caminho(g, "A", "D")
+
+    try:
+        custo_dij, caminho_dij = dijkstra_caminho(g, "A", "D")
+        dijkstra_resultado = {"custo": custo_dij, "caminho": caminho_dij}
+    except ValueError as e:
+        dijkstra_resultado = {"erro": str(e)}
+
+    print(f"Grafo direcionado: A→B(5), B→C(-2), C→D(1), B→D(4)")
+    print(f"Bellman-Ford A→D: caminho={caminho_bf}, custo={custo_bf}")
+    print(f"Dijkstra A→D: {dijkstra_resultado}")
+
+    resultado = {
+        "algoritmo": "Bellman-Ford",
+        "tipo_caso": "peso_negativo_sem_ciclo",
+        "descricao": (
+            "Grafo direcionado sintético com aresta de peso negativo (B→C = -2) "
+            "mas sem ciclo negativo. Bellman-Ford resolve corretamente; "
+            "Dijkstra rejeita pesos negativos."
+        ),
+        "grafo": {
+            "tipo": "direcionado",
+            "arestas": [
+                {"u": "A", "v": "B", "peso": 5.0},
+                {"u": "B", "v": "C", "peso": -2.0},
+                {"u": "C", "v": "D", "peso": 1.0},
+                {"u": "B", "v": "D", "peso": 4.0},
+            ],
+        },
+        "origem": "A",
+        "destino": "D",
+        "bellman_ford": {
+            "custo": custo_bf,
+            "caminho": caminho_bf,
+            "ciclo_negativo_detectado": False,
+        },
+        "dijkstra": dijkstra_resultado,
+        "observacao": "Caminho mínimo A→B→C→D = 5 + (-2) + 1 = 4 (melhor que A→B→D = 5 + 4 = 9)",
+    }
+    _salvar_json(resultado, os.path.join(out_dir, "bellman_ford_peso_negativo.json"))
+
+
+def _executar_bf_ciclo_negativo(out_dir):
+
+    from src.graphs.graph import GrafoDirecionado
+    from src.graphs.algorithms import bellman_ford
+
+    g = GrafoDirecionado()
+    for no in ["A", "B", "C"]:
+        g.adicionar_no(no)
+    g.adicionar_aresta("A", "B", peso=1.0)
+    g.adicionar_aresta("B", "C", peso=-3.0)
+    g.adicionar_aresta("C", "A", peso=1.0)
+
+    print(f"      Grafo direcionado: A→B(1), B→C(-3), C→A(1)")
+    print(f"      Ciclo A→B→C→A = 1 + (-3) + 1 = -1 (negativo)")
+
+    try:
+        bellman_ford(g, "A")
+        ciclo_detectado = False
+        mensagem_erro = None
+        print(f"      ERRO: ciclo negativo não foi detectado!")
+    except ValueError as e:
+        ciclo_detectado = True
+        mensagem_erro = str(e)
+        print(f"      Ciclo negativo detectado corretamente: {e}")
+
+    resultado = {
+        "algoritmo": "Bellman-Ford",
+        "tipo_caso": "ciclo_negativo",
+        "descricao": (
+            "Grafo direcionado sintético com ciclo negativo A→B→C→A "
+            "(custo do ciclo = 1 + (-3) + 1 = -1). "
+            "Bellman-Ford detecta na V-ésima iteração e lança erro."
+        ),
+        "grafo": {
+            "tipo": "direcionado",
+            "arestas": [
+                {"u": "A", "v": "B", "peso": 1.0},
+                {"u": "B", "v": "C", "peso": -3.0},
+                {"u": "C", "v": "A", "peso": 1.0},
+            ],
+            "custo_do_ciclo": -1.0,
+        },
+        "origem": "A",
+        "ciclo_negativo_detectado": ciclo_detectado,
+        "mensagem_erro": mensagem_erro,
+        "observacao": "Caminho mínimo não existe — ciclo negativo faz distâncias divergirem para -∞.",
+    }
+    _salvar_json(resultado, os.path.join(out_dir, "bellman_ford_ciclo_negativo.json"))
+
 
 # Main
 
@@ -232,6 +418,63 @@ def main():
         executar_dfs(grafo, origem, sufixos_dfs[i], out_dir)
 
         arquivos_gerados += [sufixos_bfs[i], sufixos_dfs[i]]
+
+    print(f"\n{'='*60}")
+    print(f"  Dijkstra — 5 pares origem/destino (pesos ≥ 0)")
+    print(f"{'='*60}")
+
+    pares_dijkstra = [
+        (FONTES[0], FONTES[1]),
+        (FONTES[1], FONTES[2]),
+        (FONTES[0], FONTES[2]),
+        (FONTES[1], FONTES[0]),
+        (FONTES[2], FONTES[0]),
+    ]
+    sufixos_dij = [
+        "dijkstra_dataset2_f1_f2.json",
+        "dijkstra_dataset2_f2_f3.json",
+        "dijkstra_dataset2_f1_f3.json",
+        "dijkstra_dataset2_f2_f1.json",
+        "dijkstra_dataset2_f3_f1.json",
+    ]
+
+    for i, (origem, destino) in enumerate(pares_dijkstra):
+        if origem not in grafo.adj_list or destino not in grafo.adj_list:
+            print(f"\nAviso: par {i+1} inválido — nó não encontrado no grafo.")
+            continue
+        executar_dijkstra_spotify(grafo, origem, destino, sufixos_dij[i], out_dir)
+        arquivos_gerados.append(sufixos_dij[i])
+
+    print(f"\n{'='*60}")
+    print(f"  Bellman-Ford — dataset real + casos especiais")
+    print(f"{'='*60}")
+
+    pares_bf = [
+        (FONTES[0], FONTES[1]),
+        (FONTES[1], FONTES[2]),
+        (FONTES[0], FONTES[2]),
+    ]
+    sufixos_bf = [
+        "bellman_ford_dataset2_f1_f2.json",
+        "bellman_ford_dataset2_f2_f3.json",
+        "bellman_ford_dataset2_f1_f3.json",
+    ]
+
+    for i, (origem, destino) in enumerate(pares_bf):
+        if origem not in grafo.adj_list or destino not in grafo.adj_list:
+            continue
+        executar_bellman_ford_spotify(grafo, origem, destino, sufixos_bf[i], out_dir)
+        arquivos_gerados.append(sufixos_bf[i])
+
+    # grafo direcionado com peso negativo sem ciclo negativo
+    print(f"\n[BELLMAN-FORD — peso negativo sem ciclo (grafo direcionado sintético)]")
+    _executar_bf_peso_negativo_sem_ciclo(out_dir)
+    arquivos_gerados.append("bellman_ford_peso_negativo.json")
+
+    # grafo direcionado com ciclo negativo -> detectar
+    print(f"\n[BELLMAN-FORD — ciclo negativo detectado (grafo direcionado sintético)]")
+    _executar_bf_ciclo_negativo(out_dir)
+    arquivos_gerados.append("bellman_ford_ciclo_negativo.json")
 
     print("\n" + "=" * 60)
     print("  Resultados salvos em:", out_dir)

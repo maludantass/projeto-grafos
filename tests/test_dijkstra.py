@@ -182,7 +182,7 @@ class TestDijkstraPesosNegativos:
     def test_peso_negativo_levanta_value_error(self):
 
         g = _grafo_com_peso_negativo()
-        with pytest.raises(ValueError, match="peso negativo"):
+        with pytest.raises(ValueError, match="pesos negativos"):
             dijkstra(g, "A")
 
     def test_dijkstra_caminho_peso_negativo_levanta_erro(self):

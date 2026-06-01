@@ -1,0 +1,25 @@
+{
+  "algoritmo": "Bellman-Ford",
+  "dataset": "Spotify Tracks — dataset_parte2",
+  "origem": "2l2zYplvdjpRDEAmoHKX0t",
+  "musica_origem": "Just Can't Get Enough - Radio Edit – Charly Lownoise & Mental Theo (happy)",
+  "destino": "3D4J0o9w44QKFrBrYrSVJY",
+  "musica_destino": "What Comes Next? – Jonathan Groff (show-tunes)",
+  "custo": 2.248876,
+  "caminho": [
+    "2l2zYplvdjpRDEAmoHKX0t",
+    "4UZifG6wVTl3dFIeHKLi8y",
+    "3kRGiGpjCFS7CtEBSfHNH0",
+    "4JWbH50WabthGhmtduR8b9",
+    "6tAWgyIwWB6f1ozhA0tadW",
+    "44DFFra1iTFvIGpzVlRHFx",
+    "5H6Jp0syB5yEPk7SWYdlmk",
+    "4tkN2pk11GYamfmIz8tmKa",
+    "3D4J0o9w44QKFrBrYrSVJY"
+  ],
+  "saltos": 8,
+  "ciclo_negativo": false,
+  "tempo_ms": 5.3155,
+  "complexidade": "O(V * E)",
+  "observacoes": "Aceita pesos negativos (não há neste dataset). Peso = distância euclidiana entre vetores de atributos musicais. Caminho mínimo = sequência de músicas mais similares entre origem e destino."
+}
