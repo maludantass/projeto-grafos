@@ -8,6 +8,7 @@ from pathlib import Path
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 from graphs.io import ler_musicas, ler_adjacencias_musicas
+from graphs.graph import GrafoDirecionado
 from graphs.algorithms import bfs, dfs, dijkstra, bellman_ford, dfs_componentes_conexos
 
 BASE_DIR   = Path(__file__).resolve().parent.parent
@@ -15,147 +16,200 @@ DATA_DIR   = BASE_DIR / "data" / "dataset_parte2"
 OUT_DIR    = BASE_DIR / "out"
 REPORT_OUT = OUT_DIR / "parte2_report.json"
 
-NOS_CSV    = DATA_DIR / "musicas_nos.csv"
-ADJ_CSV    = DATA_DIR / "adjacencias_musicas.csv"
+NOS_CSV = DATA_DIR / "musicas_nos.csv"
+ADJ_CSV = DATA_DIR / "adjacencias_musicas.csv"
 
-MEDIR_MEMORIA = True
+N_RUNS = 5
 
 
-def medir(fn, *args, **kwargs):
-    """
-    Executa fn(*args, **kwargs) e retorna:
-      resultado, tempo_ms, memoria_kb (ou None se desativado)
-    """
-    if MEDIR_MEMORIA:
-        tracemalloc.start()
+def _medir(fn, *args, **kwargs):
+    tempos = []
+    resultado = None
 
-    inicio = time.perf_counter()
+    tracemalloc.start()
+    for _ in range(N_RUNS):
+        t0 = time.perf_counter()
+        resultado = fn(*args, **kwargs)
+        tempos.append((time.perf_counter() - t0) * 1000)
+    _, pico = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+
+    return (
+        resultado,
+        round(sum(tempos) / len(tempos), 4),
+        round(min(tempos), 4),
+        round(pico / 1024, 2),
+    )
+
+
+def _medir_unico(fn, *args, **kwargs):
+    tracemalloc.start()
+    t0 = time.perf_counter()
     resultado = fn(*args, **kwargs)
-    fim = time.perf_counter()
-
-    tempo_ms = round((fim - inicio) * 1000, 4)
-
-    if MEDIR_MEMORIA:
-        _, pico = tracemalloc.get_traced_memory()
-        tracemalloc.stop()
-        memoria_kb = round(pico / 1024, 2)
-    else:
-        memoria_kb = None
-
-    return resultado, tempo_ms, memoria_kb
-
-
-def entrada_para_str(grafo):
-    n = len(grafo.get_nos())
-    m = sum(len(v) for v in grafo.adj_list.values()) // 2
-    return f"|V|={n}, |E|={m}"
+    tempo_ms = round((time.perf_counter() - t0) * 1000, 4)
+    _, pico = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+    return resultado, tempo_ms, round(pico / 1024, 2)
 
 
 def carregar_grafo():
-    print("Carregando grafo Spotify...")
-    grafo = ler_musicas(str(NOS_CSV))
-    ler_adjacencias_musicas(grafo, str(ADJ_CSV))
-    nos = grafo.get_nos()
-    print(f"  {grafo}  — {len(nos)} vértices disponíveis")
-    return grafo, nos
-
-
-def tarefa_carregamento(nos_csv, adj_csv):
-    """Leitura completa dos CSVs e construção do grafo."""
-    g = ler_musicas(str(nos_csv))
-    ler_adjacencias_musicas(g, str(adj_csv))
+    g = ler_musicas(str(NOS_CSV))
+    ler_adjacencias_musicas(g, str(ADJ_CSV))
     return g
 
 
-def tarefa_bfs(grafo, origem):
-    return bfs(grafo, origem)
+def _benchmark_bf_negativo_sem_ciclo():
+    g = GrafoDirecionado()
+    for no in ["A", "B", "C", "D"]:
+        g.adicionar_no(no)
+    g.adicionar_aresta("A", "B", peso=5.0)
+    g.adicionar_aresta("B", "C", peso=-2.0)
+    g.adicionar_aresta("C", "D", peso=1.0)
+    g.adicionar_aresta("B", "D", peso=4.0)
+
+    t0 = time.perf_counter()
+    dists, preds = bellman_ford(g, "A")
+    tempo_ms = round((time.perf_counter() - t0) * 1000, 4)
+
+    from graphs.algorithms import _reconstruir_caminho
+    caminho = _reconstruir_caminho(preds, "A", "D")
+    return {
+        "tipo_caso": "peso_negativo_sem_ciclo",
+        "descricao": "Grafo direcionado sintético: A→B(5), B→C(-2), C→D(1), B→D(4)",
+        "origem": "A", "destino": "D",
+        "custo": dists["D"],
+        "caminho": caminho,
+        "ciclo_negativo_detectado": False,
+        "tempo_ms": tempo_ms,
+        "observacao": "A→B→C→D = 4 (melhor que A→B→D = 9). Dijkstra rejeitaria o peso negativo.",
+    }
 
 
-def tarefa_dfs(grafo, origem):
-    return dfs(grafo, origem)
+def _benchmark_bf_ciclo_negativo():
+    g = GrafoDirecionado()
+    for no in ["A", "B", "C"]:
+        g.adicionar_no(no)
+    g.adicionar_aresta("A", "B", peso=1.0)
+    g.adicionar_aresta("B", "C", peso=-3.0)
+    g.adicionar_aresta("C", "A", peso=1.0)
 
+    t0 = time.perf_counter()
+    try:
+        bellman_ford(g, "A")
+        ciclo_detectado = False
+        mensagem = None
+    except ValueError as e:
+        ciclo_detectado = True
+        mensagem = str(e)
+    tempo_ms = round((time.perf_counter() - t0) * 1000, 4)
 
-def tarefa_dijkstra(grafo, origem):
-    return dijkstra(grafo, origem)
+    return {
+        "tipo_caso": "ciclo_negativo",
+        "descricao": "Grafo direcionado sintético: A→B(1), B→C(-3), C→A(1)",
+        "custo_do_ciclo": -1.0,
+        "ciclo_negativo_detectado": ciclo_detectado,
+        "mensagem_erro": mensagem,
+        "tempo_ms": tempo_ms,
+        "observacao": "Ciclo A→B→C→A = -1. Caminho mínimo não existe (distâncias → -∞).",
+    }
 
-
-def tarefa_bellman_ford(grafo, origem):
-    return bellman_ford(grafo, origem)
-
-
-def tarefa_componentes(grafo):
-    return dfs_componentes_conexos(grafo)
 
 def main():
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 
-    # ── 0. Carregamento (medido) ──────────────
-    print("\n[0] Medindo carregamento do grafo...")
-    _, t_load, m_load = medir(tarefa_carregamento, NOS_CSV, ADJ_CSV)
-    grafo, nos = carregar_grafo()
-    origem = nos[0]  # primeiro nó como origem padrão
-    desc_entrada = entrada_para_str(grafo)
+    print("=" * 60)
+    print("  BENCHMARK PARTE 2 — Algoritmos de Grafos")
+    print(f"  (cada algoritmo executado {N_RUNS}× para média estável)")
+    print("=" * 60)
 
-    print(f"    tempo: {t_load} ms  |  memória pico: {m_load} KB")
+    print("\n[0] Carregando grafo...")
+    _, t_load, t_load_min, m_load = _medir(carregar_grafo)
+    grafo = carregar_grafo()
+    nos = grafo.get_nos()
+    n_v = len(nos)
+    n_e = sum(len(v) for v in grafo.adj_list.values()) // 2
+    origem = nos[0]
+    print(f"    |V|={n_v}  |E|={n_e}  origem padrão: {origem}")
+    print(f"    tempo médio: {t_load} ms  |  mín: {t_load_min} ms  |  mem pico: {m_load} KB")
 
-    # bfs
-    print("\n[1] Medindo BFS...")
-    _, t_bfs, m_bfs = medir(tarefa_bfs, grafo, origem)
-    print(f"    origem: {origem}")
-    print(f"    tempo: {t_bfs} ms  |  memória pico: {m_bfs} KB")
+    print("\n[1] BFS...")
+    _, t_bfs, t_bfs_min, m_bfs = _medir(bfs, grafo, origem)
+    print(f"    tempo médio: {t_bfs} ms  |  mín: {t_bfs_min} ms  |  mem: {m_bfs} KB")
 
-    # dfs
-    print("\n[2] Medindo DFS...")
-    _, t_dfs, m_dfs = medir(tarefa_dfs, grafo, origem)
-    print(f"    origem: {origem}")
-    print(f"    tempo: {t_dfs} ms  |  memória pico: {m_dfs} KB")
+    print("\n[2] DFS...")
+    _, t_dfs, t_dfs_min, m_dfs = _medir(dfs, grafo, origem)
+    print(f"    tempo médio: {t_dfs} ms  |  mín: {t_dfs_min} ms  |  mem: {m_dfs} KB")
 
-    #- dijkstra
-    print("\n[3] Medindo Dijkstra...")
-    _, t_dij, m_dij = medir(tarefa_dijkstra, grafo, origem)
-    print(f"    origem: {origem}")
-    print(f"    tempo: {t_dij} ms  |  memória pico: {m_dij} KB")
+    print("\n[3] Dijkstra (fonte única, todos os destinos)...")
+    _, t_dij, t_dij_min, m_dij = _medir(dijkstra, grafo, origem)
+    print(f"    tempo médio: {t_dij} ms  |  mín: {t_dij_min} ms  |  mem: {m_dij} KB")
 
-    # bellman-ford
-    print("\n[4] Medindo Bellman-Ford...")
-    _, t_bf, m_bf = medir(tarefa_bellman_ford, grafo, origem)
-    print(f"    origem: {origem}")
-    print(f"    tempo: {t_bf} ms  |  memória pico: {m_bf} KB")
+    print("\n[4] Bellman-Ford (execução única — O(V*E) é custoso)...")
+    _, t_bf, m_bf = _medir_unico(bellman_ford, grafo, origem)
+    print(f"    tempo: {t_bf} ms  |  mem: {m_bf} KB")
 
-    # os componentes conexos
-    print("\n[5] Medindo Componentes Conexos (DFS global)...")
-    resultado_comp, t_comp, m_comp = medir(tarefa_componentes, grafo)
+    print("\n[5] Componentes Conexos (DFS global)...")
+    resultado_comp, t_comp, t_comp_min, m_comp = _medir(dfs_componentes_conexos, grafo)
     num_comp = len(resultado_comp)
-    print(f"    componentes encontrados: {num_comp}")
-    print(f"    tempo: {t_comp} ms  |  memória pico: {m_comp} KB")
+    print(f"    componentes: {num_comp}  |  tempo médio: {t_comp} ms  |  mem: {m_comp} KB")
 
-    #  Monta relatório 
+    print("\n[6] Bellman-Ford — peso negativo sem ciclo (grafo sintético)...")
+    caso_neg = _benchmark_bf_negativo_sem_ciclo()
+    print(f"    caminho: {caso_neg['caminho']}  custo: {caso_neg['custo']}  tempo: {caso_neg['tempo_ms']} ms")
+
+    print("\n[7] Bellman-Ford — ciclo negativo detectado (grafo sintético)...")
+    caso_ciclo = _benchmark_bf_ciclo_negativo()
+    print(f"    ciclo detectado: {caso_ciclo['ciclo_negativo_detectado']}  tempo: {caso_ciclo['tempo_ms']} ms")
+
+    algoritmos = [
+        ("BFS",          t_bfs,  t_bfs_min),
+        ("DFS",          t_dfs,  t_dfs_min),
+        ("Dijkstra",     t_dij,  t_dij_min),
+        ("Bellman-Ford", t_bf,   t_bf),
+    ]
+    mais_rapido = min(algoritmos, key=lambda x: x[1])
+    mais_lento  = max(algoritmos, key=lambda x: x[1])
+
     relatorio = {
         "descricao": (
-            "Métricas de desempenho dos algoritmos de grafos aplicados "
-            "ao grafo de similaridade musical Spotify (Parte 2)."
+            "Benchmark dos algoritmos de grafos aplicados ao grafo de "
+            "similaridade musical Spotify (Parte 2)."
         ),
+        "configuracao": {
+            "n_runs": N_RUNS,
+            "nota": (
+                f"BFS, DFS, Dijkstra e Componentes Conexos executados {N_RUNS}× "
+                "para média mais estável. Bellman-Ford executado 1× (O(V*E) é lento)."
+            ),
+        },
         "grafo": {
             "dataset": "Spotify Tracks — dataset_parte2",
-            "vertices": len(nos),
-            "arestas": sum(len(v) for v in grafo.adj_list.values()) // 2,
+            "vertices": n_v,
+            "arestas": n_e,
             "tipo": "não dirigido, ponderado",
+            "distribuicao_graus": {
+                "minimo": min(len(v) for v in grafo.adj_list.values()),
+                "maximo": max(len(v) for v in grafo.adj_list.values()),
+                "medio": round(sum(len(v) for v in grafo.adj_list.values()) / n_v, 2),
+            },
         },
         "medicoes": [
             {
                 "tarefa": "Carregamento do grafo",
                 "algoritmo": "leitura de CSV + construção da lista de adjacência",
-                "entrada": f"musicas_nos.csv + adjacencias_musicas.csv ({desc_entrada})",
-                "tempo_ms": t_load,
+                "tempo_medio_ms": t_load,
+                "tempo_min_ms": t_load_min,
                 "memoria_pico_kb": m_load,
+                "complexidade_teorica": "O(V + E)",
                 "observacoes": "Inclui leitura de arquivo e inserção de todos os nós e arestas.",
             },
             {
                 "tarefa": "BFS (Busca em Largura)",
                 "algoritmo": "BFS iterativo com fila (deque)",
-                "entrada": desc_entrada,
                 "origem": origem,
-                "tempo_ms": t_bfs,
+                "n_runs": N_RUNS,
+                "tempo_medio_ms": t_bfs,
+                "tempo_min_ms": t_bfs_min,
                 "memoria_pico_kb": m_bfs,
                 "complexidade_teorica": "O(V + E)",
                 "observacoes": "Percorre todo o componente conexo a partir da origem.",
@@ -163,73 +217,105 @@ def main():
             {
                 "tarefa": "DFS (Busca em Profundidade)",
                 "algoritmo": "DFS recursivo com coloração BRANCO/CINZA/PRETO",
-                "entrada": desc_entrada,
                 "origem": origem,
-                "tempo_ms": t_dfs,
+                "n_runs": N_RUNS,
+                "tempo_medio_ms": t_dfs,
+                "tempo_min_ms": t_dfs_min,
                 "memoria_pico_kb": m_dfs,
                 "complexidade_teorica": "O(V + E)",
                 "observacoes": "Percorre todos os vértices do grafo (não apenas um componente).",
             },
             {
-                "tarefa": "Dijkstra (caminho mínimo)",
+                "tarefa": "Dijkstra (caminho mínimo, single-source)",
                 "algoritmo": "Dijkstra com heap binário (heapq)",
-                "entrada": desc_entrada,
                 "origem": origem,
-                "tempo_ms": t_dij,
+                "n_runs": N_RUNS,
+                "tempo_medio_ms": t_dij,
+                "tempo_min_ms": t_dij_min,
                 "memoria_pico_kb": m_dij,
                 "complexidade_teorica": "O((V + E) log V)",
-                "observacoes": "Calcula distâncias mínimas de origem para todos os demais vértices.",
+                "observacoes": (
+                    "Calcula distâncias mínimas da origem para todos os demais vértices. "
+                    "Pesos = distâncias euclidianas (≥ 0), portanto Dijkstra é adequado."
+                ),
             },
             {
-                "tarefa": "Bellman-Ford (caminho mínimo)",
+                "tarefa": "Bellman-Ford (caminho mínimo, single-source)",
                 "algoritmo": "Bellman-Ford iterativo (V-1 relaxamentos)",
-                "entrada": desc_entrada,
                 "origem": origem,
-                "tempo_ms": t_bf,
+                "n_runs": 1,
+                "tempo_medio_ms": t_bf,
+                "tempo_min_ms": t_bf,
                 "memoria_pico_kb": m_bf,
-                "complexidade_teorica": "O(V * E)",
+                "complexidade_teorica": "O(V × E)",
                 "observacoes": (
                     "Aceita pesos negativos e detecta ciclos negativos. "
                     "Neste dataset os pesos são distâncias euclidianas (≥ 0), "
-                    "portanto Dijkstra e Bellman-Ford produzem os mesmos caminhos."
+                    "portanto Dijkstra e Bellman-Ford produzem os mesmos caminhos mínimos."
                 ),
             },
             {
-                "tarefa": "Componentes Conexos",
-                "algoritmo": "DFS global iterativo",
-                "entrada": desc_entrada,
-                "componentes_encontrados": num_comp,
-                "tempo_ms": t_comp,
+                "tarefa": "Componentes Conexos (DFS global)",
+                "algoritmo": "DFS iterativo global",
+                "n_runs": N_RUNS,
+                "tempo_medio_ms": t_comp,
+                "tempo_min_ms": t_comp_min,
                 "memoria_pico_kb": m_comp,
+                "componentes_encontrados": num_comp,
                 "complexidade_teorica": "O(V + E)",
-                "observacoes": (
-                    f"Identifica todos os componentes conexos do grafo. "
-                    f"Resultado: {num_comp} componente(s)."
-                ),
+                "observacoes": f"Resultado: {num_comp} componente(s) conexo(s).",
             },
         ],
+        "casos_especiais_bellman_ford": {
+            "descricao": (
+                "Grafos direcionados sintéticos para demonstrar as capacidades únicas "
+                "do Bellman-Ford: pesos negativos e detecção de ciclos negativos."
+            ),
+            "peso_negativo_sem_ciclo": caso_neg,
+            "ciclo_negativo_detectado": caso_ciclo,
+        },
         "resumo_comparativo": {
-            "mais_rapido_ms": min(t_bfs, t_dfs, t_dij, t_bf, t_comp),
-            "mais_lento_ms":  max(t_bfs, t_dfs, t_dij, t_bf, t_comp),
+            "mais_rapido": {"algoritmo": mais_rapido[0], "tempo_medio_ms": mais_rapido[1]},
+            "mais_lento":  {"algoritmo": mais_lento[0],  "tempo_medio_ms": mais_lento[1]},
+            "razao_bf_vs_dijkstra": round(t_bf / t_dij, 1) if t_dij > 0 else None,
+            "razao_bf_vs_bfs":      round(t_bf / t_bfs, 1) if t_bfs > 0 else None,
             "ordem_por_tempo_crescente": sorted(
                 [
-                    ("BFS",                t_bfs),
-                    ("DFS",                t_dfs),
-                    ("Dijkstra",           t_dij),
-                    ("Bellman-Ford",       t_bf),
-                    ("Componentes Conexos",t_comp),
+                    {"algoritmo": "BFS",          "tempo_medio_ms": t_bfs},
+                    {"algoritmo": "DFS",          "tempo_medio_ms": t_dfs},
+                    {"algoritmo": "Dijkstra",     "tempo_medio_ms": t_dij},
+                    {"algoritmo": "Bellman-Ford", "tempo_medio_ms": t_bf},
                 ],
-                key=lambda x: x[1],
+                key=lambda x: x["tempo_medio_ms"],
+            ),
+        },
+        "discussao_critica": {
+            "BFS": (
+                "Ideal para encontrar o caminho com menor número de saltos (grafo não ponderado). "
+                "O(V+E), eficiente em memória com fila. Não considera pesos das arestas."
+            ),
+            "DFS": (
+                "Útil para detecção de ciclos, ordenação topológica e componentes fortemente conexos. "
+                "O(V+E), mas pode ter pilha de recursão profunda. Não garante caminho mínimo."
+            ),
+            "Dijkstra": (
+                "Algoritmo ótimo para grafos com pesos não negativos. "
+                "O((V+E) log V) com heap. Mais rápido que Bellman-Ford na prática. "
+                "Falha com pesos negativos."
+            ),
+            "Bellman-Ford": (
+                "Necessário quando há pesos negativos ou para detectar ciclos negativos. "
+                "O(V×E) — significativamente mais lento que Dijkstra. "
+                "Neste dataset (pesos ≥ 0), Dijkstra é preferível por ser mais eficiente."
             ),
         },
         "metadados": {
-            "medicao_de_memoria": MEDIR_MEMORIA,
             "unidade_tempo": "milissegundos (ms)",
             "unidade_memoria": "kilobytes (KB) — pico alocado durante execução",
             "ferramenta_memoria": "tracemalloc (stdlib Python)",
             "nota": (
-                "Os tempos podem variar entre execuções por fatores do SO "
-                "(cache, agendador). Recomenda-se repetir e tirar a média para benchmarks rigorosos."
+                "Tempos medidos com time.perf_counter(). "
+                "Variações entre execuções são esperadas por fatores do SO (cache, agendador)."
             ),
         },
     }
@@ -237,16 +323,23 @@ def main():
     with open(REPORT_OUT, "w", encoding="utf-8") as f:
         json.dump(relatorio, f, ensure_ascii=False, indent=2)
 
-    print(f"\n✓ Relatório salvo em: {REPORT_OUT}")
-    print("\n══════════════════════════════════════════════")
-    print("  RESUMO — TEMPO DE EXECUÇÃO (ms)")
-    print("══════════════════════════════════════════════")
-    print(f"  {'Tarefa':<30} {'Tempo (ms)':>12}  {'Mem pico (KB)':>14}")
-    print(f"  {'-'*30} {'-'*12}  {'-'*14}")
-    for m in relatorio["medicoes"]:
-        mem = str(m["memoria_pico_kb"]) if m["memoria_pico_kb"] is not None else "—"
-        print(f"  {m['tarefa']:<30} {m['tempo_ms']:>12.4f}  {mem:>14}")
-    print("══════════════════════════════════════════════\n")
+    print(f"\n{'='*60}")
+    print("  RESUMO — TEMPO MÉDIO DE EXECUÇÃO")
+    print(f"{'='*60}")
+    print(f"  {'Algoritmo':<22} {'Médio (ms)':>12}  {'Mín (ms)':>10}  {'Mem (KB)':>10}")
+    print(f"  {'-'*22} {'-'*12}  {'-'*10}  {'-'*10}")
+    for m in relatorio["medicoes"][1:]:  # pula carregamento
+        print(
+            f"  {m['tarefa'][:22]:<22} "
+            f"{m['tempo_medio_ms']:>12.4f}  "
+            f"{m['tempo_min_ms']:>10.4f}  "
+            f"{m['memoria_pico_kb']:>10.2f}"
+        )
+    print(f"{'='*60}")
+    print(f"\n  Mais rápido: {mais_rapido[0]} ({mais_rapido[1]} ms)")
+    print(f"  Mais lento : {mais_lento[0]} ({mais_lento[1]} ms)")
+    print(f"  BF é {relatorio['resumo_comparativo']['razao_bf_vs_dijkstra']}× mais lento que Dijkstra")
+    print(f"\n  Relatório completo: {REPORT_OUT}")
 
 
 if __name__ == "__main__":

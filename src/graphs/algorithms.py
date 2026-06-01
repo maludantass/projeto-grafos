@@ -209,8 +209,7 @@ def bellman_ford(grafo, origem):
     predecessores = {no: None         for no in nos}
     distancias[origem] = 0.0
 
-    from src.graphs.graph import GrafoDirecionado
-    direcionado = isinstance(grafo, GrafoDirecionado)
+    direcionado = type(grafo).__name__ == "GrafoDirecionado"
 
     if direcionado:
         arestas = []
