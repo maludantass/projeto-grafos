@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Projeto Grafos</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green:  #00e676;
+      --purple: #d500f9;
+      --blue:   #2979ff;
+      --bg:     #080810;
+      --card:   #0f0f1a;
+      --border: rgba(255,255,255,0.07);
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: #fff;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ── canvas background ── */
+    #bg-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      opacity: .55;
+    }
+
+    /* ── layout ── */
+    .page {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 24px;
+      gap: 56px;
+    }
+
+    /* ── header ── */
+    .header { text-align: center; }
+
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--green);
+      border: 1px solid var(--green);
+      border-radius: 99px;
+      padding: 4px 14px;
+      margin-bottom: 20px;
+      opacity: .9;
+    }
+
+    h1 {
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -1px;
+    }
+
+    h1 span.g { color: var(--green); }
+    h1 span.p { color: var(--purple); }
+
+    .subtitle {
+      margin-top: 16px;
+      font-size: 1.05rem;
+      color: rgba(255,255,255,.5);
+      max-width: 520px;
+      margin-inline: auto;
+      line-height: 1.6;
+    }
+
+    /* ── stats row ── */
+    .stats {
+      display: flex;
+      gap: 40px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .stat { text-align: center; }
+    .stat-value {
+      font-size: 1.9rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--green), var(--blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .stat:nth-child(2) .stat-value {
+      background: linear-gradient(135deg, var(--purple), #ff6b9d);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .stat:nth-child(3) .stat-value {
+      background: linear-gradient(135deg, var(--blue), var(--green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .stat-label {
+      font-size: .75rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.35);
+      margin-top: 2px;
+    }
+
+    /* ── cards ── */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 380px));
+      gap: 24px;
+      justify-content: center;
+      width: 100%;
+      max-width: 820px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 36px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      transition: transform .3s ease, border-color .3s ease, box-shadow .3s ease;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 20px;
+      opacity: 0;
+      transition: opacity .4s;
+    }
+
+    .card-1::before { background: radial-gradient(ellipse at 30% 0%, rgba(0,230,118,.12) 0%, transparent 70%); }
+    .card-2::before { background: radial-gradient(ellipse at 70% 0%, rgba(213,0,249,.12) 0%, transparent 70%); }
+
+    .card:hover { transform: translateY(-6px); }
+    .card:hover::before { opacity: 1; }
+    .card-1:hover { border-color: rgba(0,230,118,.4); box-shadow: 0 20px 60px rgba(0,230,118,.12); }
+    .card-2:hover { border-color: rgba(213,0,249,.4); box-shadow: 0 20px 60px rgba(213,0,249,.12); }
+
+    .card-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .card-1 .card-icon { background: rgba(0,230,118,.15); }
+    .card-2 .card-icon { background: rgba(213,0,249,.15); }
+
+    .card-part {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+    }
+    .card-1 .card-part { color: var(--green); }
+    .card-2 .card-part { color: var(--purple); }
+
+    .card-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .card-desc {
+      font-size: .9rem;
+      color: rgba(255,255,255,.45);
+      line-height: 1.6;
+      flex: 1;
+    }
+
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 99px;
+    }
+    .card-1 .tag { background: rgba(0,230,118,.1); color: var(--green); }
+    .card-2 .tag { background: rgba(213,0,249,.1); color: var(--purple); }
+
+    .card-cta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: .9rem;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+    .card-1 .card-cta { color: var(--green); }
+    .card-2 .card-cta { color: var(--purple); }
+
+    .arrow {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      transition: transform .2s;
+    }
+    .card-1 .arrow { background: rgba(0,230,118,.15); }
+    .card-2 .arrow { background: rgba(213,0,249,.15); }
+    .card:hover .arrow { transform: translateX(4px); }
+
+    /* ── footer ── */
+    .footer {
+      font-size: .75rem;
+      color: rgba(255,255,255,.2);
+      letter-spacing: 1px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<div class="page">
+
+  <header class="header">
+    <div class="badge">Teoria dos Grafos · 2026</div>
+    <h1>
+      Explorando Grafos<br>
+      <span class="g">Reais.</span> <span class="p">Complexos.</span>
+    </h1>
+    <p class="subtitle">
+      BFS, DFS, Dijkstra e Bellman-Ford aplicados a redes reais —
+      da malha aérea brasileira à similaridade musical do Spotify.
+    </p>
+  </header>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">20</div>
+      <div class="stat-label">Aeroportos</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">4.000</div>
+      <div class="stat-label">Músicas</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">4</div>
+      <div class="stat-label">Algoritmos</div>
+    </div>
+  </div>
+
+  <div class="cards">
+
+    <a class="card card-1" href="grafo_interativo.html">
+      <div class="card-icon">✈️</div>
+      <div class="card-part">Parte 1</div>
+      <div class="card-title">Rede de Aeroportos do Brasil</div>
+      <div class="card-desc">
+        Grafo da malha aérea brasileira com 20 aeroportos e conexões
+        regionais e nacionais. Explore métricas, caminhos mínimos e a
+        estrutura de hubs do país.
+      </div>
+      <div class="card-tags">
+        <span class="tag">Dijkstra</span>
+        <span class="tag">BFS</span>
+        <span class="tag">Ego-redes</span>
+        <span class="tag">Interativo</span>
+      </div>
+      <div class="card-cta">
+        Explorar grafo
+        <span class="arrow">→</span>
+      </div>
+    </a>
+
+    <a class="card card-2" href="parte2/index.html">
+      <div class="card-icon">🎵</div>
+      <div class="card-part">Parte 2</div>
+      <div class="card-title">Rede Musical Spotify</div>
+      <div class="card-desc">
+        4.000 músicas conectadas por similaridade de atributos sonoros.
+        Benchmark comparativo entre BFS, DFS, Dijkstra e Bellman-Ford
+        em um grafo de larga escala.
+      </div>
+      <div class="card-tags">
+        <span class="tag">Bellman-Ford</span>
+        <span class="tag">DFS</span>
+        <span class="tag">Benchmark</span>
+        <span class="tag">K-NN</span>
+      </div>
+      <div class="card-cta">
+        Explorar grafo
+        <span class="arrow">→</span>
+      </div>
+    </a>
+
+  </div>
+
+  <footer class="footer">CESAR School · Teoria dos Grafos 2026</footer>
+
+</div>
+
+<script>
+  const canvas = document.getElementById('bg-canvas');
+  const ctx    = canvas.getContext('2d');
+
+  let W, H, nodes, edges;
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    init();
+  }
+
+  function rand(a, b) { return a + Math.random() * (b - a); }
+
+  function init() {
+    const N = Math.floor((W * H) / 18000);
+    nodes = Array.from({ length: N }, () => ({
+      x:  rand(0, W),
+      y:  rand(0, H),
+      vx: rand(-0.3, 0.3),
+      vy: rand(-0.3, 0.3),
+      r:  rand(1.5, 3.5),
+      // alternate color between green and purple clusters
+      hue: Math.random() > .5 ? 'green' : 'purple',
+    }));
+
+    // build edges between nearby nodes
+    edges = [];
+    const DIST = 160;
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[i].x - nodes[j].x;
+        const dy = nodes[i].y - nodes[j].y;
+        if (Math.sqrt(dx*dx + dy*dy) < DIST) {
+          edges.push([i, j]);
+        }
+      }
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    // move nodes
+    for (const n of nodes) {
+      n.x += n.vx;
+      n.y += n.vy;
+      if (n.x < 0 || n.x > W) n.vx *= -1;
+      if (n.y < 0 || n.y > H) n.vy *= -1;
+    }
+
+    // rebuild edges every frame would be heavy; just update positions
+    for (const [i, j] of edges) {
+      const a = nodes[i], b = nodes[j];
+      const dx = a.x - b.x, dy = a.y - b.y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if (dist > 200) continue;
+
+      const alpha = (1 - dist / 200) * 0.25;
+      // color based on node pair
+      const color = (a.hue === 'green' && b.hue === 'green')
+        ? `rgba(0,230,118,${alpha})`
+        : (a.hue === 'purple' && b.hue === 'purple')
+          ? `rgba(213,0,249,${alpha})`
+          : `rgba(41,121,255,${alpha * .7})`;
+
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = .8;
+      ctx.stroke();
+    }
+
+    // draw nodes
+    for (const n of nodes) {
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+      ctx.fillStyle = n.hue === 'green'
+        ? 'rgba(0,230,118,0.7)'
+        : 'rgba(213,0,249,0.7)';
+      ctx.fill();
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+  draw();
+</script>
+
+</body>
+</html>

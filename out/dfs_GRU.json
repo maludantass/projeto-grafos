@@ -1,8 +1,9 @@
 {
   "algoritmo": "DFS",
   "origem": "GRU",
-  "tempo_ms": 0.5412,
+  "tempo_ms": 0.1001,
   "nos_visitados": 20,
+  "tem_ciclo": true,
   "ordem_visita": [
     "REC",
     "SSA",
@@ -25,7 +26,6 @@
     "THE",
     "VIX"
   ],
-  "tem_ciclo": true,
   "arestas_tipo": {
     "arvore": 19,
     "retorno": 4

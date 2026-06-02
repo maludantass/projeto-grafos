@@ -1,157 +1,242 @@
-DESCRICAO DO DATASET PARTE 2 (Spotify Tracks)
+=================================================================
+DESCRICAO DO DATASET — PARTE 2 (Spotify Tracks)
+Teoria dos Grafos · CESAR School · 2026
+=================================================================
 
-FONTE: Spotify Tracks Dataset (Kaggle)
-https://www.kaggle.com/datasets/maharshipandya/-spotify-tracks-dataset
+FONTE DOS DADOS
+---------------
+  Dataset : Spotify Tracks Dataset (Kaggle)
+  URL     : https://www.kaggle.com/datasets/maharshipandya/-spotify-tracks-dataset
+  Tamanho : ~114.000 faixas originais
+  Licenca : Uso academico/pesquisa
 
-CONSTRUCAO DO GRAFO:
-  - Dataset original: 114.000 faixas
-  - Amostra utilizada: 500 musicas (estratificada por genero)
-  - Nos: cada musica e um vertice
-  - Arestas: K-vizinhos mais proximos (K=5) por similaridade
-  - Peso: distancia euclidiana entre vetores de atributos normalizados
-  - Atributos usados: danceability, energy, speechiness, acousticness, instrumentalness, liveness, valence, loudness, tempo
+=================================================================
+CONSTRUCAO DO GRAFO
+=================================================================
 
-PROPRIEDADES DO GRAFO:
-  |V| (vertices)  = 500
-  |E| (arestas)   = 1764
-  Tipo            = Nao dirigido, Ponderado
-  Pesos           = Distancia euclidiana (continuo)
-    Peso minimo   = 0.000000
-    Peso maximo   = 0.981174
-    Peso medio    = 0.304147
+VISAO GERAL
+-----------
+  Cada musica e um vertice do grafo.
+  Duas musicas sao conectadas se uma e K-vizinha mais proxima
+  da outra DENTRO DO MESMO GENERO, usando distancia euclidiana
+  entre vetores de atributos sonoros normalizados.
 
-DISTRIBUICAO DE GRAUS:
-  Grau minimo  = 5
-  Grau maximo  = 23
-  Grau medio   = 7.07
+PARAMETROS FINAIS
+-----------------
+  Tamanho da amostra : 4.000 musicas
+  K vizinhos         : 7 (por musica, dentro do genero)
+  Seed               : 42 (reproducibilidade)
 
-  Frequencia por grau:
-    Grau    Qtd vertices         %
-  
-       5             116    23.20%
-       6             116    23.20%
-       7             103    20.60%
-       8              67    13.40%
-       9              41     8.20%
-      10              25     5.00%
-      11              18     3.60%
-      12               4     0.80%
-      13               5     1.00%
-      14               3     0.60%
-      23               1     0.20%
+ATRIBUTOS USADOS NA SIMILARIDADE
+---------------------------------
+  Atributos diretos (escala 0–1, Spotify API):
+    - danceability      : quao dançavel e a faixa
+    - energy            : intensidade/energia percebida
+    - speechiness       : presenca de palavras faladas
+    - acousticness      : probabilidade de ser acustica
+    - instrumentalness  : ausencia de vocais
+    - liveness          : presenca de audiencia ao vivo
+    - valence           : positividade/alegria transmitida
 
-GENEROS NA AMOSTRA:
-  acoustic                4 musicas
-  afrobeat                4 musicas
-  alt-rock                4 musicas
-  alternative             4 musicas
-  ambient                 4 musicas
-  anime                   4 musicas
-  black-metal             4 musicas
-  bluegrass               4 musicas
-  blues                   5 musicas
-  brazil                  6 musicas
-  breakbeat               4 musicas
-  british                 4 musicas
-  cantopop                4 musicas
-  chicago-house           4 musicas
-  children                4 musicas
-  chill                   4 musicas
-  classical               5 musicas
-  club                    4 musicas
-  comedy                  4 musicas
-  country                 5 musicas
-  dance                   4 musicas
-  dancehall               4 musicas
-  death-metal             4 musicas
-  deep-house              4 musicas
-  detroit-techno          4 musicas
-  disco                   4 musicas
-  disney                  5 musicas
-  drum-and-bass           5 musicas
-  dub                     4 musicas
-  dubstep                 4 musicas
-  edm                     4 musicas
-  electro                 6 musicas
-  electronic              4 musicas
-  emo                     8 musicas
-  folk                    4 musicas
-  forro                   4 musicas
-  french                  6 musicas
-  funk                    4 musicas
-  garage                  5 musicas
-  german                  4 musicas
-  gospel                  5 musicas
-  goth                    4 musicas
-  grindcore               4 musicas
-  groove                  5 musicas
-  grunge                  5 musicas
-  guitar                  4 musicas
-  happy                   4 musicas
-  hard-rock               4 musicas
-  hardcore                4 musicas
-  hardstyle               4 musicas
-  heavy-metal             4 musicas
-  hip-hop                 5 musicas
-  honky-tonk              4 musicas
-  house                   5 musicas
-  idm                     4 musicas
-  indian                  4 musicas
-  indie                   5 musicas
-  indie-pop               4 musicas
-  industrial              6 musicas
-  iranian                 4 musicas
-  j-dance                 4 musicas
-  j-idol                  4 musicas
-  j-pop                   4 musicas
-  j-rock                  4 musicas
-  jazz                    4 musicas
-  k-pop                   4 musicas
-  kids                    5 musicas
-  latin                   5 musicas
-  latino                  4 musicas
-  malay                   5 musicas
-  mandopop                5 musicas
-  metal                   4 musicas
-  metalcore               5 musicas
-  minimal-techno          4 musicas
-  mpb                     5 musicas
-  new-age                 4 musicas
-  opera                   5 musicas
-  pagode                  4 musicas
-  party                   4 musicas
-  piano                   5 musicas
-  pop                     4 musicas
-  pop-film                4 musicas
-  power-pop               5 musicas
-  progressive-house       4 musicas
-  psych-rock              5 musicas
-  punk                    6 musicas
-  punk-rock               4 musicas
-  r-n-b                   5 musicas
-  reggae                  4 musicas
-  reggaeton               4 musicas
-  rock                    4 musicas
-  rock-n-roll             4 musicas
-  rockabilly              4 musicas
-  romance                 4 musicas
-  sad                     4 musicas
-  salsa                   5 musicas
-  samba                   5 musicas
-  sertanejo               4 musicas
-  show-tunes              4 musicas
-  singer-songwriter       4 musicas
-  ska                     4 musicas
-  sleep                   4 musicas
-  songwriter              4 musicas
-  soul                    5 musicas
-  spanish                 4 musicas
-  study                   4 musicas
-  swedish                 4 musicas
-  synth-pop               4 musicas
-  tango                   4 musicas
-  techno                  5 musicas
-  trance                  4 musicas
-  trip-hop                4 musicas
-  turkish                 5 musicas
-  world-music             6 musicas
+  Atributos normalizados (min-max para escala 0–1):
+    - loudness          : volume medio em dB (original: -60 a 0 dB)
+    - tempo             : andamento em BPM
+
+  Total: 9 dimensoes por vetor de caracteristicas.
+
+PIPELINE DE CONSTRUCAO (passo a passo)
+---------------------------------------
+  1. LEITURA E FILTRAGEM
+     - Lê o CSV original (~114k faixas)
+     - Filtra apenas generos reconhecidos (ver mapeamento abaixo)
+     - Descarta linhas com valores invalidos nos atributos
+
+  2. NORMALIZACAO DE GENEROS
+     Subgeneros sao mapeados para 8 categorias principais:
+       pop       <- indie-pop, synth-pop
+       rock      <- alt-rock, alternative
+       hip-hop   <- r-n-b, soul
+       electronic<- edm, dance
+       funk      <- disco
+       brazil    <- mpb, sertanejo, samba, pagode, forro
+       latin     <- latino, reggaeton
+       country   (sem subgeneros mapeados)
+
+  3. DEDUPLICACAO
+     Mesma musica pode aparecer em multiplos albuns.
+     Chave de deduplicacao: (track_name.lower(), artists.lower())
+     Criterio de desempate: mantida a versao com maior popularidade.
+
+  4. AMOSTRAGEM ESTRATIFICADA
+     - Amostra proporcional por genero (500 por genero aprox.)
+     - Seed=42 garante reproducibilidade
+     - Resultado: 4.000 musicas balanceadas entre os 8 generos
+
+  5. NORMALIZACAO DOS ATRIBUTOS
+     - loudness e tempo: min-max normalization sobre a amostra
+     - Demais atributos ja estao em [0,1] pela Spotify API
+
+  6. CONSTRUCAO DAS ARESTAS (K-NN vetorizado por genero)
+     - Para cada genero, monta matriz X de features (numpy float32)
+     - Calcula matriz de distancias euclidianas entre todos os pares
+       do mesmo genero usando operacoes vetorizadas numpy
+     - Para cada musica, conecta aos K=7 vizinhos mais proximos
+     - Arestas sao nao dirigidas: par (i,j) inserido uma unica vez
+     - Peso da aresta = distancia euclidiana (float, continuo)
+
+     Complexidade: O(|genero|^2) por genero (aceitavel pois cada
+     genero tem ~500 musicas, nao 4.000 inteiras)
+
+  7. EXPORTACAO
+     - musicas_nos.csv        : vertices com todos os atributos
+     - adjacencias_musicas.csv: arestas com pesos
+     - descricao_dataset.txt  : este arquivo
+     - frontend/src/data/graph.json: formato para visualizacao web
+       (value = 1 - peso, ou seja, similaridade ao inves de distancia)
+
+=================================================================
+PROPRIEDADES DO GRAFO RESULTANTE
+=================================================================
+
+  |V| (vertices) = 4.000
+  |E| (arestas)  = 19.717
+  Tipo           = Nao dirigido, Ponderado
+  Componentes    = 1 (grafo conexo)
+
+  PESOS DAS ARESTAS (distancia euclidiana):
+    Minimo  = 0.000000
+    Maximo  = 1.024962   (ultrapassa 1.0 pois e distancia, nao similaridade)
+    Medio   = 0.260926
+
+  DISTRIBUICAO DE GRAUS:
+    Grau minimo = 7   (todo vertice tem ao menos K=7 arestas por construcao)
+    Grau maximo = 22  (musicas que sao vizinhas de muitos outros)
+    Grau medio  = 9.86
+
+    Grau  | Vertices |    %
+    ------|----------|--------
+       7  |      716 | 17.90%
+       8  |      754 | 18.85%
+       9  |      641 | 16.02%
+      10  |      538 | 13.45%
+      11  |      441 | 11.03%
+      12  |      314 |  7.85%
+      13  |      222 |  5.55%
+      14  |      165 |  4.12%
+      15  |       75 |  1.88%
+      16  |       55 |  1.38%
+      17  |       38 |  0.95%
+      18  |       20 |  0.50%
+      19  |       12 |  0.30%
+      20  |        3 |  0.07%
+      21  |        5 |  0.12%
+      22  |        1 |  0.03%
+
+  GENEROS NA AMOSTRA:
+    brazil     | 513 musicas | 12.8%
+    funk       | 509 musicas | 12.7%
+    hip-hop    | 509 musicas | 12.7%
+    rock       | 509 musicas | 12.7%
+    electronic | 507 musicas | 12.7%
+    country    | 504 musicas | 12.6%
+    pop        | 512 musicas | 12.8%
+    latin      | 437 musicas | 10.9%
+
+=================================================================
+ALGORITMOS APLICADOS E RESULTADOS
+=================================================================
+
+  Todos os algoritmos foram implementados em Python puro (sem
+  bibliotecas de grafos externas) usando a estrutura Grafo com
+  lista de adjacencia.
+
+  OBSERVACAO SOBRE RECURSAO (DFS):
+    O grafo tem 4.000 vertices. DFS recursivo excede o limite
+    padrao do Python (1.000 chamadas). Por isso, o limite foi
+    aumentado para 50.000 via sys.setrecursionlimit(50.000).
+
+  RESULTADOS DO BENCHMARK (ver out/parte2_report.json):
+    Algoritmo     | Complexidade    | Tempo medio
+    --------------|-----------------|------------
+    BFS           | O(V + E)        | ~12.8 ms
+    Dijkstra      | O((V+E) log V)  | ~14.7 ms
+    DFS           | O(V + E)        | ~29.5 ms
+    Bellman-Ford  | O(V x E)        | ~162.2 ms
+
+    Componentes conexos: 1 (grafo totalmente conexo)
+    Algoritmo mais rapido : BFS
+    Algoritmo mais lento  : Bellman-Ford (11x mais lento que Dijkstra)
+
+  CASOS ESPECIAIS — BELLMAN-FORD:
+    Demonstrado em grafos sinteticos (nao no dataset principal):
+    1. Peso negativo sem ciclo: A->B(5), B->C(-2), C->D(1) — funciona
+    2. Ciclo negativo: A->B(1), B->C(-3), C->A(1) — detectado corretamente
+    Neste dataset os pesos sao distancias euclidianas (>= 0),
+    portanto Dijkstra e Bellman-Ford produzem os mesmos caminhos.
+
+=================================================================
+EVOLUCAO DO DATASET (HISTORICO DE MUDANCAS)
+=================================================================
+
+  VERSAO 1 (protótipo inicial):
+    - Amostra      : 500 musicas
+    - K vizinhos   : 5
+    - KNN          : brute-force O(n^2) entre TODOS os pares
+    - Generos      : sem mapeamento/normalizacao de subgeneros
+    - Deduplicacao : nao havia
+    - Resultado    : 1.764 arestas
+
+  VERSAO 2 (versao atual):
+    - Amostra      : 4.000 musicas (+700%)
+    - K vizinhos   : 7 (+40%)
+    - KNN          : vetorizado com numpy, calculado POR GENERO
+                     (reduz complexidade e garante conexoes semanticas)
+    - Generos      : 8 subgeneros mapeados para categorias principais
+    - Deduplicacao : por (nome, artista), mantida versao mais popular
+    - Resultado    : 19.717 arestas (+1.018%)
+
+  MOTIVACAO DAS MUDANCAS:
+    - Amostra maior: representatividade estatistica melhor por genero
+    - KNN por genero: musicas so se conectam a musicas do mesmo estilo,
+      o que e mais semanticamente correto e cria clusters visiveis
+    - Normalizacao de generos: unifica variantes (ex: "alt-rock" e
+      "alternative" vao para "rock") evitando fragmentacao desnecessaria
+    - Deduplicacao: remove duplicatas cross-album, melhora qualidade
+
+=================================================================
+FRONTEND INTERATIVO
+=================================================================
+
+  Localização : out/parte2/index.html  (arquivo unico auto-contido)
+  Tecnologia  : React 18 + Vite + react-force-graph-2d
+  Como abrir  : abrir diretamente no browser (nao precisa servidor)
+
+  FUNCIONALIDADES:
+    - Grafo de forca com 4.000 nos interativos
+    - Nos coloridos por genero; tamanho proporcional ao grau
+    - Arestas coloridas pela cor do genero de origem
+    - Filtro por genero (isola cluster visual)
+    - Filtro de similaridade minima (remove arestas fracas)
+    - Busca por nome de musica ou artista com zoom automatico
+    - Modo Dijkstra: clique em 2 musicas para ver caminho minimo
+      (caminho destacado em dourado, demais nos/arestas esmaecidos)
+
+  PARA DESENVOLVER O FRONTEND:
+    cd frontend
+    npm install    (instala dependencias: React, Vite, force-graph)
+    npm run dev    (servidor local em http://localhost:5173)
+    npm run build  (regera out/parte2/index.html)
+
+=================================================================
+REPRODUCIBILIDADE
+=================================================================
+
+  Para regenerar todos os arquivos do zero:
+    python src/construir_grafo_spotify.py
+
+  Requisitos Python:
+    numpy, tabulate  (ver requirements.txt)
+    Python >= 3.9
+
+  O resultado sera identico desde que o dataset_parte2.csv
+  esteja presente e a SEED=42 nao seja alterada.

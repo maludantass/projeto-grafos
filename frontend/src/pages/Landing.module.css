@@ -1,0 +1,92 @@
+.page { position: absolute; inset: 0; overflow: hidden; }
+.canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+.tooltip {
+  position: absolute; z-index: 10; pointer-events: none;
+  background: rgba(8,8,20,0.92); backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,255,255,.12); border-radius: 12px;
+  padding: 10px 14px; flex-direction: column; gap: 4px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.6); min-width: 160px;
+}
+.ttArtist { font-size: .85rem; font-weight: 800; color: #fff; }
+.ttGenre  { font-size: .68rem; margin-top: 2px; }
+
+.overlay {
+  position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  display: flex; flex-direction: column; justify-content: center; padding: 0 60px;
+}
+.badge {
+  display: inline-block; font-size: .62rem; font-weight: 800; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--purple); border: 1px solid var(--purple);
+  border-radius: 99px; padding: 4px 12px; margin-bottom: 18px; align-self: flex-start;
+}
+.title {
+  font-size: clamp(2.4rem, 4.5vw, 4rem); font-weight: 900;
+  line-height: 1.0; letter-spacing: -1px; text-shadow: 0 0 40px rgba(0,0,0,.8);
+}
+.g { color: var(--green); }
+.p { color: var(--purple); }
+.sub {
+  margin-top: 16px; font-size: .88rem; color: rgba(255,255,255,.5);
+  max-width: 360px; line-height: 1.6;
+}
+.cta {
+  margin-top: 26px; display: inline-flex; align-items: center; gap: 10px;
+  background: transparent; border: 1.5px solid #fff; border-radius: 99px;
+  padding: 11px 24px; font-size: .83rem; font-weight: 700; letter-spacing: 1px;
+  cursor: pointer; color: #fff; transition: background .25s, border-color .25s, color .25s;
+  align-self: flex-start; pointer-events: auto;
+}
+.cta:hover { background: rgba(255,255,255,.1); border-color: var(--green); color: var(--green); }
+.scroll {
+  margin-top: 36px; font-size: .62rem; font-weight: 700; letter-spacing: 3px;
+  text-transform: uppercase; color: rgba(255,255,255,.22);
+  display: flex; align-items: center; gap: 8px;
+}
+.scrollIcon {
+  width: 16px; height: 26px; border: 1.5px solid rgba(255,255,255,.22);
+  border-radius: 99px; position: relative; overflow: hidden;
+}
+.scrollIcon::after {
+  content: ''; position: absolute; top: 4px; left: 50%; transform: translateX(-50%);
+  width: 3px; height: 5px; background: rgba(255,255,255,.35); border-radius: 99px;
+  animation: dot 1.6s ease-in-out infinite;
+}
+@keyframes dot { 0%,100%{opacity:1;transform:translateX(-50%) translateY(0)} 50%{opacity:.2;transform:translateX(-50%) translateY(5px)} }
+
+.hint {
+  position: absolute; bottom: 112px; right: 60px; z-index: 3;
+  font-size: .6rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+  color: rgba(255,255,255,.25); display: flex; align-items: center; gap: 6px;
+}
+
+.statsBar {
+  position: absolute; bottom: 0; left: 0; right: 0; z-index: 3;
+  display: flex; border-top: 1px solid var(--border);
+  background: rgba(5,5,16,.78); backdrop-filter: blur(10px);
+}
+.statBlock {
+  flex: 1; padding: 16px 20px; border-right: 1px solid var(--border);
+}
+.statBlock:last-child { border-right: none; }
+.statVal {
+  font-size: 1.6rem; font-weight: 900;
+  background: linear-gradient(135deg, var(--green), var(--blue));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.statBlock:nth-child(2) .statVal {
+  background: linear-gradient(135deg, var(--purple), var(--pink));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.statBlock:nth-child(3) .statVal {
+  background: linear-gradient(135deg, var(--blue), var(--green));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.statBlock:nth-child(4) .statVal {
+  background: linear-gradient(135deg, var(--pink), var(--purple));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.statLbl {
+  font-size: .58rem; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--text2); margin-top: 2px;
+}

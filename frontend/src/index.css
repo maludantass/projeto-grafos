@@ -1,0 +1,24 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --green:  #00e676;
+  --purple: #d500f9;
+  --pink:   #ff2d78;
+  --blue:   #2979ff;
+  --bg:     #050510;
+  --surface:#0f0f1a;
+  --border: rgba(255,255,255,0.07);
+  --text2:  rgba(255,255,255,0.4);
+}
+
+html, body, #root {
+  height: 100%;
+  background: var(--bg);
+  color: #fff;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  overflow: hidden;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 4px; }

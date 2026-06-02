@@ -2,9 +2,12 @@
 Testes de BFS e DFS aplicados ao 2° dataset (Spotify Tracks — dataset_parte2).
 
 Grafo: similaridade musical KNN (não dirigido, ponderado)
-  |V| = 499   |E| = 1764   componentes conexos = 1
+  |V| = 4000   |E| = 19717   componentes conexos = 8
 
-Pessoa 1 — Execução correta de BFS/DFS + testes do 2° dataset.
+Estrutura do grafo:
+  - KNN é calculado DENTRO DO MESMO GÊNERO, portanto o grafo tem
+    8 componentes conexos (um por gênero), cada um totalmente conexo.
+  - ORIGEM e DESTINO pertencem ao componente 'brazil' (513 vértices).
 """
 
 import os
@@ -27,11 +30,12 @@ BASE_DIR = os.path.join(os.path.dirname(__file__), "..")
 NOS_CSV  = os.path.join(BASE_DIR, "data", "dataset_parte2", "musicas_nos.csv")
 ADJ_CSV  = os.path.join(BASE_DIR, "data", "dataset_parte2", "adjacencias_musicas.csv")
 
-ORIGEM  = "7g96GMqMFfkrzEvDwSIWzQ"
-DESTINO = "1xU4U0HkoKrDAkKxbTbda6"
+# nós do componente 'brazil' (maior componente, 513 vértices)
+ORIGEM  = "3pyQ7RB5P8iwZMkPAeZ3ym"
+DESTINO = "4cpdzzOLPuoRLnaJBcQFYp"
 
-NUM_VERTICES = 499
-NUM_ARESTAS  = 1764
+NUM_VERTICES    = 513   # tamanho do componente ao qual ORIGEM pertence
+NUM_COMPONENTES = 8     # um por gênero (brazil, pop, funk, hip-hop, rock, electronic, country, latin)
 
 
 @pytest.fixture(scope="module")
@@ -40,10 +44,11 @@ def grafo_spotify():
     ler_adjacencias_musicas(g, ADJ_CSV)
     return g
 
+
 class TestBFSDataset2:
 
-    def test_bfs_visita_todos_nos(self, grafo_spotify):
-        """BFS deve visitar todos os vértices (grafo é totalmente conexo)."""
+    def test_bfs_visita_todos_nos_do_componente(self, grafo_spotify):
+        """BFS deve visitar todos os vértices do componente ao qual ORIGEM pertence."""
         ordem, _, _, _ = bfs(grafo_spotify, ORIGEM)
         assert len(ordem) == NUM_VERTICES
 
@@ -95,16 +100,16 @@ class TestBFSDataset2:
                 assert pred in todos_nos
 
     def test_bfs_caminho_entre_duas_musicas(self, grafo_spotify):
-        """BFS deve encontrar caminho entre dois nós quaisquer no grafo conexo."""
+        """BFS deve encontrar caminho entre dois nós do mesmo componente."""
         caminho = bfs_caminho(grafo_spotify, ORIGEM, DESTINO)
         assert caminho is not None
         assert caminho[0] == ORIGEM
         assert caminho[-1] == DESTINO
 
     def test_bfs_caminho_comprimento_minimo(self, grafo_spotify):
-        """O caminho BFS deve ter 8 nós (7 saltos) — o menor entre ORIGEM e DESTINO."""
+        """O caminho BFS deve ter 5 nós (4 saltos) entre ORIGEM e DESTINO."""
         caminho = bfs_caminho(grafo_spotify, ORIGEM, DESTINO)
-        assert len(caminho) == 8
+        assert len(caminho) == 5
 
     def test_bfs_caminho_usa_apenas_arestas_validas(self, grafo_spotify):
         """Cada par consecutivo do caminho BFS deve ser vizinhos no grafo."""
@@ -125,30 +130,31 @@ class TestBFSDataset2:
         camadas = bfs_por_niveis(grafo_spotify, ORIGEM)
         assert camadas[0] == [ORIGEM]
 
-    def test_bfs_por_niveis_soma_total_igual_vertices(self, grafo_spotify):
-        """A soma dos nós em todas as camadas deve ser igual a |V|."""
+    def test_bfs_por_niveis_soma_total_igual_componente(self, grafo_spotify):
+        """A soma dos nós em todas as camadas deve ser igual ao tamanho do componente."""
         camadas = bfs_por_niveis(grafo_spotify, ORIGEM)
         assert sum(len(c) for c in camadas) == NUM_VERTICES
 
     def test_bfs_nivel_maximo(self, grafo_spotify):
-        """O nível máximo atingido pelo BFS neste dataset deve ser 11."""
+        """O nível máximo atingido pelo BFS neste componente deve ser 7."""
         _, niveis, _, _ = bfs(grafo_spotify, ORIGEM)
-        assert max(niveis.values()) == 11
+        assert max(niveis.values()) == 7
+
 
 class TestDFSDataset2:
 
     def test_dfs_visita_todos_nos(self, grafo_spotify):
-        """DFS global deve visitar todos os vértices do grafo."""
+        """DFS global visita todos os 4000 vértices do grafo (todos os componentes)."""
         ordem, _, _, _, _, _ = dfs(grafo_spotify, ORIGEM)
-        assert len(ordem) == NUM_VERTICES
+        assert len(ordem) == 4000
 
-    def test_dfs_origem_e_primeiro_visitado(self, grafo_spotify):
-        """A origem deve ser o primeiro nó na ordem de visita."""
+    def test_dfs_origem_esta_na_ordem_de_visita(self, grafo_spotify):
+        """A origem deve aparecer na ordem de visita (DFS global, não necessariamente primeiro)."""
         ordem, _, _, _, _, _ = dfs(grafo_spotify, ORIGEM)
-        assert ordem[0] == ORIGEM
+        assert ORIGEM in ordem
 
     def test_dfs_detecta_ciclo_real(self, grafo_spotify):
-        """Grafo KNN com 1764 arestas e 499 vértices possui ciclos reais."""
+        """Grafo KNN com 4000 vértices e 19717 arestas possui ciclos reais."""
         _, _, _, _, _, tem_ciclo = dfs(grafo_spotify, ORIGEM)
         assert tem_ciclo is True
 
@@ -193,8 +199,8 @@ class TestDFSDataset2:
                 )
 
     def test_dfs_arestas_arvore_cobrem_todos_nos(self, grafo_spotify):
-        """Arestas de árvore DFS (sem duplicatas) devem ser |V| - 1 em grafo conexo."""
-        ordem, _, _, _, arestas_tipo, _ = dfs(grafo_spotify, ORIGEM)
+        """Arestas de árvore DFS global = |V| - |componentes| = 4000 - 8 = 3992."""
+        _, _, _, _, arestas_tipo, _ = dfs(grafo_spotify, ORIGEM)
         vistas = set()
         arvore = []
         for u, v, t in arestas_tipo:
@@ -202,17 +208,24 @@ class TestDFSDataset2:
             if chave not in vistas and t == "arvore":
                 vistas.add(chave)
                 arvore.append((u, v))
-        assert len(arvore) == NUM_VERTICES - 1
+        assert len(arvore) == 4000 - NUM_COMPONENTES
 
-    def test_dfs_componentes_conexos_retorna_um(self, grafo_spotify):
-        """O grafo Spotify é totalmente conexo: exatamente 1 componente."""
+    def test_dfs_componentes_conexos_retorna_oito(self, grafo_spotify):
+        """O grafo tem 8 componentes conexos (um por gênero, pois KNN é intra-gênero)."""
         componentes = dfs_componentes_conexos(grafo_spotify)
-        assert len(componentes) == 1
+        assert len(componentes) == NUM_COMPONENTES
 
-    def test_dfs_componente_contem_todos_nos(self, grafo_spotify):
-        """O único componente conexo deve conter todos os |V| vértices."""
+    def test_dfs_componentes_somam_todos_nos(self, grafo_spotify):
+        """A soma dos vértices em todos os componentes deve ser |V| = 4000."""
         componentes = dfs_componentes_conexos(grafo_spotify)
-        assert len(componentes[0]) == NUM_VERTICES
+        assert sum(len(c) for c in componentes) == 4000
+
+    def test_dfs_maior_componente_contem_origem(self, grafo_spotify):
+        """O maior componente deve conter a ORIGEM (gênero brazil, 513 vértices)."""
+        componentes = dfs_componentes_conexos(grafo_spotify)
+        maior = max(componentes, key=len)
+        assert ORIGEM in maior
+        assert len(maior) == NUM_VERTICES
 
     def test_dfs_sem_falso_ciclo_em_grafo_linear(self):
         """Regressão: grafo linear não-dirigido NÃO deve ser detectado como cíclico."""

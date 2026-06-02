@@ -1,0 +1,63 @@
+
+.pathPanel {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  background: rgba(10,10,24,0.92);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,215,0,0.3);
+  border-radius: 14px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+  max-width: 500px;
+}
+
+.pathStep {
+  font-size: .75rem;
+  color: rgba(255,215,0,0.8);
+  font-weight: 600;
+}
+
+.pathNode {
+  font-size: .78rem;
+  font-weight: 700;
+  white-space: nowrap;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pathArrow {
+  color: #ffd700;
+  font-size: 1rem;
+}
+
+.pathMeta {
+  font-size: .7rem;
+  color: rgba(255,255,255,0.4);
+  padding-left: 6px;
+  border-left: 1px solid rgba(255,255,255,0.1);
+}
+
+.clearBtn {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.3);
+  font-size: .72rem;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: color .15s;
+  font-family: inherit;
+}
+
+.clearBtn:hover {
+  color: #fff;
+}

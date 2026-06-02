@@ -12,6 +12,12 @@ out/*
 !out/*.png
 !out/*.csv
 !out/*.json
+!out/parte2/
+out/parte2/assets/
+
+# Node
+frontend/node_modules/
+frontend/dist/
 
 # Ambiente virtual (se alguém criar)
 .venv/

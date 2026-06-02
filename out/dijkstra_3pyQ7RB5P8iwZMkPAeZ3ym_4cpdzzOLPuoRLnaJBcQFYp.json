@@ -1,0 +1,15 @@
+{
+  "algoritmo": "DIJKSTRA",
+  "origem": "3pyQ7RB5P8iwZMkPAeZ3ym",
+  "destino": "4cpdzzOLPuoRLnaJBcQFYp",
+  "custo": 1.1491,
+  "caminho": [
+    "3pyQ7RB5P8iwZMkPAeZ3ym",
+    "10xmOtSiahwvaMHT8TASgP",
+    "341GYXColngGhf4hfCO15y",
+    "4FqQkJVgoKw7lvcoxax5ua",
+    "4cpdzzOLPuoRLnaJBcQFYp"
+  ],
+  "saltos": 4,
+  "tempo_ms": 20.2833
+}

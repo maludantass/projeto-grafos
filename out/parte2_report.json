@@ -1,102 +1,154 @@
 {
-  "descricao": "Métricas de desempenho dos algoritmos de grafos aplicados ao grafo de similaridade musical Spotify (Parte 2).",
+  "descricao": "Benchmark dos algoritmos de grafos aplicados ao grafo de similaridade musical Spotify (Parte 2).",
+  "configuracao": {
+    "n_runs": 5,
+    "nota": "BFS, DFS, Dijkstra e Componentes Conexos executados 5× para média mais estável. Bellman-Ford executado 1× (O(V*E) é lento)."
+  },
   "grafo": {
     "dataset": "Spotify Tracks — dataset_parte2",
-    "vertices": 499,
-    "arestas": 1764,
-    "tipo": "não dirigido, ponderado"
+    "vertices": 4000,
+    "arestas": 19717,
+    "tipo": "não dirigido, ponderado",
+    "distribuicao_graus": {
+      "minimo": 7,
+      "maximo": 22,
+      "medio": 9.86
+    }
   },
   "medicoes": [
     {
       "tarefa": "Carregamento do grafo",
       "algoritmo": "leitura de CSV + construção da lista de adjacência",
-      "entrada": "musicas_nos.csv + adjacencias_musicas.csv (|V|=499, |E|=1764)",
-      "tempo_ms": 25.542,
-      "memoria_pico_kb": 1262.29,
+      "tempo_medio_ms": 1009.1057,
+      "tempo_min_ms": 893.9595,
+      "memoria_pico_kb": 24883.56,
+      "complexidade_teorica": "O(V + E)",
       "observacoes": "Inclui leitura de arquivo e inserção de todos os nós e arestas."
     },
     {
       "tarefa": "BFS (Busca em Largura)",
       "algoritmo": "BFS iterativo com fila (deque)",
-      "entrada": "|V|=499, |E|=1764",
-      "origem": "7g96GMqMFfkrzEvDwSIWzQ",
-      "tempo_ms": 5.572,
-      "memoria_pico_kb": 312.21,
+      "origem": "7i6skfKZnPwTvfEm5Vq7lp",
+      "n_runs": 5,
+      "tempo_medio_ms": 18.4268,
+      "tempo_min_ms": 17.0179,
+      "memoria_pico_kb": 796.94,
       "complexidade_teorica": "O(V + E)",
       "observacoes": "Percorre todo o componente conexo a partir da origem."
     },
     {
       "tarefa": "DFS (Busca em Profundidade)",
       "algoritmo": "DFS recursivo com coloração BRANCO/CINZA/PRETO",
-      "entrada": "|V|=499, |E|=1764",
-      "origem": "7g96GMqMFfkrzEvDwSIWzQ",
-      "tempo_ms": 11.8883,
-      "memoria_pico_kb": 297.25,
+      "origem": "7i6skfKZnPwTvfEm5Vq7lp",
+      "n_runs": 5,
+      "tempo_medio_ms": 428.0148,
+      "tempo_min_ms": 385.9168,
+      "memoria_pico_kb": 13405.9,
       "complexidade_teorica": "O(V + E)",
       "observacoes": "Percorre todos os vértices do grafo (não apenas um componente)."
     },
     {
-      "tarefa": "Dijkstra (caminho mínimo)",
+      "tarefa": "Dijkstra (caminho mínimo, single-source)",
       "algoritmo": "Dijkstra com heap binário (heapq)",
-      "entrada": "|V|=499, |E|=1764",
-      "origem": "7g96GMqMFfkrzEvDwSIWzQ",
-      "tempo_ms": 5.4288,
-      "memoria_pico_kb": 81.84,
+      "origem": "7i6skfKZnPwTvfEm5Vq7lp",
+      "n_runs": 5,
+      "tempo_medio_ms": 49.8975,
+      "tempo_min_ms": 47.3213,
+      "memoria_pico_kb": 683.78,
       "complexidade_teorica": "O((V + E) log V)",
-      "observacoes": "Calcula distâncias mínimas de origem para todos os demais vértices."
+      "observacoes": "Calcula distâncias mínimas da origem para todos os demais vértices. Pesos = distâncias euclidianas (≥ 0), portanto Dijkstra é adequado."
     },
     {
-      "tarefa": "Bellman-Ford (caminho mínimo)",
+      "tarefa": "Bellman-Ford (caminho mínimo, single-source)",
       "algoritmo": "Bellman-Ford iterativo (V-1 relaxamentos)",
-      "entrada": "|V|=499, |E|=1764",
-      "origem": "7g96GMqMFfkrzEvDwSIWzQ",
-      "tempo_ms": 88.7019,
-      "memoria_pico_kb": 290.86,
-      "complexidade_teorica": "O(V * E)",
-      "observacoes": "Aceita pesos negativos e detecta ciclos negativos. Neste dataset os pesos são distâncias euclidianas (≥ 0), portanto Dijkstra e Bellman-Ford produzem os mesmos caminhos."
+      "origem": "7i6skfKZnPwTvfEm5Vq7lp",
+      "n_runs": 1,
+      "tempo_medio_ms": 1895.4304,
+      "tempo_min_ms": 1895.4304,
+      "memoria_pico_kb": 5225.83,
+      "complexidade_teorica": "O(V × E)",
+      "observacoes": "Aceita pesos negativos e detecta ciclos negativos. Neste dataset os pesos são distâncias euclidianas (≥ 0), portanto Dijkstra e Bellman-Ford produzem os mesmos caminhos mínimos."
     },
     {
-      "tarefa": "Componentes Conexos",
-      "algoritmo": "DFS global iterativo",
-      "entrada": "|V|=499, |E|=1764",
-      "componentes_encontrados": 1,
-      "tempo_ms": 1.0181,
-      "memoria_pico_kb": 55.45,
+      "tarefa": "Componentes Conexos (DFS global)",
+      "algoritmo": "DFS iterativo global",
+      "n_runs": 5,
+      "tempo_medio_ms": 27.5036,
+      "tempo_min_ms": 26.6591,
+      "memoria_pico_kb": 245.09,
+      "componentes_encontrados": 8,
       "complexidade_teorica": "O(V + E)",
-      "observacoes": "Identifica todos os componentes conexos do grafo. Resultado: 1 componente(s)."
+      "observacoes": "Resultado: 8 componente(s) conexo(s)."
     }
   ],
+  "casos_especiais_bellman_ford": {
+    "descricao": "Grafos direcionados sintéticos para demonstrar as capacidades únicas do Bellman-Ford: pesos negativos e detecção de ciclos negativos.",
+    "peso_negativo_sem_ciclo": {
+      "tipo_caso": "peso_negativo_sem_ciclo",
+      "descricao": "Grafo direcionado sintético: A→B(5), B→C(-2), C→D(1), B→D(4)",
+      "origem": "A",
+      "destino": "D",
+      "custo": 4.0,
+      "caminho": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "ciclo_negativo_detectado": false,
+      "tempo_ms": 0.042,
+      "observacao": "A→B→C→D = 4 (melhor que A→B→D = 9). Dijkstra rejeitaria o peso negativo."
+    },
+    "ciclo_negativo_detectado": {
+      "tipo_caso": "ciclo_negativo",
+      "descricao": "Grafo direcionado sintético: A→B(1), B→C(-3), C→A(1)",
+      "custo_do_ciclo": -1.0,
+      "ciclo_negativo_detectado": true,
+      "mensagem_erro": "Ciclo de peso negativo detectado envolvendo a aresta A→B.",
+      "tempo_ms": 0.03,
+      "observacao": "Ciclo A→B→C→A = -1. Caminho mínimo não existe (distâncias → -∞)."
+    }
+  },
   "resumo_comparativo": {
-    "mais_rapido_ms": 1.0181,
-    "mais_lento_ms": 88.7019,
+    "mais_rapido": {
+      "algoritmo": "BFS",
+      "tempo_medio_ms": 18.4268
+    },
+    "mais_lento": {
+      "algoritmo": "Bellman-Ford",
+      "tempo_medio_ms": 1895.4304
+    },
+    "razao_bf_vs_dijkstra": 38.0,
+    "razao_bf_vs_bfs": 102.9,
     "ordem_por_tempo_crescente": [
-      [
-        "Componentes Conexos",
-        1.0181
-      ],
-      [
-        "Dijkstra",
-        5.4288
-      ],
-      [
-        "BFS",
-        5.572
-      ],
-      [
-        "DFS",
-        11.8883
-      ],
-      [
-        "Bellman-Ford",
-        88.7019
-      ]
+      {
+        "algoritmo": "BFS",
+        "tempo_medio_ms": 18.4268
+      },
+      {
+        "algoritmo": "Dijkstra",
+        "tempo_medio_ms": 49.8975
+      },
+      {
+        "algoritmo": "DFS",
+        "tempo_medio_ms": 428.0148
+      },
+      {
+        "algoritmo": "Bellman-Ford",
+        "tempo_medio_ms": 1895.4304
+      }
     ]
   },
+  "discussao_critica": {
+    "BFS": "Ideal para encontrar o caminho com menor número de saltos (grafo não ponderado). O(V+E), eficiente em memória com fila. Não considera pesos das arestas.",
+    "DFS": "Útil para detecção de ciclos, ordenação topológica e componentes fortemente conexos. O(V+E), mas pode ter pilha de recursão profunda. Não garante caminho mínimo.",
+    "Dijkstra": "Algoritmo ótimo para grafos com pesos não negativos. O((V+E) log V) com heap. Mais rápido que Bellman-Ford na prática. Falha com pesos negativos.",
+    "Bellman-Ford": "Necessário quando há pesos negativos ou para detectar ciclos negativos. O(V×E) — significativamente mais lento que Dijkstra. Neste dataset (pesos ≥ 0), Dijkstra é preferível por ser mais eficiente."
+  },
   "metadados": {
-    "medicao_de_memoria": true,
     "unidade_tempo": "milissegundos (ms)",
     "unidade_memoria": "kilobytes (KB) — pico alocado durante execução",
     "ferramenta_memoria": "tracemalloc (stdlib Python)",
-    "nota": "Os tempos podem variar entre execuções por fatores do SO (cache, agendador). Recomenda-se repetir e tirar a média para benchmarks rigorosos."
+    "nota": "Tempos medidos com time.perf_counter(). Variações entre execuções são esperadas por fatores do SO (cache, agendador)."
   }
 }

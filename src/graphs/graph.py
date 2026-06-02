@@ -44,6 +44,9 @@ class Grafo:
     def get_arestas(self, no):
         return self.adj_list.get(no, [])
 
+    def get_grau(self, rotulo):
+        return len(self.adj_list.get(rotulo, []))
+
     def __str__(self):
         # grafo é não direcionado
         num_arestas = sum(len(v) for v in self.adj_list.values()) // 2

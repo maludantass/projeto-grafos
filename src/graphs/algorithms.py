@@ -1,7 +1,11 @@
 #BFS, DFS, Dijkstra (parte 1) e Bellman-Ford (parte 2)
 
+import sys
 import heapq
 from collections import deque
+
+# DFS é recursivo; grafos grandes precisam de limite maior que o padrão (1000)
+sys.setrecursionlimit(50000)
 
 # BFS
 def bfs(grafo, origem):

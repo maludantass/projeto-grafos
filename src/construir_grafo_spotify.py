@@ -13,12 +13,39 @@ Saída (em data/dataset_parte2/):
 """
 
 import csv
+import json
 import os
 import sys
 import random
 import math
 from collections import Counter
 from pathlib import Path
+
+GENRE_MAP = {
+    # pop
+    "indie-pop": "pop", "synth-pop": "pop",
+    # rock
+    "alt-rock": "rock", "alternative": "rock",
+    # hip-hop
+    "r-n-b": "hip-hop", "soul": "hip-hop",
+    # electronic
+    "edm": "electronic", "dance": "electronic",
+    # funk
+    "disco": "funk",
+    # brazil
+    "mpb": "brazil", "sertanejo": "brazil", "samba": "brazil",
+    "pagode": "brazil", "forro": "brazil", "brazil": "brazil",
+    # latin
+    "latino": "latin", "reggaeton": "latin",
+}
+
+# apenas músicas cujo gênero original está nesta lista
+GENEROS_PERMITIDOS = {
+    "pop", "rock", "hip-hop", "r-n-b", "dance", "edm", "electronic",
+    "indie-pop", "alternative", "alt-rock", "synth-pop", "disco", "funk",
+    "soul", "country", "latino", "reggaeton", "mpb", "sertanejo",
+    "samba", "pagode", "forro", "brazil",
+}
 
 ATRIBUTOS_SIMILARIDADE = [
     "danceability", "energy", "speechiness",
@@ -28,13 +55,13 @@ ATRIBUTOS_SIMILARIDADE = [
 
 ATRIBUTOS_NORMALIZAR = ["loudness", "tempo"]
 
-TAMANHO_AMOSTRA = 500
-K_VIZINHOS = 5
+TAMANHO_AMOSTRA = 4000
+K_VIZINHOS = 7
 SEED = 42
 
 
 def ler_dataset(caminho_csv):
-    musicas = []
+    por_musica = {}
     with open(caminho_csv, mode="r", encoding="utf-8") as f:
         leitor = csv.DictReader(f)
         for linha in leitor:
@@ -45,17 +72,28 @@ def ler_dataset(caminho_csv):
                 atributos = {}
                 for attr in ATRIBUTOS_SIMILARIDADE + ATRIBUTOS_NORMALIZAR:
                     atributos[attr] = float(linha[attr])
-                musicas.append({
+                genero_raw = linha.get("track_genre", "").strip()
+                if genero_raw not in GENEROS_PERMITIDOS:
+                    continue
+                genero = GENRE_MAP.get(genero_raw, genero_raw)
+                popularidade = int(linha.get("popularity", 0))
+                track_name = linha.get("track_name", "").strip()
+                artists = linha.get("artists", "").strip()
+                # chave de deduplicação: mesma música mesmo em álbuns diferentes
+                chave = (track_name.lower(), artists.lower())
+                musica = {
                     "track_id": track_id,
-                    "track_name": linha.get("track_name", "").strip(),
-                    "artists": linha.get("artists", "").strip(),
-                    "track_genre": linha.get("track_genre", "").strip(),
-                    "popularity": int(linha.get("popularity", 0)),
+                    "track_name": track_name,
+                    "artists": artists,
+                    "track_genre": genero,
+                    "popularity": popularidade,
                     **atributos,
-                })
+                }
+                if chave not in por_musica or popularidade > por_musica[chave]["popularity"]:
+                    por_musica[chave] = musica
             except (ValueError, KeyError):
                 continue
-    return musicas
+    return list(por_musica.values())
 
 
 def amostrar_por_genero(musicas, tamanho, seed):
@@ -110,37 +148,45 @@ def distancia_euclidiana(m1, m2):
 
 
 def construir_arestas_knn(musicas, k):
-    """Conecta cada música aos K vizinhos mais próximos (grafo não dirigido)."""
-    n = len(musicas)
+    """Conecta cada música aos K vizinhos mais próximos dentro do mesmo gênero."""
+    import numpy as np
+    from collections import defaultdict
+
+    attrs = ATRIBUTOS_SIMILARIDADE + [a + "_norm" for a in ATRIBUTOS_NORMALIZAR]
+
+    por_genero = defaultdict(list)
+    for i, m in enumerate(musicas):
+        por_genero[m["track_genre"]].append(i)
+
     arestas_set = set()
     arestas = []
 
-    print(f"  Calculando distancias entre {n} musicas ({n*(n-1)//2} pares)...")
+    X = np.array([[m[a] for a in attrs] for m in musicas], dtype=np.float32)
 
-    matriz_dist = {}
-    for i in range(n):
-        for j in range(i + 1, n):
-            d = distancia_euclidiana(musicas[i], musicas[j])
-            matriz_dist[(i, j)] = d
+    for genero, indices in por_genero.items():
+        if len(indices) < 2:
+            continue
+        k_local = min(k, len(indices) - 1)
+        Xg = X[indices]
 
-    for i in range(n):
-        dists_i = []
-        for j in range(n):
-            if i == j:
-                continue
-            chave = (min(i, j), max(i, j))
-            dists_i.append((j, matriz_dist[chave]))
-        dists_i.sort(key=lambda x: x[1])
+        diff = Xg[:, None, :] - Xg[None, :, :]
+        dists = np.sqrt((diff ** 2).sum(axis=2))
+        np.fill_diagonal(dists, np.inf)
 
-        for j, d in dists_i[:k]:
-            chave = (min(i, j), max(i, j))
-            if chave not in arestas_set:
-                arestas_set.add(chave)
-                arestas.append({
-                    "origem": musicas[chave[0]]["track_id"],
-                    "destino": musicas[chave[1]]["track_id"],
-                    "peso": round(d, 6),
-                })
+        print(f"  {genero}: {len(indices)} musicas, K={k_local}")
+
+        for li, gi in enumerate(indices):
+            vizinhos_locais = np.argpartition(dists[li], k_local)[:k_local].tolist()
+            for lj in vizinhos_locais:
+                gj = indices[lj]
+                chave = (min(gi, gj), max(gi, gj))
+                if chave not in arestas_set:
+                    arestas_set.add(chave)
+                    arestas.append({
+                        "origem": musicas[gi]["track_id"],
+                        "destino": musicas[gj]["track_id"],
+                        "peso": round(float(dists[li, lj]), 6),
+                    })
 
     return arestas
 
@@ -237,6 +283,32 @@ def salvar_descricao(musicas, arestas, graus, caminho):
     print(f"  Descricao salva em: {caminho}")
 
 
+def gerar_graph_json(musicas, arestas, graus, caminho):
+    """Gera graph.json para o frontend (nodes + edges com value = 1 - peso)."""
+    nodes = [
+        {
+            "id": m["track_id"],
+            "name": m["track_name"],
+            "artist": m["artists"],
+            "genre": m["track_genre"],
+            "popularity": m["popularity"],
+            "degree": graus.get(m["track_id"], 0),
+        }
+        for m in musicas
+    ]
+    edges = [
+        {
+            "source": a["origem"],
+            "target": a["destino"],
+            "value": round(1.0 - a["peso"], 6),
+        }
+        for a in arestas
+    ]
+    with open(caminho, "w", encoding="utf-8") as f:
+        json.dump({"nodes": nodes, "edges": edges}, f, ensure_ascii=False)
+    print(f"  graph.json salvo em: {caminho}")
+
+
 def main():
     base_dir = Path(__file__).resolve().parent.parent
     csv_path = base_dir / "data" / "dataset_parte2" / "dataset_parte2.csv"
@@ -276,6 +348,10 @@ def main():
     salvar_arestas_csv(arestas, str(out_dir / "adjacencias_musicas.csv"))
     print(f"    adjacencias_musicas.csv salvo.")
     salvar_descricao(amostra, arestas, graus, str(out_dir / "descricao_dataset.txt"))
+
+    frontend_json = base_dir / "frontend" / "src" / "data" / "graph.json"
+    if frontend_json.parent.exists():
+        gerar_graph_json(amostra, arestas, graus, str(frontend_json))
 
     print(f"\n{'=' * 55}")
     print(f"RESUMO DO GRAFO")
