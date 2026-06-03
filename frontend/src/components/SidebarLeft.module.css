@@ -1,8 +1,27 @@
 .sidebar {
-  position: fixed; left: 0; top: 0; width: 200px; height: 100vh; z-index: 20;
+  position: fixed; left: 0; top: 0; width: 300px; height: 100vh; z-index: 20;
   background: rgba(5,5,16,0.92); backdrop-filter: blur(14px);
   border-right: 1px solid var(--border);
   display: flex; flex-direction: column;
+  overflow: hidden;
+}
+
+.backLink {
+  display: flex;
+  align-items: center;
+  padding: 8px 18px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: rgba(255,255,255,0.28);
+  text-decoration: none;
+  border-bottom: 1px solid var(--border);
+  transition: color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+.backLink:hover {
+  color: rgba(255,255,255,0.7);
+  background: rgba(255,255,255,0.03);
 }
 
 .brand {
@@ -81,22 +100,65 @@
 .gdot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 .gcount { margin-left: auto; font-size: .65rem; color: var(--text2); }
 
-.player { border-top: 1px solid var(--border); padding: 12px 14px; flex-shrink: 0; }
-.playerTrack { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-.playerArt {
-  width: 34px; height: 34px; border-radius: 6px; flex-shrink: 0;
-  background: linear-gradient(135deg, rgba(0,230,118,.3), rgba(213,0,249,.3));
-  display: flex; align-items: center; justify-content: center; font-size: 15px;
+.player {
+  border-top: 1px solid var(--border);
+  padding: 8px 0 6px;
+  flex-shrink: 0;
 }
+
+.playerHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  padding: 0 10px;
+}
+
 .playerInfo { flex: 1; min-width: 0; }
-.playerName { font-size: .75rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.playerArtist { font-size: .65rem; color: var(--text2); }
-.playerControls { display: flex; align-items: center; justify-content: center; gap: 14px; }
-.pcBtn { background: none; border: none; color: var(--text2); cursor: pointer; font-size: 12px; }
-.pcPlay {
-  width: 26px; height: 26px; border-radius: 50%; background: var(--green);
-  border: none; display: flex; align-items: center; justify-content: center;
-  cursor: pointer; font-size: 10px; color: #000;
+.playerName {
+  font-size: .73rem; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  color: #fff;
 }
-.playerBar { height: 2px; background: rgba(255,255,255,.1); border-radius: 2px; margin-top: 8px; position: relative; }
-.playerProg { position: absolute; left: 0; top: 0; height: 100%; width: 35%; background: var(--green); border-radius: 2px; }
+.playerArtist { font-size: .62rem; color: var(--text2); margin-top: 1px; }
+
+.pcBtn {
+  background: none; border: none; color: var(--text2);
+  cursor: pointer; font-size: 13px; padding: 2px 4px;
+  flex-shrink: 0; transition: color .15s;
+}
+.pcBtn:hover { color: #fff; }
+
+.spotifyEmbed {
+  width: 100%;
+  min-height: 80px;
+  display: block;
+}
+/* Força o iframe gerado pela Spotify API a ocupar toda a largura */
+.spotifyEmbed iframe {
+  width: 100% !important;
+  border: none !important;
+  display: block;
+}
+
+/* Dots indicadores de faixa */
+.trackDots {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 6px;
+  padding: 0 10px;
+}
+
+.dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  cursor: pointer;
+  transition: background .2s, transform .2s;
+}
+.dot:hover { background: rgba(255,255,255,0.5); }
+.dotActive {
+  background: var(--green);
+  transform: scale(1.3);
+}

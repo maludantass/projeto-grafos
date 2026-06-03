@@ -27,17 +27,45 @@ export default function Explore({
     return s
   }, [pathResult])
 
+  // Pré-computa componentes conexas uma única vez (BFS no grafo completo)
+  const componentMap = useMemo(() => {
+    const adj = new Map()
+    graphData.nodes.forEach(n => adj.set(n.id, []))
+    graphData.edges.forEach(e => {
+      adj.get(e.source)?.push(e.target)
+      adj.get(e.target)?.push(e.source)
+    })
+    const comp = new Map()
+    let compId = 0
+    for (const node of graphData.nodes) {
+      if (comp.has(node.id)) continue
+      const queue = [node.id]
+      let qi = 0
+      comp.set(node.id, compId)
+      while (qi < queue.length) {
+        const u = queue[qi++]
+        for (const v of (adj.get(u) || [])) {
+          if (!comp.has(v)) { comp.set(v, compId); queue.push(v) }
+        }
+      }
+      compId++
+    }
+    return comp
+  }, [])
+
   // stable refs for draw callbacks — prevent simulation restarts on state changes
-  const highlightIdRef = useRef(highlightId)
-  const pathNodeSetRef = useRef(pathNodeSet)
-  const pathEdgeSetRef = useRef(pathEdgeSet)
-  const pathSourceRef  = useRef(pathSource)
-  const pathResultRef  = useRef(pathResult)
-  useEffect(() => { highlightIdRef.current = highlightId }, [highlightId])
-  useEffect(() => { pathNodeSetRef.current = pathNodeSet }, [pathNodeSet])
-  useEffect(() => { pathEdgeSetRef.current = pathEdgeSet }, [pathEdgeSet])
-  useEffect(() => { pathSourceRef.current  = pathSource },  [pathSource])
-  useEffect(() => { pathResultRef.current  = pathResult },  [pathResult])
+  const highlightIdRef   = useRef(highlightId)
+  const pathNodeSetRef   = useRef(pathNodeSet)
+  const pathEdgeSetRef   = useRef(pathEdgeSet)
+  const pathSourceRef    = useRef(pathSource)
+  const pathResultRef    = useRef(pathResult)
+  const componentMapRef  = useRef(componentMap)
+  useEffect(() => { highlightIdRef.current  = highlightId   }, [highlightId])
+  useEffect(() => { pathNodeSetRef.current  = pathNodeSet   }, [pathNodeSet])
+  useEffect(() => { pathEdgeSetRef.current  = pathEdgeSet   }, [pathEdgeSet])
+  useEffect(() => { pathSourceRef.current   = pathSource    }, [pathSource])
+  useEffect(() => { pathResultRef.current   = pathResult    }, [pathResult])
+  useEffect(() => { componentMapRef.current = componentMap  }, [componentMap])
 
   const threshold = strength / 100
 
@@ -102,7 +130,13 @@ export default function Explore({
     const isDst  = pr && node.id === pr.path[pr.path.length - 1]
     const dimmed = pr && !pr.notFound && !inPath && !isHL
 
-    if (dimmed) ctx.globalAlpha = 0.1
+    // Escurece nós em componente diferente da origem selecionada
+    const srcId  = pathSourceRef.current?.id
+    const unreachable = srcId && !pr &&
+      componentMapRef.current.get(node.id) !== componentMapRef.current.get(srcId)
+
+    if (dimmed)       ctx.globalAlpha = 0.1
+    if (unreachable)  ctx.globalAlpha = 0.08
 
     if (isHL || inPath) {
       const zoom = graphRef.current?.zoom() ?? 1
@@ -143,7 +177,7 @@ export default function Explore({
       ctx.fillText(label, node.x, node.y + r + 11)
     }
 
-    if (dimmed) ctx.globalAlpha = 1
+    if (dimmed || unreachable) ctx.globalAlpha = 1
   }, [])
 
   // ── draw Dijkstra path overlay before nodes ──
@@ -190,6 +224,15 @@ export default function Explore({
     }
     if (node.id === pathSource.id) return
 
+    // Verifica componente antes de rodar Dijkstra
+    const srcComp = componentMap.get(pathSource.id)
+    const dstComp = componentMap.get(node.id)
+    if (srcComp !== dstComp) {
+      setPathResult({ path: [pathSource.id, node.id], dist: Infinity, notFound: true, differentComponent: true })
+      setSelectedNode(node)
+      return
+    }
+
     // run Dijkstra on the full graph (ignores active genre / strength filters)
     const { dist, prev } = runDijkstra(
       graphData.nodes,
@@ -199,7 +242,7 @@ export default function Explore({
     const path = reconstructPath(prev, pathSource.id, node.id)
     setPathResult(path
       ? { path, dist: dist.get(node.id) }
-      : { path: [pathSource.id, node.id], dist: Infinity, notFound: true }
+      : { path: [pathSource.id, node.id], dist: Infinity, notFound: true, differentComponent: false }
     )
     setSelectedNode(node)
   }, [pathMode, pathSource, setSelectedNode])
@@ -246,9 +289,14 @@ export default function Explore({
           {stepLabel && <span className={styles.pathStep}>{stepLabel}</span>}
 
           {pathSource && !pathResult && (
-            <span className={styles.pathNode} style={{ color: '#00e676' }}>
-              ● {pathSource.name}
-            </span>
+            <>
+              <span className={styles.pathNode} style={{ color: '#00e676' }}>
+                ● {pathSource.name}
+              </span>
+              <span style={{ fontSize: '.72rem', color: 'rgba(255,255,255,0.3)' }}>
+                nós escuros = componente diferente (sem caminho)
+              </span>
+            </>
           )}
 
           {pathResult && !pathResult.notFound && (
@@ -267,7 +315,11 @@ export default function Explore({
           )}
 
           {pathResult?.notFound && (
-            <span style={{ color: '#ff6d00', fontSize: '.78rem' }}>Caminho não encontrado</span>
+            <span style={{ color: '#ff6d00', fontSize: '.78rem' }}>
+              {pathResult.differentComponent
+                ? '⚠ Componentes desconexos — nenhum caminho possível'
+                : 'Caminho não encontrado'}
+            </span>
           )}
 
           {(pathSource || pathResult) && (
@@ -305,10 +357,10 @@ export default function Explore({
         onNodeClick={handleNodeClick}
         onRenderFramePre={handleRenderFramePre}
         nodeLabel={n => `${n.name} — ${n.artist} (${n.genre})`}
-        warmupTicks={80}
-        cooldownTicks={0}
-        d3AlphaDecay={0.04}
-        d3VelocityDecay={0.4}
+        warmupTicks={100}
+        cooldownTime={10000}
+        d3AlphaDecay={0.05}
+        d3VelocityDecay={0.45}
       />
     </div>
   )

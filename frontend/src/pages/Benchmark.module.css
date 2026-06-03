@@ -1,0 +1,288 @@
+.page {
+  padding: 32px 40px;
+  height: 100%;
+  overflow-y: auto;
+  background: #06060f;
+  color: #fff;
+}
+
+.title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #00e676;
+  margin-bottom: 6px;
+}
+
+.subtitle {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.45);
+  margin-bottom: 32px;
+}
+
+.card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.cardTitle {
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 20px;
+  text-transform: uppercase;
+}
+
+/* Gráfico de barras */
+.chart {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.barRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  border-radius: 8px;
+  padding: 4px 4px 4px 0;
+  transition: background 0.15s;
+  cursor: default;
+}
+
+.barRowHovered {
+  background: rgba(255,255,255,0.04);
+}
+
+.barLabel {
+  width: 200px;
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.55);
+  text-align: right;
+  transition: color 0.15s;
+}
+
+.barTrack {
+  flex: 1;
+  height: 30px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 6px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.85s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.2s;
+  min-width: 2px;
+}
+
+.barValue {
+  position: absolute;
+  right: 10px;
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.6);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+/* Tooltip hover */
+.tooltip {
+  position: absolute;
+  left: 212px;
+  top: -110px;
+  background: rgba(8,8,24,0.97);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.7);
+  white-space: nowrap;
+  z-index: 50;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+}
+
+.tooltip strong { color: #fff; }
+
+/* Tabela */
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.table th {
+  text-align: left;
+  padding: 10px 12px;
+  color: rgba(255,255,255,0.4);
+  font-weight: 600;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  vertical-align: middle;
+}
+
+.table tr:last-child td { border-bottom: none; }
+
+.sortable {
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: color 0.15s;
+}
+.sortable:hover { color: rgba(255,255,255,0.8); }
+
+.rowHovered {
+  background: rgba(255,255,255,0.05);
+}
+
+.sortHint {
+  font-size: 0.67rem;
+  color: rgba(255,255,255,0.22);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  margin-left: 10px;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+  color: rgba(255,255,255,0.8);
+  text-align: right;
+}
+
+.mono {
+  font-family: monospace;
+  font-size: 0.75rem;
+  color: #ffd700;
+}
+
+.dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+/* Cards de resumo */
+.cardRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.statCard {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+.statLabel {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 8px;
+}
+
+.statVal {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.statSub {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.35);
+}
+
+/* Bellman-Ford casos */
+.bfGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.bfCase {
+  background: rgba(255,255,255,0.03);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bfCaseTitle {
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.bfDesc {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.5);
+  font-family: monospace;
+}
+
+.bfPath {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.7);
+}
+
+.bfObs {
+  font-size: 0.74rem;
+  color: rgba(255,255,255,0.4);
+  font-style: italic;
+  margin-top: 4px;
+}
+
+/* Discussão */
+.discuss {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.discussItem {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.discussAlgo {
+  width: 120px;
+  flex-shrink: 0;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.discussText {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.6);
+  line-height: 1.5;
+}

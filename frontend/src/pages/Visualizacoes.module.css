@@ -1,0 +1,449 @@
+.page {
+  padding: 32px 40px;
+  height: 100%;
+  overflow-y: auto;
+  background: #06060f;
+  color: #fff;
+}
+
+.title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #d500f9;
+  margin-bottom: 24px;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.tab {
+  padding: 8px 20px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: transparent;
+  color: rgba(255,255,255,0.5);
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.tab:hover { border-color: rgba(255,255,255,0.4); color: #fff; }
+
+.tabActive {
+  background: rgba(213,0,249,0.15);
+  border-color: #d500f9;
+  color: #d500f9;
+}
+
+.sourceRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.sourceLabel {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.4);
+  white-space: nowrap;
+}
+
+.srcBtn {
+  padding: 5px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: transparent;
+  color: rgba(255,255,255,0.5);
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.2s;
+}
+
+.srcBtn:hover { border-color: rgba(255,255,255,0.4); color: #fff; }
+
+.srcBtnActive {
+  background: rgba(0,230,118,0.12);
+  border-color: #00e676;
+  color: #00e676;
+}
+
+.statsRow {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.stat {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 14px 20px;
+  min-width: 120px;
+}
+
+.statV {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.statL {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.cardTitle {
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: rgba(255,255,255,0.7);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.cardDesc {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+/* ── Animação controles ── */
+.animControls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.playBtn {
+  padding: 6px 18px;
+  border-radius: 20px;
+  border: 1px solid;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+.playBtnPlay  { border-color: #00e676; color: #00e676; }
+.playBtnPlay:hover  { background: rgba(0,230,118,0.12); }
+.playBtnPause { border-color: #ffd700; color: #ffd700; }
+.playBtnPause:hover { background: rgba(255,215,0,0.12); }
+
+.stepBtn {
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: transparent;
+  color: rgba(255,255,255,0.5);
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.15s;
+}
+.stepBtn:hover:not(:disabled) { color: #fff; border-color: rgba(255,255,255,0.5); }
+.stepBtn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.resetBtn {
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: transparent;
+  color: rgba(255,255,255,0.38);
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.15s;
+}
+.resetBtn:hover { color: rgba(255,255,255,0.7); }
+
+.speedSelect {
+  background: #0d0d1e;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 6px;
+  color: rgba(255,255,255,0.7);
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  cursor: pointer;
+  outline: none;
+}
+.speedSelect option {
+  background: #0d0d1e;
+  color: rgba(255,255,255,0.85);
+}
+
+.levelProgress {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.35);
+  margin-left: auto;
+}
+
+/* ── Detalhe do nó ── */
+.nodeDetailBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  will-change: opacity, transform;
+  animation: slideDown 0.2s ease-out;
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.nodeDetailDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.nodeDetailInfo { flex: 1; }
+
+.nodeDetailName {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.nodeDetailMeta {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.45);
+  margin-top: 3px;
+}
+
+.nodeDetailClose {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.3);
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: color 0.15s;
+}
+.nodeDetailClose:hover { color: rgba(255,255,255,0.7); }
+
+/* ── BFS Levels ── */
+.bfsLevels {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bfsLevel {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.bfsLevelCurrent .bfsLevelBadge {
+  will-change: opacity, transform;
+  animation: levelAppear 0.35s ease-out;
+}
+@keyframes levelAppear {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.bfsLevelCurrent .bfsNodes {
+  will-change: opacity, transform;
+  animation: levelAppear 0.35s ease-out 0.05s both;
+}
+
+.bfsLevelBadge {
+  width: 100px;
+  flex-shrink: 0;
+  border: 1px solid;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  transition: box-shadow 0.3s;
+}
+
+.bfsLevelCount {
+  font-size: 0.68rem;
+  font-weight: 400;
+  opacity: 0.7;
+}
+
+.bfsNodes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.bfsNode {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.7);
+  transition: background 0.15s, transform 0.1s;
+}
+.bfsNode:hover { background: rgba(255,255,255,0.08); transform: translateY(-1px); }
+
+.bfsNodeSelected {
+  color: #fff !important;
+}
+
+.bfsNodeDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.expandBtn {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 6px;
+  color: rgba(255,255,255,0.35);
+  cursor: pointer;
+  font-size: 0.7rem;
+  padding: 4px 9px;
+  transition: all 0.15s;
+  align-self: center;
+}
+.expandBtn:hover { color: rgba(255,255,255,0.7); border-color: rgba(255,255,255,0.3); }
+
+/* ── Search row ── */
+.searchRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.searchInput {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.8rem;
+  padding: 7px 13px;
+  width: 240px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.searchInput:focus { border-color: rgba(0,230,118,0.5); }
+
+.searchCount {
+  font-size: 0.73rem;
+  color: rgba(255,255,255,0.3);
+}
+
+/* Visit order */
+.visitOrder {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.visitItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.visitItem:hover { background: rgba(255,255,255,0.07); }
+
+.visitItemSelected {
+  background: rgba(255,255,255,0.08) !important;
+  outline: 1px solid rgba(255,255,255,0.15);
+}
+
+.visitNum {
+  width: 24px;
+  text-align: right;
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.3);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.visitDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.visitInfo { flex: 1; }
+
+.visitName {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.85);
+}
+
+.visitMeta {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.35);
+  margin-top: 2px;
+}
+
+/* DFS edge grid */
+.edgeGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.edgeCard {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.edgeCount {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.edgeType {
+  font-size: 0.82rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.edgeDesc {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.45);
+  line-height: 1.4;
+}

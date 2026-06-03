@@ -17,6 +17,8 @@ body { font-family: 'Montserrat', sans-serif; background: radial-gradient(circle
 
 /* ---- SISTEMA DE ABAS ---- */
 #top-nav { height: 80px; background: transparent; display: flex; align-items: center; justify-content: center; padding: 15px 24px; gap: 20px; position: relative; z-index: 100; }
+#back-link { position: absolute; left: 24px; display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; color: rgba(255,255,255,0.28); text-decoration: none; font-family: 'Montserrat', sans-serif; transition: color 0.2s; }
+#back-link:hover { color: rgba(255,255,255,0.75); }
 .nav-tab { background: rgba(20,30,45,0.7); border: 1px solid rgba(255,255,255,0.05); border-radius: 14px; color: #8ca0b8; font-size: 15px; font-weight: 700; cursor: pointer; height: 100%; padding: 0 28px; box-shadow: 0 6px 15px rgba(0,0,0,0.2); transition: all 0.3s ease; font-family: 'Montserrat', sans-serif; }
 .nav-tab:hover { color: #fff; background: rgba(30,45,65,0.9); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
 .nav-tab.active { background: linear-gradient(135deg, #1f6feb, #388bfd); color: white; border-color: transparent; box-shadow: 0 8px 25px rgba(31,111,235,0.4); transform: translateY(-2px); }
@@ -88,10 +90,19 @@ div.vis-network div.vis-navigation div.vis-button{ background-image:none !import
 #btn-chart-9 { background: linear-gradient(135deg, #10b981, #059669); color: white; border: 1px solid rgba(255,255,255,0.2); }
 #btn-chart-9:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4); }
 
-#avd-main { flex: 1; background: #0f1a2a; border-radius: 28px; border: 1px solid rgba(255,255,255,.06); position: relative; overflow: hidden; padding: 20px; box-shadow: inset 0 0 80px rgba(0,0,0,.2); }
-#avd-plot-container { width: 100%; height: 100%; }
-#avd-map-container { width: 100%; height: 100%; display: none; position: relative; }
-#avd-insights-container { width: 100%; height: 100%; display: none; position: relative; overflow-y: auto; }
+#avd-main { flex: 1; background: #0f1a2a; border-radius: 28px; border: 1px solid rgba(255,255,255,.06); position: relative; overflow-y: auto; padding: 20px; box-shadow: inset 0 0 80px rgba(0,0,0,.2); }
+#avd-plot-container { width: 100%; height: 500px; }
+#avd-map-container { width: 100%; height: 500px; display: none; position: relative; }
+#avd-insights-container { width: 100%; height: auto; display: none; position: relative; overflow-y: auto; }
+#avd-insight-text { margin-top: 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(88,166,255,0.15); border-radius: 12px; padding: 14px 18px; font-family: 'Montserrat', sans-serif; font-size: 13px; color: #8ca0b8; line-height: 1.7; display: none; }
+#avd-insight-text .ins-title { font-size: 14px; font-weight: 800; color: #58a6ff; margin-bottom: 4px; letter-spacing: .3px; }
+#avd-insight-text .ins-desc { color: #c9d7e6; margin-bottom: 10px; }
+#avd-insight-text .ins-list { display: flex; flex-direction: column; gap: 4px; }
+#avd-insight-text .ins-item { display: flex; gap: 8px; align-items: flex-start; }
+#avd-insight-text .ins-bullet { color: #58a6ff; font-weight: 800; flex-shrink: 0; margin-top: 1px; }
+#avd-insight-text .ins-item span { color: #8ca0b8; }
+#avd-insight-text b { color: #c9d7e6; }
+#avd-insight-text .hl { color: #ffd600; font-weight: 700; }
 
 /* MAPA PREMIUM COM GRID DE RADAR */
 #network-avd { 
@@ -104,7 +115,7 @@ div.vis-network div.vis-navigation div.vis-button{ background-image:none !import
   box-shadow: inset 0 0 100px rgba(0,0,0,0.8);
 }
 
-#map-controls { position: absolute; bottom: 20px; left: 20px; background: rgba(10,18,30,.95); padding: 15px; border-radius: 16px; border: 1px solid rgba(255,255,255,.1); display: flex; flex-direction: column; gap: 10px; z-index: 10; box-shadow: 0 10px 30px rgba(0,0,0,0.5); backdrop-filter: blur(10px); }
+#map-controls { position: absolute; bottom: 16px; right: 16px; background: rgba(10,18,30,.95); padding: 15px; border-radius: 16px; border: 1px solid rgba(255,255,255,.1); display: flex; flex-direction: column; gap: 10px; z-index: 10; box-shadow: 0 10px 30px rgba(0,0,0,0.5); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); min-width: 200px; }
 .map-btn { padding: 10px 15px; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; color: white; transition: 0.2s; font-size: 13px; font-family: 'Montserrat', sans-serif;}
 .btn-bfs { background: linear-gradient(135deg, #9C27B0, #7B1FA2); } .btn-bfs:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(156, 39, 176, 0.4); }
 .btn-dfs { background: linear-gradient(135deg, #E65100, #BF360C); } .btn-dfs:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(230, 81, 0, 0.4); }
@@ -117,6 +128,23 @@ div.vis-network div.vis-navigation div.vis-button{ background-image:none !import
 /* EFEITOS CARDS INSIGHTS */
 .insight-card { transition: all 0.3s ease; }
 .insight-card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(88,166,255,0.2) !important; border-color: rgba(88,166,255,0.5) !important; }
+
+/* LEGENDA DO MAPA AVD */
+#map-legend { position: absolute; top: 12px; left: 12px; background: rgba(7,14,24,0.88); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px 16px; font-family: 'Montserrat', sans-serif; font-size: 12px; color: #c9d7e6; z-index: 10; min-width: 160px; }
+#map-legend .leg-title { font-weight: 800; font-size: 13px; color: #58a6ff; margin-bottom: 8px; letter-spacing: .5px; }
+#map-legend .leg-section { font-weight: 700; color: #8ca0b8; font-size: 11px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: .5px; }
+#map-legend .leg-item { display: flex; align-items: center; gap: 7px; margin-bottom: 4px; }
+#map-legend .leg-circle { width: 12px; height: 12px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+#map-legend .leg-line { width: 18px; height: 3px; display: inline-block; border-radius: 2px; flex-shrink: 0; }
+#map-legend .leg-note { color: #8ca0b8; font-size: 11px; margin-top: 2px; line-height: 1.4; }
+#map-legend .leg-item-last { margin-bottom: 10px; }
+#map-legend .c-norte    { background: #2196F3; }
+#map-legend .c-nordeste { background: #FF9800; }
+#map-legend .c-co       { background: #9C27B0; }
+#map-legend .c-sudeste  { background: #F44336; }
+#map-legend .c-sul      { background: #4CAF50; }
+#map-legend .c-inter    { background: #E53935; }
+#map-legend .c-intra    { background: #546E7A; border-top: 1px dashed #546E7A; height: 0; }
 </style>
 </head>
 <body>
@@ -130,6 +158,7 @@ div.vis-network div.vis-navigation div.vis-button{ background-image:none !import
 </div>
 
 <div id="top-nav">
+  <a id="back-link" href="index.html">← Escolher parte</a>
   <button class="nav-tab active" id="tab-grafos" onclick="switchAba('grafos')">Módulo Grafos</button>
   <button class="nav-tab" id="tab-avd" onclick="switchAba('avd')">Módulo AVD (Análise Exploratória)</button>
 </div>
@@ -220,6 +249,23 @@ div.vis-network div.vis-navigation div.vis-button{ background-image:none !import
       
       <div id="avd-map-container">
         <div id="network-avd"></div>
+
+        <!-- Legenda do mapa -->
+        <div id="map-legend">
+          <div class="leg-title">LEGENDA</div>
+          <div class="leg-section">Regiões</div>
+          <div class="leg-item"><span class="leg-circle c-norte"></span>Norte</div>
+          <div class="leg-item"><span class="leg-circle c-nordeste"></span>Nordeste</div>
+          <div class="leg-item"><span class="leg-circle c-co"></span>Centro-Oeste</div>
+          <div class="leg-item"><span class="leg-circle c-sudeste"></span>Sudeste</div>
+          <div class="leg-item leg-item-last"><span class="leg-circle c-sul"></span>Sul</div>
+          <div class="leg-section">Arestas</div>
+          <div class="leg-item"><span class="leg-line c-inter"></span>Inter-regional</div>
+          <div class="leg-item leg-item-last"><span class="leg-line c-intra"></span>Intra-regional</div>
+          <div class="leg-section">Tamanho do nó</div>
+          <div class="leg-note">Proporcional ao grau<br>(nº de conexões)</div>
+        </div>
+
         <div id="map-controls">
           <h3 style="color:white; font-size:15px; font-weight:800; text-align:center;">Algoritmos de Busca</h3>
           <button class="map-btn btn-bfs" onclick="animarBusca('BFS')">▶ Animar BFS (Origem: BSB)</button>
@@ -228,6 +274,8 @@ div.vis-network div.vis-navigation div.vis-button{ background-image:none !import
           <p id="map-status" style="color:#FFD600; font-size:13px; font-weight:800; margin-top:5px; text-align:center; height:15px;"></p>
         </div>
       </div>
+
+      <div id="avd-insight-text"></div>
 
       <div id="avd-insights-container">
         <div class="insights-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -434,6 +482,7 @@ function loadChart(chartNum) {
     plotDiv.style.display = 'none';
     mapDiv.style.display = 'none';
     insightsDiv.style.display = 'block';
+    document.getElementById('avd-insight-text').style.display = 'none';
     renderInsights();
     return;
   } else if (chartNum === 8) {
@@ -441,6 +490,7 @@ function loadChart(chartNum) {
     mapDiv.style.display = 'block';
     insightsDiv.style.display = 'none';
     if(!networkAVD) initMapaAVD();
+    updateInsightText(8, document.getElementById('avd-filter').value);
     return;
   } else {
     plotDiv.style.display = 'block';
@@ -470,9 +520,12 @@ function loadChart(chartNum) {
         type: 'pie', hole: 0.4,
         marker: { colors: ['#90CAF9', '#42A5F5', '#1565C0', '#FF6F00'] },
         textinfo: 'label+percent',
-        textfont: { size: 16, weight: 'bold', family: 'Montserrat, sans-serif' }
+        textfont: { size: 14, weight: 'bold', family: 'Montserrat, sans-serif' },
+        hovertemplate: '<b>%{label}</b><br>%{value} aeroporto(s)<br>%{percent}<extra></extra>'
       }];
       layout.title = { text: "Distribuição de Conectividade " + (filterVal !== "Todas" ? `(${filterVal})` : ""), font: {color: 'white', size: 22, family: 'Montserrat, sans-serif', weight: 'bold'} };
+      layout.showlegend = true;
+      layout.legend = { bgcolor:'rgba(0,0,0,0)', font:{color:'#8ca0b8', family:'Montserrat, sans-serif', size:13}, bordercolor:'#1f3047', borderwidth:1 };
       break;
 
     case 2: // Ranking Barras
@@ -481,31 +534,51 @@ function loadChart(chartNum) {
         type: 'bar', orientation: 'h',
         x: sortedNodes.map(n => n.grau), y: sortedNodes.map(n => n.id),
         marker: { color: sortedNodes.map(n => COR_REGIAO[n.region] || '#888') },
-        text: sortedNodes.map(n => String(n.grau)), textposition: 'auto', textfont: { size: 15, weight: 'bold', family: 'Montserrat, sans-serif' }
+        text: sortedNodes.map(n => String(n.grau)), textposition: 'auto', textfont: { size: 15, weight: 'bold', family: 'Montserrat, sans-serif' },
+        showlegend: false
       }];
+      // Legendas das regiões presentes
+      [...new Set(sortedNodes.map(n=>n.region))].forEach(r => {
+        data.push({ x:[null], y:[null], type:'scatter', mode:'markers', name: r,
+          marker:{ color: COR_REGIAO[r], size:12, symbol:'square' }, showlegend:true });
+      });
       layout.title = { text: "Ranking de Aeroportos " + (filterVal !== "Todas" ? `(${filterVal})` : ""), font: {color: 'white', size: 22, family: 'Montserrat, sans-serif'} };
-      layout.xaxis = { title: "Grau", gridcolor: '#1f3047', tickfont: {family: 'Montserrat, sans-serif', weight: 600} }; 
-      layout.yaxis = { title: "IATA", tickfont: {family: 'Montserrat, sans-serif', weight: 600} };
+      layout.xaxis = { title: "Grau (nº de conexões)", gridcolor: '#1f3047', tickfont: {family: 'Montserrat, sans-serif', weight: 600} };
+      layout.yaxis = { title: "Aeroporto (IATA)", tickfont: {family: 'Montserrat, sans-serif', weight: 600} };
+      layout.showlegend = true;
+      layout.legend = { title:{text:'Região', font:{color:'#8ca0b8'}}, bgcolor:'rgba(0,0,0,0)', font:{color:'#8ca0b8', family:'Montserrat, sans-serif'}, bordercolor:'#1f3047', borderwidth:1 };
       break;
 
     case 3: // Centralidade
       let sortedCent = [...activeNodes].sort((a,b) => a.grau - b.grau);
-      let N_1 = NODES_DATA.length - 1; 
+      let N_1 = NODES_DATA.length - 1;
       let centValues = sortedCent.map(n => n.grau / N_1);
-      
+      let meanCent = centValues.reduce((a,b)=>a+b,0) / centValues.length;
+
       data = [{
         type: 'bar', orientation: 'h',
         x: centValues.map(v => v.toFixed(3)), y: sortedCent.map(n => n.id),
-        marker: { 
-          color: centValues, 
+        marker: {
+          color: centValues,
           colorscale: [[0, '#162b4d'], [1, '#00d2ff']],
           showscale: true,
           colorbar: { title: 'Centralidade', tickfont: {color: '#8ca0b8', family: 'Montserrat'}, titlefont: {color: '#8ca0b8', family: 'Montserrat', weight: 'bold'} }
-        }
+        },
+        showlegend: false
       }];
+      // Linha de média vertical
+      data.push({
+        x: [meanCent, meanCent], y: [sortedCent[0].id, sortedCent[sortedCent.length-1].id],
+        type: 'scatter', mode: 'lines',
+        name: `Média: ${meanCent.toFixed(3)}`,
+        line: { color: '#FF9800', width: 2, dash: 'dash' },
+        showlegend: true
+      });
       layout.title = { text: "Centralidade de Grau " + (filterVal !== "Todas" ? `(${filterVal})` : ""), font: {color: 'white', size: 22, family: 'Montserrat, sans-serif'} };
       layout.xaxis = { title: "Centralidade Normalizada [grau / (|V|-1)]", gridcolor: '#1f3047', tickfont: {family: 'Montserrat, sans-serif', weight: 600} };
-      layout.yaxis = { tickfont: {family: 'Montserrat, sans-serif', weight: 600} };
+      layout.yaxis = { title: "Aeroporto (IATA)", tickfont: {family: 'Montserrat, sans-serif', weight: 600} };
+      layout.showlegend = true;
+      layout.legend = { bgcolor:'rgba(0,0,0,0)', font:{color:'#8ca0b8', family:'Montserrat, sans-serif'}, bordercolor:'#1f3047', borderwidth:1 };
       break;
 
     case 4: // Comparação Regiões
@@ -527,10 +600,12 @@ function loadChart(chartNum) {
         { x: regioes, y: stats.map(s => s.t), type: 'bar', name: 'Tamanho (|E|)', marker: {color: '#388E3C'} },
         { x: regioes, y: stats.map(s => s.d), type: 'scatter', mode: 'lines+markers', name: 'Densidade', yaxis: 'y2', line: {color: '#F57C00', width: 4} }
       ];
-      layout.xaxis = { tickfont: {family: 'Montserrat, sans-serif', weight: 600} };
-      layout.yaxis = { title: 'Quantidade', gridcolor: '#1f3047', tickfont: {family: 'Montserrat, sans-serif', weight: 600} };
-      layout.yaxis2 = { title: 'Densidade', overlaying: 'y', side: 'right', range: [0, 1.2], tickfont: {family: 'Montserrat, sans-serif', weight: 600} };
+      layout.xaxis = { title: 'Região', tickfont: {family: 'Montserrat, sans-serif', weight: 600} };
+      layout.yaxis = { title: 'Quantidade (aeroportos / arestas)', gridcolor: '#1f3047', tickfont: {family: 'Montserrat, sans-serif', weight: 600} };
+      layout.yaxis2 = { title: 'Densidade (0–1)', overlaying: 'y', side: 'right', range: [0, 1.2], tickfont: {family: 'Montserrat, sans-serif', weight: 600} };
       layout.barmode = 'group';
+      layout.showlegend = true;
+      layout.legend = { bgcolor:'rgba(0,0,0,0)', font:{color:'#8ca0b8', family:'Montserrat, sans-serif'}, bordercolor:'#1f3047', borderwidth:1 };
       break;
 
     case 5: // Heatmap 
@@ -548,20 +623,29 @@ function loadChart(chartNum) {
       }];
       layout.title = { text: "Heatmap de Adjacências entre Regiões", font: {color: 'white', size: 22, family: 'Montserrat, sans-serif'} };
       if(filterVal !== "Todas") layout.title.text = "⚠️ Filtro desativado para matriz completa";
-      layout.xaxis = { tickfont: {family: 'Montserrat, sans-serif', weight: 600, size: 14} };
-      layout.yaxis = { tickfont: {family: 'Montserrat, sans-serif', weight: 600, size: 14} };
+      layout.xaxis = { title: { text: 'Região de Destino', standoff: 10 }, tickfont: {family: 'Montserrat, sans-serif', weight: 600, size: 13} };
+      layout.yaxis = { title: { text: 'Região de Origem', standoff: 15 }, tickfont: {family: 'Montserrat, sans-serif', weight: 600, size: 13} };
+      layout.margin = { t: 70, l: 150, r: 80, b: 90 };
       break;
 
-    case 6: // Hubs Multidimensionais
+    case 6: // Top Hubs por Conectividade
       let topNodes = [...activeNodes].sort((a,b) => b.grau - a.grau).slice(0, 7).reverse();
-      data = [{ 
-        y: topNodes.map(n=>n.id), x: topNodes.map(n=>n.grau), type: 'bar', orientation: 'h', name: 'Grau', 
-        marker:{color: topNodes.map(n=>COR_REGIAO[n.region])},
-        text: topNodes.map(n => String(n.grau)), textposition: 'auto', textfont: { size: 15, weight: 'bold', family: 'Montserrat, sans-serif' }
+      data = [{
+        y: topNodes.map(n=>n.id), x: topNodes.map(n=>n.grau), type: 'bar', orientation: 'h',
+        marker:{ color: topNodes.map(n=>COR_REGIAO[n.region]) },
+        text: topNodes.map(n => String(n.grau)), textposition: 'auto', textfont: { size: 15, weight: 'bold', family: 'Montserrat, sans-serif' },
+        showlegend: false
       }];
-      layout.title = { text: "Multidimensional Hubs " + (filterVal !== "Todas" ? `(${filterVal})` : ""), font: {color: 'white', size: 22, family: 'Montserrat, sans-serif'} };
-      layout.xaxis = { gridcolor: '#1f3047', tickfont: {family: 'Montserrat, sans-serif', weight: 600} };
-      layout.yaxis = { tickfont: {family: 'Montserrat, sans-serif', weight: 600} };
+      // Legendas das regiões presentes
+      [...new Set(topNodes.map(n=>n.region))].forEach(r => {
+        data.push({ x:[null], y:[null], type:'scatter', mode:'markers', name: r,
+          marker:{ color: COR_REGIAO[r], size:12, symbol:'square' }, showlegend:true });
+      });
+      layout.title = { text: "Top 7 Hubs por Conectividade " + (filterVal !== "Todas" ? `(${filterVal})` : ""), font: {color: 'white', size: 22, family: 'Montserrat, sans-serif'} };
+      layout.xaxis = { title: "Grau (nº de conexões)", gridcolor: '#1f3047', tickfont: {family: 'Montserrat, sans-serif', weight: 600} };
+      layout.yaxis = { title: "Aeroporto (IATA)", tickfont: {family: 'Montserrat, sans-serif', weight: 600} };
+      layout.showlegend = true;
+      layout.legend = { title:{text:'Região', font:{color:'#8ca0b8'}}, bgcolor:'rgba(0,0,0,0)', font:{color:'#8ca0b8', family:'Montserrat, sans-serif'}, bordercolor:'#1f3047', borderwidth:1 };
       break;
 
     case 7: // BFS Layers from BSB
@@ -595,13 +679,178 @@ function loadChart(chartNum) {
         marker: { size: 35, color: scatterColor, line: {color: 'white', width: 2} },
         textfont: { size: 16, color: '#fff', weight: 'bold', family: 'Montserrat, sans-serif' }
       }];
+      // Legendas das regiões visitadas
+      [...new Set(Object.keys(visited).map(id => NODES_DATA.find(n=>n.id===id)?.region).filter(Boolean))].forEach(r => {
+        data.push({ x:[null], y:[null], type:'scatter', mode:'markers', name: r,
+          marker:{ color: COR_REGIAO[r], size:13, symbol:'circle' }, showlegend:true });
+      });
       layout.title = { text: `Camadas BFS a partir de ${start} ` + (filterVal !== "Todas" ? `(${filterVal})` : ""), font: {color: 'white', size: 22, family: 'Montserrat, sans-serif'} };
-      layout.xaxis = { showgrid: false, zeroline: false, showticklabels: false };
-      layout.yaxis = { showgrid: true, gridcolor: '#1f3047', zeroline: false, tickvals: Array.from({length:maxLvl+1}, (_,i)=>i), ticktext: Array.from({length:maxLvl+1}, (_,i)=>`Nível ${maxLvl-i}`), tickfont: {family: 'Montserrat, sans-serif', weight: 600} };
+      layout.xaxis = { showgrid: false, zeroline: false, showticklabels: false, title: { text: '← posição horizontal é apenas para espaçamento →', font: {color:'#3a4f6a', size:11} } };
+      layout.yaxis = { showgrid: true, gridcolor: '#1f3047', zeroline: false, title: "Nível BFS (distância da origem)", tickvals: Array.from({length:maxLvl+1}, (_,i)=>i), ticktext: Array.from({length:maxLvl+1}, (_,i)=>`Nível ${maxLvl-i}`), tickfont: {family: 'Montserrat, sans-serif', weight: 600} };
+      layout.showlegend = true;
+      layout.legend = { title:{text:'Região', font:{color:'#8ca0b8'}}, bgcolor:'rgba(0,0,0,0)', font:{color:'#8ca0b8', family:'Montserrat, sans-serif'}, bordercolor:'#1f3047', borderwidth:1 };
       break;
   }
   
   Plotly.newPlot('avd-plot-container', data, layout, {responsive: true, displayModeBar: false});
+  updateInsightText(chartNum, filterVal);
+}
+
+function updateInsightText(chartNum, filterVal) {
+  const el = document.getElementById('avd-insight-text');
+  if (chartNum === 9) { el.style.display = 'none'; return; }
+  el.style.display = 'block';
+  el.innerHTML = getInsightText(chartNum, filterVal);
+}
+
+function ins(title, desc, bullets) {
+  const items = bullets.map(b => `<div class="ins-item"><span class="ins-bullet">▸</span><span>${b}</span></div>`).join('');
+  return `<div class="ins-title">${title}</div>
+          <div class="ins-desc">${desc}</div>
+          <div class="ins-list">${items}</div>`;
+}
+
+function getInsightText(chartNum, filterVal) {
+  const nodes  = filterVal === 'Todas' ? NODES_DATA : NODES_DATA.filter(n => n.region === filterVal);
+  const region = filterVal === 'Todas' ? 'Brasil' : filterVal;
+  const total  = nodes.length;
+  const hl = t => `<span class="hl">${t}</span>`;
+
+  switch(chartNum) {
+    case 1: {
+      const perifericos = nodes.filter(n => n.grau === 1).length;
+      const mediosHubs  = nodes.filter(n => n.grau >= 4).length;
+      const top = [...nodes].sort((a,b) => b.grau - a.grau)[0];
+      const pctPeri = total > 0 ? Math.round(perifericos/total*100) : 0;
+      return ins(
+        `Distribuição de Conectividade — ${region}`,
+        `Mostra como os ${total} aeroportos se distribuem por categoria: Periféricos (grau 1), Pequenos (2–3), Médios (4–6) e Hubs (7+).`,
+        [
+          `${hl(pctPeri + '%')} dos aeroportos são periféricos — possuem apenas 1 conexão e dependem dos hubs para acessar a rede.`,
+          top ? `O aeroporto mais conectado é ${hl(top.id)} (${top.cidade}), com grau ${hl(top.grau)}.` : '',
+          `Apenas ${hl(mediosHubs)} aeroporto(s) têm grau ≥ 4, evidenciando que a conectividade está concentrada em poucos nós.`
+        ].filter(Boolean)
+      );
+    }
+    case 2: {
+      const sorted = [...nodes].sort((a,b) => b.grau - a.grau);
+      const top = sorted[0]; const bot = sorted[sorted.length-1];
+      const media = total > 0 ? (nodes.reduce((s,n)=>s+n.grau,0)/total).toFixed(1) : 0;
+      return ins(
+        `Ranking de Aeroportos — ${region}`,
+        `Aeroportos ordenados por grau (número de conexões diretas). Permite identificar quais nós são mais influentes na estrutura da rede regional.`,
+        [
+          `${hl(top?.id)} (${top?.cidade}) é o mais conectado com grau ${hl(top?.grau)}. O grau médio regional é ${hl(media)}.`,
+          top?.grau !== bot?.grau
+            ? `Há assimetria de ${hl(top.grau - bot.grau)} conexões entre o mais e o menos conectado — indica hierarquia na rede.`
+            : `Todos os aeroportos têm o mesmo grau — conectividade distribuída de forma uniforme.`,
+          `Aeroportos acima da média são pontos críticos: removê-los fragmenta a rede regional.`
+        ]
+      );
+    }
+    case 3: {
+      const N_1 = NODES_DATA.length - 1;
+      const sorted = [...nodes].sort((a,b) => b.grau - a.grau);
+      const top = sorted[0];
+      const media = total > 0 ? (nodes.reduce((s,n)=>s+n.grau,0)/(total*N_1)).toFixed(3) : 0;
+      const topCent = top ? (top.grau/N_1).toFixed(3) : '?';
+      return ins(
+        `Centralidade de Grau — ${region}`,
+        `Centralidade normalizada pelo valor máximo possível [grau ÷ (|V|−1)]. Varia de 0 (isolado) a 1 (conectado a todos). A linha tracejada laranja marca a média.`,
+        [
+          `${hl(top?.id)} tem a maior centralidade: ${hl(topCent)}, enquanto a média é ${hl(media)}.`,
+          `Aeroportos acima da média (à direita da linha laranja) são os hubs estruturais da rede.`,
+          `Quanto mais próximo de 1, mais o aeroporto se aproxima de um hub universal — maior influência na conectividade total.`
+        ]
+      );
+    }
+    case 4: {
+      const regioes = ["Norte", "Nordeste", "Centro-Oeste", "Sudeste", "Sul"];
+      const stats = regioes.map(r => {
+        const ns = NODES_DATA.filter(n=>n.region===r); const o=ns.length;
+        const es = EDGES_DATA.filter(e=>ns.some(n=>n.id===e.from)&&ns.some(n=>n.id===e.to)).length;
+        const d = o>1 ? parseFloat((2*es/(o*(o-1))).toFixed(2)) : 0;
+        return {r,o,es,d};
+      });
+      const maxDens = stats.reduce((a,b)=>a.d>b.d?a:b);
+      const maxNos  = stats.reduce((a,b)=>a.o>b.o?a:b);
+      const minDens = stats.reduce((a,b)=>a.d<b.d?a:b);
+      return ins(
+        `Comparação de Métricas por Região`,
+        `Barras mostram ordem (|V|) e tamanho (|E|) de cada subgrafo regional. A linha laranja (eixo direito) é a densidade — proporção de conexões existentes em relação ao máximo possível.`,
+        [
+          `${hl(maxNos.r)} tem o maior número de aeroportos (${maxNos.o}), mas não necessariamente a maior densidade.`,
+          `${hl(maxDens.r)} tem a maior densidade regional (${maxDens.d}) — seus aeroportos estão mais interconectados entre si.`,
+          `${hl(minDens.r)} tem a menor densidade (${minDens.d}): seus aeroportos dependem de BSB ou GRU como pontes inter-regionais.`
+        ]
+      );
+    }
+    case 5: {
+      const internalEdges = EDGES_DATA.filter(e => {
+        const r1 = NODES_DATA.find(n=>n.id===e.from)?.region;
+        const r2 = NODES_DATA.find(n=>n.id===e.to)?.region;
+        return r1 === r2;
+      }).length;
+      const interEdges = EDGES_DATA.length - internalEdges;
+      return ins(
+        `Heatmap de Adjacências entre Regiões`,
+        `Matriz simétrica 5×5: cada célula mostra quantas arestas existem entre dois pares de regiões. A diagonal principal representa conexões internas (intra-regional); fora dela, conexões inter-regionais.`,
+        [
+          `Das ${EDGES_DATA.length} arestas totais, ${hl(internalEdges)} são intra-regionais e ${hl(interEdges)} são inter-regionais.`,
+          `A célula mais clara é ${hl('Nordeste × Nordeste')} com 5 arestas — a região mais densa internamente.`,
+          `Células com valor 0 fora da diagonal indicam pares de regiões sem conexão direta, exigindo escala via hubs (BSB, GRU).`
+        ]
+      );
+    }
+    case 6: {
+      const top7 = [...nodes].sort((a,b)=>b.grau-a.grau).slice(0,Math.min(7,nodes.length));
+      const top1 = top7[0]; const top2 = top7[1];
+      const regsPresentes = [...new Set(top7.map(n=>n.region))];
+      return ins(
+        `Top 7 Hubs por Conectividade — ${region}`,
+        `Os 7 aeroportos com maior grau da região selecionada. O comprimento da barra representa o número de conexões diretas — quanto maior, mais central o aeroporto é na rede.`,
+        [
+          `${hl(top1?.id)} (${top1?.cidade}) é o hub principal com grau ${hl(top1?.grau)}.${top2 ? ` Seguido por ${hl(top2?.id)} com grau ${top2?.grau}.` : ''}`,
+          regsPresentes.length > 1
+            ? `Os hubs estão distribuídos por ${hl(regsPresentes.length)} regiões — indicando centralidade geográfica descentralizada.`
+            : `Todos os hubs pertencem à região ${hl(regsPresentes[0])} — forte concentração de conectividade nessa área.`,
+          `Hubs com grau alto são pontos críticos: sua remoção pode desconectar partes da rede.`
+        ]
+      );
+    }
+    case 7: {
+      const startNode = filterVal === 'Todas' ? 'BSB' : (nodes.length > 0 ? [...nodes].sort((a,b)=>b.grau-a.grau)[0].id : '?');
+      const startInfo = NODES_DATA.find(n=>n.id===startNode);
+      const adjLocal = {}; NODES_DATA.forEach(n=>adjLocal[n.id]=[]);
+      EDGES_DATA.forEach(e=>{adjLocal[e.from].push(e.to);adjLocal[e.to].push(e.from);});
+      const vis2 = {[startNode]:0}; const q2=[startNode];
+      while(q2.length){ const c=q2.shift(); (adjLocal[c]||[]).forEach(v=>{if(vis2[v]===undefined){vis2[v]=vis2[c]+1;q2.push(v);}}); }
+      const maxLv = Math.max(...Object.values(vis2));
+      const nVisited = Object.keys(vis2).length;
+      return ins(
+        `Camadas BFS — origem: ${startNode} (${startInfo?.cidade || ''})`,
+        `Busca em Largura (BFS) a partir de ${startNode}. Cada linha horizontal é um nível: o nível 0 é a origem, e cada nível seguinte reúne os aeroportos a exatamente 1 salto a mais de distância.`,
+        [
+          `A partir de ${hl(startNode)}, o BFS percorre ${hl(maxLv)} nível(is) e visita ${hl(nVisited)} aeroporto(s).`,
+          nVisited < NODES_DATA.length
+            ? `${hl(NODES_DATA.length - nVisited)} aeroporto(s) não alcançados — pertencem a componentes desconexas da rede.`
+            : `Todos os ${NODES_DATA.length} aeroportos são alcançados — a rede é completamente conexa.`,
+          `Quanto mais nivelado o grafo (poucos saltos para o máximo), mais centralizado é o hub de origem.`
+        ]
+      );
+    }
+    case 8:
+      return ins(
+        `Mapa de Conectividade — Rede de Aeroportos`,
+        `Visualização geográfica da rede. O tamanho de cada nó é proporcional ao seu grau. Arestas vermelhas são inter-regionais; cinzas são intra-regionais.`,
+        [
+          `BSB (Brasília) é o hub central — único aeroporto com conexões para todas as outras regiões.`,
+          `Arestas vermelhas (inter-regionais) são os pontos críticos da rede: sem elas, regiões ficam isoladas.`,
+          `Use os botões "Animar BFS/DFS" para visualizar como a busca percorre a rede a partir de BSB.`
+        ]
+      );
+    default: return '';
+  }
 }
 
 // Renderização dinâmica do painel de Insights

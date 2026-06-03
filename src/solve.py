@@ -17,9 +17,9 @@ OUT_DIR  = os.path.join(BASE_DIR, "out")
 
 # Três fontes distintas — critério obrigatório (≥ 3 origens para BFS/DFS)
 FONTES = [
-    "7g96GMqMFfkrzEvDwSIWzQ",   # Fonte 1: "Failing, Flailing" – Streetlight Manifesto (ska)
-    "2l2zYplvdjpRDEAmoHKX0t",   # Fonte 2: "Just Can't Get Enough" (happy) — região central do grafo
-    "3D4J0o9w44QKFrBrYrSVJY",   # Fonte 3: "What Comes Next?" (show-tunes) — região final do grafo
+    "3pyQ7RB5P8iwZMkPAeZ3ym",   # Fonte 1: "Seu Zé Que Ta Chegando - Ao Vivo" (brazil)
+    "4kLyAbRTMMfmAH5Fjm3cYU",   # Fonte 2: "Eleanor - Edit" (pop)
+    "1DIXPcTDzTj8ZMHt3PDt8p",   # Fonte 3: "Gangsta's Paradise" (funk)
 ]
 
 ORIGEM_PADRAO = FONTES[0]

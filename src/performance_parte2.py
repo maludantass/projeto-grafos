@@ -21,6 +21,13 @@ ADJ_CSV = DATA_DIR / "adjacencias_musicas.csv"
 
 N_RUNS = 5  # número de repetições para calcular a média dos tempos
 
+# Mesmas 3 fontes usadas em solve.py (critério obrigatório: ≥ 3 origens)
+FONTES = [
+    ("3pyQ7RB5P8iwZMkPAeZ3ym", "Seu Zé Que Ta Chegando - Ao Vivo (brazil)"),
+    ("4kLyAbRTMMfmAH5Fjm3cYU", "Eleanor - Edit (pop)"),
+    ("1DIXPcTDzTj8ZMHt3PDt8p", "Gangsta's Paradise (funk)"),
+]
+
 
 def _medir(fn, *args, **kwargs):
     """Executa fn N_RUNS vezes e retorna (resultado, tempo_medio_ms, tempo_min_ms, memoria_pico_kb)."""
@@ -137,15 +144,65 @@ def main():
     print(f"    |V|={n_v}  |E|={n_e}  origem padrão: {origem}")
     print(f"    tempo médio: {t_load} ms  |  mín: {t_load_min} ms  |  mem pico: {m_load} KB")
 
-    print("\n[1] BFS...")
-    _, t_bfs, t_bfs_min, m_bfs = _medir(bfs, grafo, origem)
-    print(f"    tempo médio: {t_bfs} ms  |  mín: {t_bfs_min} ms  |  mem: {m_bfs} KB")
+    # BFS — 3 fontes distintas (critério obrigatório)
+    medicoes_bfs = []
+    for idx, (fonte_id, fonte_nome) in enumerate(FONTES, 1):
+        if fonte_id not in grafo.adj_list:
+            print(f"\n[BFS {idx}] Fonte '{fonte_id}' não encontrada — ignorando.")
+            continue
+        print(f"\n[{idx}] BFS (fonte {idx}/3): {fonte_nome}...")
+        resultado_bfs, t_bfs_f, t_bfs_min_f, m_bfs_f = _medir(bfs, grafo, fonte_id)
+        ordem_bfs, niveis_bfs, _, _ = resultado_bfs
+        print(f"    nós visitados: {len(ordem_bfs)}  |  nível máx: {max(niveis_bfs.values())}  |  tempo médio: {t_bfs_f} ms")
+        medicoes_bfs.append({
+            "tarefa": f"BFS fonte {idx} — {fonte_nome}",
+            "algoritmo": "BFS iterativo com fila (deque)",
+            "origem": fonte_id,
+            "musica_origem": fonte_nome,
+            "n_runs": N_RUNS,
+            "nos_visitados": len(ordem_bfs),
+            "nivel_maximo": max(niveis_bfs.values()),
+            "tempo_medio_ms": t_bfs_f,
+            "tempo_min_ms": t_bfs_min_f,
+            "memoria_pico_kb": m_bfs_f,
+            "complexidade_teorica": "O(V + E)",
+            "observacoes": "Percorre todo o componente conexo a partir da origem.",
+        })
+    t_bfs     = medicoes_bfs[0]["tempo_medio_ms"] if medicoes_bfs else 0
+    t_bfs_min = medicoes_bfs[0]["tempo_min_ms"]   if medicoes_bfs else 0
 
-    print("\n[2] DFS...")
-    _, t_dfs, t_dfs_min, m_dfs = _medir(dfs, grafo, origem)
-    print(f"    tempo médio: {t_dfs} ms  |  mín: {t_dfs_min} ms  |  mem: {m_dfs} KB")
+    # DFS — 3 fontes distintas (critério obrigatório)
+    medicoes_dfs = []
+    for idx, (fonte_id, fonte_nome) in enumerate(FONTES, 1):
+        if fonte_id not in grafo.adj_list:
+            print(f"\n[DFS {idx}] Fonte '{fonte_id}' não encontrada — ignorando.")
+            continue
+        print(f"\n[{idx + len(FONTES)}] DFS (fonte {idx}/3): {fonte_nome}...")
+        resultado_dfs, t_dfs_f, t_dfs_min_f, m_dfs_f = _medir(dfs, grafo, fonte_id)
+        ordem_dfs, _, _, _, arestas_dfs, tem_ciclo_dfs = resultado_dfs
+        tipos_dfs = {}
+        for _, _, tipo in arestas_dfs:
+            tipos_dfs[tipo] = tipos_dfs.get(tipo, 0) + 1
+        print(f"    nós visitados: {len(ordem_dfs)}  |  ciclo: {'SIM' if tem_ciclo_dfs else 'NÃO'}  |  tempo médio: {t_dfs_f} ms")
+        medicoes_dfs.append({
+            "tarefa": f"DFS fonte {idx} — {fonte_nome}",
+            "algoritmo": "DFS recursivo com coloração BRANCO/CINZA/PRETO",
+            "origem": fonte_id,
+            "musica_origem": fonte_nome,
+            "n_runs": N_RUNS,
+            "nos_visitados": len(ordem_dfs),
+            "ciclo_detectado": tem_ciclo_dfs,
+            "classificacao_arestas": tipos_dfs,
+            "tempo_medio_ms": t_dfs_f,
+            "tempo_min_ms": t_dfs_min_f,
+            "memoria_pico_kb": m_dfs_f,
+            "complexidade_teorica": "O(V + E)",
+            "observacoes": "Percorre todos os vértices do grafo (não apenas um componente).",
+        })
+    t_dfs     = medicoes_dfs[0]["tempo_medio_ms"] if medicoes_dfs else 0
+    t_dfs_min = medicoes_dfs[0]["tempo_min_ms"]   if medicoes_dfs else 0
 
-    print("\n[3] Dijkstra (fonte única, todos os destinos)...")
+    print(f"\n[{2 * len(FONTES) + 1}] Dijkstra (fonte única, todos os destinos)...")
     _, t_dij, t_dij_min, m_dij = _medir(dijkstra, grafo, origem)
     print(f"    tempo médio: {t_dij} ms  |  mín: {t_dij_min} ms  |  mem: {m_dij} KB")
 
@@ -208,28 +265,8 @@ def main():
                 "complexidade_teorica": "O(V + E)",
                 "observacoes": "Inclui leitura de arquivo e inserção de todos os nós e arestas.",
             },
-            {
-                "tarefa": "BFS (Busca em Largura)",
-                "algoritmo": "BFS iterativo com fila (deque)",
-                "origem": origem,
-                "n_runs": N_RUNS,
-                "tempo_medio_ms": t_bfs,
-                "tempo_min_ms": t_bfs_min,
-                "memoria_pico_kb": m_bfs,
-                "complexidade_teorica": "O(V + E)",
-                "observacoes": "Percorre todo o componente conexo a partir da origem.",
-            },
-            {
-                "tarefa": "DFS (Busca em Profundidade)",
-                "algoritmo": "DFS recursivo com coloração BRANCO/CINZA/PRETO",
-                "origem": origem,
-                "n_runs": N_RUNS,
-                "tempo_medio_ms": t_dfs,
-                "tempo_min_ms": t_dfs_min,
-                "memoria_pico_kb": m_dfs,
-                "complexidade_teorica": "O(V + E)",
-                "observacoes": "Percorre todos os vértices do grafo (não apenas um componente).",
-            },
+            *medicoes_bfs,
+            *medicoes_dfs,
             {
                 "tarefa": "Dijkstra (caminho mínimo, single-source)",
                 "algoritmo": "Dijkstra com heap binário (heapq)",

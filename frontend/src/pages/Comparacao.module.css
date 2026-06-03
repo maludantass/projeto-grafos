@@ -1,0 +1,352 @@
+.page {
+  padding: 32px 40px;
+  height: 100%;
+  overflow-y: auto;
+  background: #06060f;
+  color: #fff;
+}
+
+.title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #ffd700;
+  margin-bottom: 6px;
+}
+
+.subtitle {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 20px;
+  line-height: 1.5;
+  max-width: 700px;
+}
+
+/* ── Seletor de modo ── */
+.modeRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.modeBtn {
+  padding: 7px 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: transparent;
+  color: rgba(255,255,255,0.45);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+.modeBtn:hover { border-color: rgba(255,255,255,0.4); color: #fff; }
+.modeBtnActive {
+  background: rgba(255,215,0,0.1);
+  border-color: #ffd700;
+  color: #ffd700;
+}
+
+/* ── Pares pré-computados ── */
+.pairRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.pairBtn {
+  padding: 8px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.03);
+  color: rgba(255,255,255,0.5);
+  cursor: pointer;
+  font-size: 0.78rem;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+}
+.pairBtn:hover { border-color: rgba(255,255,255,0.3); color: #fff; }
+.pairBtnActive { background: rgba(255,215,0,0.1); border-color: #ffd700; color: #ffd700; }
+
+.pairNum { font-weight: 700; font-size: 0.75rem; }
+.pairSongs { font-size: 0.68rem; color: rgba(255,255,255,0.4); }
+.pairBtnActive .pairSongs { color: rgba(255,215,0,0.6); }
+
+/* ── Modo personalizado ── */
+.customPanel {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 18px;
+}
+
+.customSearches {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.customArrow {
+  color: rgba(255,255,255,0.3);
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.calcBtn {
+  padding: 9px 24px;
+  border-radius: 20px;
+  border: 1px solid #ffd700;
+  background: rgba(255,215,0,0.1);
+  color: #ffd700;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 700;
+  transition: all 0.2s;
+}
+.calcBtn:hover { background: rgba(255,215,0,0.2); }
+.calcBtnDisabled { opacity: 0.4; cursor: not-allowed; }
+
+.customHint {
+  font-size: 0.73rem;
+  color: rgba(255,255,255,0.3);
+  line-height: 1.5;
+  margin-top: 10px;
+}
+
+/* ── Song Search ── */
+.songSearch {
+  flex: 1;
+  min-width: 220px;
+  position: relative;
+}
+
+.ssLabel {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.ssWrap { position: relative; }
+
+.ssInput {
+  width: 100%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.8rem;
+  padding: 8px 30px 8px 12px;
+  outline: none;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+.ssInput:focus { border-color: rgba(255,215,0,0.5); }
+
+.ssTick {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.85rem;
+}
+
+.ssDropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0; right: 0;
+  z-index: 100;
+  background: #0d0d1e;
+  border: 1px solid rgba(255,215,0,0.25);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+}
+
+.ssItem {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.ssItem:hover { background: rgba(255,215,0,0.08); }
+
+.ssDot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.ssName { font-size: 0.78rem; font-weight: 600; color: #fff; }
+.ssSub { font-size: 0.65rem; color: rgba(255,255,255,0.4); margin-top: 1px; }
+
+/* ── Banners ── */
+.banner {
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  margin-bottom: 18px;
+}
+.bannerOk   { background: rgba(0,230,118,0.1); border: 1px solid rgba(0,230,118,0.3); color: #00e676; }
+.bannerFail { background: rgba(255,45,120,0.1); border: 1px solid rgba(255,45,120,0.3); color: #ff2d78; }
+.bannerInfo { background: rgba(255,215,0,0.07); border: 1px solid rgba(255,215,0,0.2); color: rgba(255,215,0,0.8); font-size: 0.78rem; }
+
+/* ── Node detail popup ── */
+.nodePopup {
+  position: relative;
+  background: rgba(10,10,28,0.97);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  will-change: opacity, transform;
+  animation: popupIn 0.18s ease-out;
+}
+@keyframes popupIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.nodePopupClose {
+  position: absolute;
+  top: 10px; right: 12px;
+  background: none; border: none;
+  color: rgba(255,255,255,0.3);
+  cursor: pointer; font-size: 0.85rem;
+  transition: color 0.15s;
+}
+.nodePopupClose:hover { color: #fff; }
+.npDot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+.npName { font-size: 0.9rem; font-weight: 700; color: #fff; }
+.npArtist { font-size: 0.72rem; color: rgba(255,255,255,0.4); margin-top: 2px; }
+.npMeta { display: flex; gap: 8px; align-items: center; margin-top: 6px; flex-wrap: wrap; }
+.npTag { font-size: 0.65rem; font-weight: 700; border-radius: 6px; padding: 2px 8px; }
+.npStat { font-size: 0.72rem; color: rgba(255,255,255,0.4); }
+
+/* ── Cards lado a lado ── */
+.side2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.algoCard {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.algoHeader { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.algoLabel { font-size: 1.1rem; font-weight: 700; }
+.algoBadge { font-size: 0.68rem; border: 1px solid; border-radius: 12px; padding: 2px 10px; font-family: monospace; }
+
+.algoStats { display: flex; gap: 16px; }
+.algoStatV { font-size: 1.2rem; font-weight: 700; margin-bottom: 2px; }
+.algoStatL { font-size: 0.68rem; color: rgba(255,255,255,0.35); text-transform: uppercase; }
+
+.endpoints { display: flex; align-items: center; gap: 10px; }
+.endpoint { flex: 1; }
+.epBadge { font-size: 0.65rem; font-weight: 700; border-radius: 4px; padding: 2px 6px; display: inline-block; margin-bottom: 4px; letter-spacing: 0.05em; }
+.epName { font-size: 0.82rem; font-weight: 600; color: #fff; }
+.epArtist { font-size: 0.72rem; color: rgba(255,255,255,0.4); }
+.arrow { color: rgba(255,255,255,0.3); font-size: 1.2rem; }
+
+/* ── Caminho ── */
+.pathTitle {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pathHint {
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.2);
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 400;
+}
+.pathNodes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+.pathNodeWrap { display: flex; align-items: center; gap: 4px; }
+.pathNode {
+  border: 1px solid;
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  will-change: opacity, transform;
+  animation: nodeIn 0.2s ease-out;
+}
+.pathNode:hover { filter: brightness(1.3); transform: translateY(-1px); }
+.pathNodeActive { filter: brightness(1.4); transform: translateY(-1px); }
+@keyframes nodeIn {
+  from { opacity: 0; transform: scale(0.8); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.pathArrow { font-size: 0.7rem; color: rgba(255,255,255,0.25); }
+.pathLoading { font-size: 0.75rem; color: rgba(255,255,255,0.25); will-change: opacity; animation: pulse 0.6s ease-in-out infinite alternate; }
+@keyframes pulse { from { opacity: 0.3; } to { opacity: 0.8; } }
+.noPath { font-size: 0.78rem; color: rgba(255,45,120,0.7); }
+
+/* ── BF indisponível ── */
+.bfUnavailable {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 28px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
+}
+.bfUnavLabel { font-size: 1.1rem; font-weight: 700; color: rgba(0,230,118,0.4); }
+.bfUnavMsg { font-size: 0.85rem; color: rgba(255,255,255,0.4); }
+.bfUnavNote { font-size: 0.72rem; color: rgba(255,255,255,0.22); line-height: 1.5; max-width: 280px; font-family: monospace; }
+
+/* ── Speed bars ── */
+.card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 18px;
+}
+.cardTitle {
+  font-size: 0.88rem; font-weight: 700; letter-spacing: 0.06em;
+  color: rgba(255,255,255,0.7); text-transform: uppercase; margin-bottom: 18px;
+}
+.speedCompare { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
+.speedRow { display: flex; align-items: center; gap: 12px; }
+.speedLabel { width: 120px; font-size: 0.8rem; color: rgba(255,255,255,0.6); text-align: right; }
+.speedTrack { flex: 1; height: 28px; background: rgba(255,255,255,0.05); border-radius: 6px; position: relative; display: flex; align-items: center; overflow: hidden; }
+.speedFill { height: 100%; border-radius: 6px; min-width: 2px; transition: width 0.9s cubic-bezier(0.25,1,0.5,1); }
+.speedValue { position: absolute; right: 10px; font-size: 0.75rem; color: rgba(255,255,255,0.6); }
+
+.ratioRow { display: flex; align-items: center; gap: 16px; }
+.ratioVal { font-size: 2rem; font-weight: 800; color: #ffd700; flex-shrink: 0; }
+.ratioDesc { font-size: 0.8rem; color: rgba(255,255,255,0.45); line-height: 1.6; }
+.ratioDesc strong { color: #ffd700; }

@@ -1,0 +1,14 @@
+{
+  "algoritmo": "BELLMAN_FORD",
+  "origem": "MAO",
+  "destino": "GRU",
+  "custo": 5.0,
+  "caminho": [
+    "MAO",
+    "BSB",
+    "GRU"
+  ],
+  "saltos": 2,
+  "ciclo_negativo": false,
+  "tempo_ms": 0.569
+}

@@ -1,0 +1,217 @@
+.page {
+  padding: 40px 48px;
+  height: 100%;
+  overflow-y: auto;
+  background: #06060f;
+  color: #fff;
+}
+
+.hero {
+  margin-bottom: 40px;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--green);
+  border: 1px solid var(--green);
+  border-radius: 99px;
+  padding: 4px 14px;
+  margin-bottom: 18px;
+  opacity: 0.85;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin-bottom: 14px;
+  background: linear-gradient(90deg, #fff 60%, rgba(255,255,255,0.4));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.5);
+  line-height: 1.65;
+  max-width: 680px;
+}
+
+/* ── Sections ── */
+.section {
+  margin-bottom: 40px;
+}
+
+.sectionTitle {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+  margin-bottom: 18px;
+}
+
+/* ── Algorithms ── */
+.algoGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.algoCard {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid;
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.algoHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.algoName {
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.algoBadge {
+  font-size: 0.68rem;
+  border: 1px solid;
+  border-radius: 8px;
+  padding: 2px 9px;
+  font-family: monospace;
+}
+
+.algoTempo {
+  margin-left: auto;
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.3);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.algoFull {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.55);
+}
+
+.algoDesc {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.4);
+  line-height: 1.55;
+}
+
+/* ── Datasets ── */
+.dsCard {
+  max-width: 720px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dsRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 0.8rem;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  padding-bottom: 8px;
+}
+.dsRow:last-child { border-bottom: none; padding-bottom: 0; }
+
+.dsLabel {
+  color: rgba(255,255,255,0.38);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.dsVal {
+  color: rgba(255,255,255,0.85);
+  font-weight: 600;
+  text-align: right;
+}
+
+/* ── Rules ── */
+.ruleList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ruleItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.65);
+  line-height: 1.5;
+}
+
+.ruleCheck {
+  color: var(--green);
+  font-weight: 800;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ── How to use ── */
+.howGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.howCard {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.howIcon {
+  font-size: 1.2rem;
+  margin-bottom: 2px;
+}
+
+.howPage {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.howDesc {
+  font-size: 0.76rem;
+  color: rgba(255,255,255,0.42);
+  line-height: 1.55;
+}
+
+/* ── Footer ── */
+.footer {
+  margin-top: 48px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.2);
+  letter-spacing: 1px;
+  text-align: center;
+}
