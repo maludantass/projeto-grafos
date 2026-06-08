@@ -143,13 +143,13 @@ class TestBFSDataset2:
 
 class TestDFSDataset2:
 
-    def test_dfs_visita_todos_nos(self, grafo_spotify):
-        """DFS global visita todos os 4000 vértices do grafo (todos os componentes)."""
+    def test_dfs_visita_apenas_componente_da_origem(self, grafo_spotify):
+        """DFS de fonte única visita só o componente alcançável a partir da origem (513 vértices)."""
         ordem, _, _, _, _, _ = dfs(grafo_spotify, ORIGEM)
-        assert len(ordem) == 4000
+        assert len(ordem) == NUM_VERTICES
 
     def test_dfs_origem_esta_na_ordem_de_visita(self, grafo_spotify):
-        """A origem deve aparecer na ordem de visita (DFS global, não necessariamente primeiro)."""
+        """A origem deve aparecer na ordem de visita (não necessariamente primeiro)."""
         ordem, _, _, _, _, _ = dfs(grafo_spotify, ORIGEM)
         assert ORIGEM in ordem
 
@@ -198,8 +198,8 @@ class TestDFSDataset2:
                     f"deveria entrar antes de {no} (entrada={t_entrada[no]})"
                 )
 
-    def test_dfs_arestas_arvore_cobrem_todos_nos(self, grafo_spotify):
-        """Arestas de árvore DFS global = |V| - |componentes| = 4000 - 8 = 3992."""
+    def test_dfs_arestas_arvore_cobrem_componente(self, grafo_spotify):
+        """Arestas de árvore cobrem o componente da origem: |componente| - 1 = 512."""
         _, _, _, _, arestas_tipo, _ = dfs(grafo_spotify, ORIGEM)
         vistas = set()
         arvore = []
@@ -208,7 +208,7 @@ class TestDFSDataset2:
             if chave not in vistas and t == "arvore":
                 vistas.add(chave)
                 arvore.append((u, v))
-        assert len(arvore) == 4000 - NUM_COMPONENTES
+        assert len(arvore) == NUM_VERTICES - 1
 
     def test_dfs_componentes_conexos_retorna_oito(self, grafo_spotify):
         """O grafo tem 8 componentes conexos (um por gênero, pois KNN é intra-gênero)."""

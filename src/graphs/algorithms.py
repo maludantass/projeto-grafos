@@ -101,17 +101,21 @@ def dfs(grafo, origem):
         tempo[0]       += 1
         tempo_saida[u]  = tempo[0]
 
-    for no in grafo.get_nos():
-        if cor[no] == BRANCO:
-            _visitar(no)
+    _visitar(origem)
 
     return ordem_visita, predecessores, tempo_entrada, tempo_saida, arestas_tipo, tem_ciclo
 
 
 def dfs_detectar_ciclo(grafo):
-
-    _, _, _, _, _, tem_ciclo = dfs(grafo, grafo.get_nos()[0])
-    return tem_ciclo
+    """Detecta ciclo em qualquer componente do grafo (uma DFS por componente)."""
+    visitados = set()
+    for no in grafo.get_nos():
+        if no not in visitados:
+            ordem_visita, _, _, _, _, tem_ciclo = dfs(grafo, no)
+            visitados.update(ordem_visita)
+            if tem_ciclo:
+                return True
+    return False
 
 
 def dfs_componentes_conexos(grafo):

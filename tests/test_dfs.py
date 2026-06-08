@@ -83,11 +83,11 @@ class TestDFSOrdemVisita:
         ordem, _, _, _, _, _ = dfs(g, "R")
         assert ordem[0] == "R"
 
-    def test_dfs_visita_todos_em_grafo_desconexo(self):
+    def test_dfs_visita_apenas_componente_da_origem_em_grafo_desconexo(self):
 
         g = _grafo_desconexo_dois_componentes()
         ordem, _, _, _, _, _ = dfs(g, "A")
-        assert set(ordem) == {"A", "B", "C", "X", "Y", "Z"}
+        assert set(ordem) == {"A", "B", "C"}
 
 #testes de detecção de ciclo
 class TestDFSDeteccaoCiclo:

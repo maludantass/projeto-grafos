@@ -19,9 +19,9 @@
     {
       "tarefa": "Carregamento do grafo",
       "algoritmo": "leitura de CSV + construção da lista de adjacência",
-      "tempo_medio_ms": 576.4364,
-      "tempo_min_ms": 484.4896,
-      "memoria_pico_kb": 24887.54,
+      "tempo_medio_ms": 510.4031,
+      "tempo_min_ms": 429.1046,
+      "memoria_pico_kb": 24887.48,
       "complexidade_teorica": "O(V + E)",
       "observacoes": "Inclui leitura de arquivo e inserção de todos os nós e arestas."
     },
@@ -33,8 +33,8 @@
       "n_runs": 5,
       "nos_visitados": 513,
       "nivel_maximo": 7,
-      "tempo_medio_ms": 7.3814,
-      "tempo_min_ms": 6.2081,
+      "tempo_medio_ms": 7.2932,
+      "tempo_min_ms": 5.5364,
       "memoria_pico_kb": 781.48,
       "complexidade_teorica": "O(V + E)",
       "observacoes": "Percorre todo o componente conexo a partir da origem."
@@ -47,8 +47,8 @@
       "n_runs": 5,
       "nos_visitados": 512,
       "nivel_maximo": 8,
-      "tempo_medio_ms": 7.2093,
-      "tempo_min_ms": 6.5657,
+      "tempo_medio_ms": 8.5298,
+      "tempo_min_ms": 7.3928,
       "memoria_pico_kb": 804.99,
       "complexidade_teorica": "O(V + E)",
       "observacoes": "Percorre todo o componente conexo a partir da origem."
@@ -61,8 +61,8 @@
       "n_runs": 5,
       "nos_visitados": 509,
       "nivel_maximo": 7,
-      "tempo_medio_ms": 7.8155,
-      "tempo_min_ms": 6.9352,
+      "tempo_medio_ms": 6.7956,
+      "tempo_min_ms": 5.8461,
       "memoria_pico_kb": 808.92,
       "complexidade_teorica": "O(V + E)",
       "observacoes": "Percorre todo o componente conexo a partir da origem."
@@ -73,16 +73,16 @@
       "origem": "3pyQ7RB5P8iwZMkPAeZ3ym",
       "musica_origem": "Seu Zé Que Ta Chegando - Ao Vivo (brazil)",
       "n_runs": 5,
-      "nos_visitados": 4000,
+      "nos_visitados": 513,
       "ciclo_detectado": true,
       "classificacao_arestas": {
-        "arvore": 3992,
-        "retorno": 15725,
-        "avanco": 15725
+        "arvore": 512,
+        "retorno": 1911,
+        "avanco": 1911
       },
-      "tempo_medio_ms": 184.7112,
-      "tempo_min_ms": 153.8827,
-      "memoria_pico_kb": 14250.3,
+      "tempo_medio_ms": 20.5014,
+      "tempo_min_ms": 13.8482,
+      "memoria_pico_kb": 1693.27,
       "complexidade_teorica": "O(V + E)",
       "observacoes": "Percorre todos os vértices do grafo (não apenas um componente)."
     },
@@ -92,16 +92,16 @@
       "origem": "4kLyAbRTMMfmAH5Fjm3cYU",
       "musica_origem": "Eleanor - Edit (pop)",
       "n_runs": 5,
-      "nos_visitados": 4000,
+      "nos_visitados": 512,
       "ciclo_detectado": true,
       "classificacao_arestas": {
-        "arvore": 3992,
-        "retorno": 15725,
-        "avanco": 15725
+        "arvore": 511,
+        "retorno": 2008,
+        "avanco": 2008
       },
-      "tempo_medio_ms": 194.2587,
-      "tempo_min_ms": 166.0356,
-      "memoria_pico_kb": 9633.95,
+      "tempo_medio_ms": 21.0232,
+      "tempo_min_ms": 16.3348,
+      "memoria_pico_kb": 1729.04,
       "complexidade_teorica": "O(V + E)",
       "observacoes": "Percorre todos os vértices do grafo (não apenas um componente)."
     },
@@ -111,16 +111,16 @@
       "origem": "1DIXPcTDzTj8ZMHt3PDt8p",
       "musica_origem": "Gangsta's Paradise (funk)",
       "n_runs": 5,
-      "nos_visitados": 4000,
+      "nos_visitados": 509,
       "ciclo_detectado": true,
       "classificacao_arestas": {
-        "arvore": 3992,
-        "retorno": 15725,
-        "avanco": 15725
+        "arvore": 508,
+        "retorno": 2027,
+        "avanco": 2027
       },
-      "tempo_medio_ms": 195.3072,
-      "tempo_min_ms": 182.9468,
-      "memoria_pico_kb": 12834.55,
+      "tempo_medio_ms": 23.7512,
+      "tempo_min_ms": 14.1161,
+      "memoria_pico_kb": 1734.84,
       "complexidade_teorica": "O(V + E)",
       "observacoes": "Percorre todos os vértices do grafo (não apenas um componente)."
     },
@@ -129,9 +129,9 @@
       "algoritmo": "Dijkstra com heap binário (heapq)",
       "origem": "7i6skfKZnPwTvfEm5Vq7lp",
       "n_runs": 5,
-      "tempo_medio_ms": 33.2646,
-      "tempo_min_ms": 25.7353,
-      "memoria_pico_kb": 683.91,
+      "tempo_medio_ms": 33.7415,
+      "tempo_min_ms": 31.2709,
+      "memoria_pico_kb": 681.72,
       "complexidade_teorica": "O((V + E) log V)",
       "observacoes": "Calcula distâncias mínimas da origem para todos os demais vértices. Pesos = distâncias euclidianas (≥ 0), portanto Dijkstra é adequado."
     },
@@ -140,8 +140,8 @@
       "algoritmo": "Bellman-Ford iterativo (V-1 relaxamentos)",
       "origem": "7i6skfKZnPwTvfEm5Vq7lp",
       "n_runs": 1,
-      "tempo_medio_ms": 801.7073,
-      "tempo_min_ms": 801.7073,
+      "tempo_medio_ms": 851.8556,
+      "tempo_min_ms": 851.8556,
       "memoria_pico_kb": 5225.83,
       "complexidade_teorica": "O(V × E)",
       "observacoes": "Aceita pesos negativos e detecta ciclos negativos. Neste dataset os pesos são distâncias euclidianas (≥ 0), portanto Dijkstra e Bellman-Ford produzem os mesmos caminhos mínimos."
@@ -150,8 +150,8 @@
       "tarefa": "Componentes Conexos (DFS global)",
       "algoritmo": "DFS iterativo global",
       "n_runs": 5,
-      "tempo_medio_ms": 16.7402,
-      "tempo_min_ms": 15.5976,
+      "tempo_medio_ms": 16.8494,
+      "tempo_min_ms": 14.2,
       "memoria_pico_kb": 245.08,
       "componentes_encontrados": 8,
       "complexidade_teorica": "O(V + E)",
@@ -173,7 +173,7 @@
         "D"
       ],
       "ciclo_negativo_detectado": false,
-      "tempo_ms": 0.0228,
+      "tempo_ms": 0.1243,
       "observacao": "A→B→C→D = 4 (melhor que A→B→D = 9). Dijkstra rejeitaria o peso negativo."
     },
     "ciclo_negativo_detectado": {
@@ -182,37 +182,37 @@
       "custo_do_ciclo": -1.0,
       "ciclo_negativo_detectado": true,
       "mensagem_erro": "Ciclo de peso negativo detectado envolvendo a aresta A→B.",
-      "tempo_ms": 0.0159,
+      "tempo_ms": 0.0251,
       "observacao": "Ciclo A→B→C→A = -1. Caminho mínimo não existe (distâncias → -∞)."
     }
   },
   "resumo_comparativo": {
     "mais_rapido": {
       "algoritmo": "BFS",
-      "tempo_medio_ms": 7.3814
+      "tempo_medio_ms": 7.2932
     },
     "mais_lento": {
       "algoritmo": "Bellman-Ford",
-      "tempo_medio_ms": 801.7073
+      "tempo_medio_ms": 851.8556
     },
-    "razao_bf_vs_dijkstra": 24.1,
-    "razao_bf_vs_bfs": 108.6,
+    "razao_bf_vs_dijkstra": 25.2,
+    "razao_bf_vs_bfs": 116.8,
     "ordem_por_tempo_crescente": [
       {
         "algoritmo": "BFS",
-        "tempo_medio_ms": 7.3814
-      },
-      {
-        "algoritmo": "Dijkstra",
-        "tempo_medio_ms": 33.2646
+        "tempo_medio_ms": 7.2932
       },
       {
         "algoritmo": "DFS",
-        "tempo_medio_ms": 184.7112
+        "tempo_medio_ms": 20.5014
+      },
+      {
+        "algoritmo": "Dijkstra",
+        "tempo_medio_ms": 33.7415
       },
       {
         "algoritmo": "Bellman-Ford",
-        "tempo_medio_ms": 801.7073
+        "tempo_medio_ms": 851.8556
       }
     ]
   },
