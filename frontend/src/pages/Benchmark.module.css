@@ -286,3 +286,213 @@
   color: rgba(255,255,255,0.6);
   line-height: 1.5;
 }
+
+/* ── Seção de gráficos analíticos ── */
+.chartsSectionHeader {
+  margin: 40px 0 16px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding-top: 32px;
+}
+
+.chartsSectionTitle {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  color: #00e676;
+  margin-bottom: 5px;
+}
+
+.chartsSectionSub {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.38);
+}
+
+/* filtros */
+.filtersRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.filtersLabel {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.35);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filterPill {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1.5px solid;
+  font-size: 0.76rem;
+  cursor: pointer;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  transition: background 0.18s, color 0.18s, border-color 0.18s;
+  background: transparent;
+  font-family: inherit;
+}
+
+.filterPill:hover {
+  opacity: 0.85;
+}
+
+.filterReset {
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: transparent;
+  color: rgba(255,255,255,0.4);
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  font-family: inherit;
+}
+
+.filterReset:hover {
+  color: rgba(255,255,255,0.7);
+  border-color: rgba(255,255,255,0.4);
+}
+
+/* cards dos gráficos */
+.chartCard {
+  background: rgba(255,255,255,0.035);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 24px 22px 20px;
+  margin-bottom: 20px;
+  transition: border-color 0.2s;
+}
+
+.chartCard:hover {
+  border-color: rgba(255,255,255,0.15);
+}
+
+.chartCardHeader {
+  margin-bottom: 18px;
+}
+
+.chartCardTitle {
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: rgba(255,255,255,0.82);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.chartCardDesc {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.38);
+  line-height: 1.55;
+}
+
+/* grids */
+.chartsGrid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.chartsGridHeatmap {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+/* legenda HTML abaixo dos SVGs */
+.svgLegend {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  justify-content: center;
+}
+
+.svgLegendItem {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.42);
+}
+
+.svgLegendDot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.svgLegendBar {
+  display: inline-block;
+  width: 22px;
+  height: 8px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.55);
+  flex-shrink: 0;
+}
+
+/* legenda descritiva expandida */
+.legendExplained {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 18px;
+  background: rgba(255,255,255,0.025);
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.legendExplainedRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.55;
+}
+
+.legendExplainedDot {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.legendExplainedDesc {
+  color: rgba(255,255,255,0.45);
+}
+
+.legendNote {
+  font-size: 0.73rem;
+  color: rgba(255,255,255,0.28);
+  font-style: italic;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding-top: 8px;
+  margin-top: 2px;
+  line-height: 1.5;
+}
+
+@media (max-width: 860px) {
+  .chartsGrid2,
+  .chartsGridHeatmap {
+    grid-template-columns: 1fr;
+  }
+}

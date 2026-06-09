@@ -665,7 +665,8 @@ function loadChart(chartNum) {
       layout.xaxis = { title: "Centralidade Normalizada [grau / (|V|-1)]", gridcolor: '#1f3047', tickfont: {family: 'Montserrat, sans-serif', weight: 600} };
       layout.yaxis = { title: "Aeroporto (IATA)", tickfont: {family: 'Montserrat, sans-serif', weight: 600} };
       layout.showlegend = true;
-      layout.legend = { bgcolor:'rgba(0,0,0,0)', font:{color:'#8ca0b8', family:'Montserrat, sans-serif'}, bordercolor:'#1f3047', borderwidth:1 };
+      layout.legend = { x: 0, xanchor: 'left', y: -0.18, yanchor: 'top', bgcolor: 'rgba(5,14,28,0.88)', font:{color:'#8ca0b8', family:'Montserrat, sans-serif'}, bordercolor:'#1f3047', borderwidth:1 };
+      layout.margin = { t: 70, l: 80, r: 155, b: 130 };
       break;
 
     case 4: // Comparação Regiões
@@ -1055,7 +1056,6 @@ const COORDS_SPREAD = {
   networkAVD = new vis.Network(document.getElementById('network-avd'), { nodes: nodesMapDS, edges: edgesMapDS }, {
     physics: false, interaction: { dragNodes: false, zoomView: true, hover: true }
   });
-}
 
 function resetarMapaAVD() {
   clearInterval(animTimer);
