@@ -32,7 +32,9 @@ function getAlgoKey(tarefa) {
 }
 
 function algoColor(nome) {
-  for (const [k, v] of Object.entries(COLORS)) {
+  // check longer keys first to avoid 'DFS' matching 'Componentes Conexos (DFS global)'
+  const sorted = Object.entries(COLORS).sort((a, b) => b[0].length - a[0].length)
+  for (const [k, v] of sorted) {
     if (nome.includes(k)) return v
   }
   return '#888'
@@ -84,17 +86,35 @@ function ScatterChart({ medicoes, activeAlgos }) {
 
   const logMin = Math.log10(5), logMax = Math.log10(1300)
   const xS = v => PL + ((Math.log10(v) - logMin) / (logMax - logMin)) * iW
-  const yMax = 6400
-  const yS = v => PT + iH - (v / yMax) * iH
+  const yLogMin = Math.log10(150), yLogMax = Math.log10(35000)
+  const yS = v => PT + iH - ((Math.log10(v) - yLogMin) / (yLogMax - yLogMin)) * iH
   const xTicks = [5, 10, 20, 50, 100, 200, 500, 1000]
-  const yTicks = [0, 1000, 2000, 3000, 4000, 5000, 6000]
-  const pts = medicoes.map(m => ({ ...m, cx: xS(m.tempo_medio_ms), cy: yS(m.memoria_pico_kb) }))
+  const yTicks = [200, 500, 1000, 2000, 5000, 10000, 25000]
+  // spread overlapping dots in same algo group using circular jitter
+  const algoGroups = {}
+  medicoes.forEach(m => {
+    const k = getAlgoKey(m.tarefa) ?? m.tarefa
+    if (!algoGroups[k]) algoGroups[k] = []
+    algoGroups[k].push(m)
+  })
+  const algoIdx = {}
+  const SPREAD_R = 18
+  const pts = medicoes.map(m => {
+    const k = getAlgoKey(m.tarefa) ?? m.tarefa
+    const n = algoGroups[k].length
+    const i = algoIdx[k] = (algoIdx[k] ?? 0)
+    algoIdx[k]++
+    const cx0 = xS(m.tempo_medio_ms), cy0 = yS(m.memoria_pico_kb)
+    if (n <= 1) return { ...m, cx: cx0, cy: cy0 }
+    const angle = (i / n) * 2 * Math.PI - Math.PI / 2
+    return { ...m, cx: cx0 + SPREAD_R * Math.cos(angle), cy: cy0 + SPREAD_R * Math.sin(angle) }
+  })
 
   return (
     <>
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ overflow: 'visible' }}>
         {/* zona ideal */}
-        <rect x={PL} y={yS(1050)} width={xS(28) - PL} height={yS(0) - yS(1050)}
+        <rect x={PL} y={yS(1050)} width={xS(28) - PL} height={PT + iH - yS(1050)}
           fill="rgba(0,230,118,0.05)" rx={6} />
         <text x={PL + 8} y={yS(1050) + 18} fill="rgba(0,230,118,0.3)" fontSize={10} fontStyle="italic">
           zona ideal ↙
@@ -110,14 +130,14 @@ function ScatterChart({ medicoes, activeAlgos }) {
         ))}
         {yTicks.map(t => (
           <text key={t} x={PL-8} y={yS(t)+4} textAnchor="end" fill="rgba(255,255,255,0.42)" fontSize={11}>
-            {t===0?'0':t>=1000?`${t/1000}k`:t}
+            {t >= 1000 ? `${t/1000}k` : t}
           </text>
         ))}
         <text x={PL+iW/2} y={H-8} textAnchor="middle" fill="rgba(255,255,255,0.45)" fontSize={12} fontWeight="600">
           Tempo médio de execução (ms) — escala logarítmica →
         </text>
         <text x={18} y={PT+iH/2} textAnchor="middle" fill="rgba(255,255,255,0.45)" fontSize={12} fontWeight="600"
-          transform={`rotate(-90,18,${PT+iH/2})`}>↑ Memória pico (KB)</text>
+          transform={`rotate(-90,18,${PT+iH/2})`}>↑ Memória pico (KB) — escala log</text>
         {/* pontos */}
         {pts.map(p => {
           const key    = getAlgoKey(p.tarefa)
@@ -149,7 +169,7 @@ function ScatterChart({ medicoes, activeAlgos }) {
       </svg>
       <ExplainedLegend
         items={ALGO_GROUPS.map(g => ({ label: g.label, color: g.color, desc: '', dot: true }))}
-        note="Leia o gráfico: quanto mais à esquerda = mais rápido; quanto mais abaixo = menos memória. A zona verde no canto inferior esquerdo representa o melhor custo-benefício. O eixo X usa escala logarítmica para comportar a diferença de 117× entre BFS e Bellman-Ford."
+        note="Leia o gráfico: quanto mais à esquerda = mais rápido; quanto mais abaixo = menos memória. A zona verde no canto inferior esquerdo representa o melhor custo-benefício. Ambos os eixos usam escala logarítmica — isso normaliza a distância euclidiana entre os pontos, trazendo o Carregamento (24k KB) para perto dos demais sem distorcer a comparação relativa."
       />
     </>
   )
