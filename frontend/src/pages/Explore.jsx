@@ -88,6 +88,21 @@ export default function Explore({
   // keep dataRef in sync so callbacks always read fresh node positions
   useEffect(() => { dataRef.current = data }, [data])
 
+  const neighborSet = useMemo(() => {
+    if (!highlightId) return new Set()
+    const s = new Set()
+    data.links.forEach(l => {
+      const sourceId = typeof l.source === 'object' ? l.source.id : l.source
+      const targetId = typeof l.target === 'object' ? l.target.id : l.target
+      if (sourceId === highlightId) s.add(targetId)
+      if (targetId === highlightId) s.add(sourceId)
+    })
+    return s
+  }, [highlightId, data])
+
+  const neighborSetRef   = useRef(neighborSet)
+  useEffect(() => { neighborSetRef.current   = neighborSet   }, [neighborSet])
+
   // quando o caminho fica pronto, centraliza nos nós do caminho (força redraw + boa UX)
   useEffect(() => {
     if (!pathResult || pathResult.notFound) return
@@ -123,20 +138,35 @@ export default function Explore({
   const drawNode = useCallback((node, ctx) => {
     const r      = Math.sqrt(2 + node.degree * 0.6) * 4.5
     const color  = genreColor(node.genre)
-    const isHL   = node.id === highlightIdRef.current
+    const activeHL = highlightIdRef.current
+    const isHL   = node.id === activeHL
     const inPath = pathNodeSetRef.current.has(node.id)
+    const isNeighbor = neighborSetRef.current.has(node.id)
     const pr     = pathResultRef.current
     const isSrc  = node.id === pathSourceRef.current?.id
     const isDst  = pr && node.id === pr.path[pr.path.length - 1]
-    const dimmed = pr && !pr.notFound && !inPath && !isHL
+
+    let alpha = 1.0
+    if (pr && !pr.notFound) {
+      if (!inPath && !isHL) {
+        alpha = 0.08
+      }
+    } else if (activeHL) {
+      if (isHL) {
+        alpha = 1.0
+      } else if (isNeighbor) {
+        alpha = 0.45
+      } else {
+        alpha = 0.08
+      }
+    }
 
     // Escurece nós em componente diferente da origem selecionada
     const srcId  = pathSourceRef.current?.id
     const unreachable = srcId && !pr &&
       componentMapRef.current.get(node.id) !== componentMapRef.current.get(srcId)
 
-    if (dimmed)       ctx.globalAlpha = 0.1
-    if (unreachable)  ctx.globalAlpha = 0.08
+    ctx.globalAlpha = unreachable ? 0.05 : alpha
 
     if (isHL || inPath) {
       const zoom = graphRef.current?.zoom() ?? 1
@@ -145,20 +175,20 @@ export default function Explore({
 
       ctx.beginPath()
       ctx.arc(node.x, node.y, r + haloExtra, 0, Math.PI * 2)
-      ctx.fillStyle = (isSrc ? '#00e676' : isDst ? '#ff2d78' : '#ffd700') + '33'
+      ctx.fillStyle = (isSrc ? '#00e676' : isDst ? '#ff2d78' : isHL ? '#00ffff' : '#ffffff') + '33'
       ctx.fill()
 
       ctx.beginPath()
       ctx.arc(node.x, node.y, r + ringExtra, 0, Math.PI * 2)
-      ctx.strokeStyle = isSrc ? '#00e676' : isDst ? '#ff2d78' : isHL ? '#fff' : '#ffd700'
+      ctx.strokeStyle = isSrc ? '#00e676' : isDst ? '#ff2d78' : isHL ? '#00ffff' : '#ffffff'
       ctx.lineWidth = 1.5 / zoom
       ctx.stroke()
     }
 
-    const nodeFill = isSrc ? '#00e676' : isDst ? '#ff2d78' : (isHL || inPath) ? '#fff' : color
+    const nodeFill = isHL ? '#00ffff' : isSrc ? '#00e676' : isDst ? '#ff2d78' : inPath ? '#ffffff' : color
 
     // glow suave com a cor do gênero (apenas nós normais visíveis)
-    if (!dimmed && !isSrc && !isDst) {
+    if (alpha > 0.1 && !isSrc && !isDst) {
       ctx.shadowColor = color
       ctx.shadowBlur  = r * 2.2
     }
@@ -177,7 +207,7 @@ export default function Explore({
       ctx.fillText(label, node.x, node.y + r + 11)
     }
 
-    if (dimmed || unreachable) ctx.globalAlpha = 1
+    ctx.globalAlpha = 1
   }, [])
 
   // ── draw Dijkstra path overlay before nodes ──
@@ -336,23 +366,47 @@ export default function Explore({
         nodeCanvasObjectMode={() => 'replace'}
         linkColor={link => {
           const pr = pathResultRef.current
+          const activeHL = highlightIdRef.current
           const s = typeof link.source === 'object' ? link.source.id : link.source
           const t = typeof link.target === 'object' ? link.target.id : link.target
+          
           if (pr && !pr.notFound) {
             return pathEdgeSetRef.current.has(`${s}|${t}`)
               ? 'rgba(255,215,0,0.9)'
-              : 'rgba(255,255,255,0.04)'
+              : 'rgba(255,255,255,0.02)'
           }
-          // cor da aresta = cor do gênero do nó de origem (com opacidade baixa)
+          
           const genre = typeof link.source === 'object' ? link.source.genre : null
-          return genreColor(genre ?? '') + '50'  // ~31% opacidade
+          const baseColor = genreColor(genre ?? '')
+          
+          if (activeHL) {
+            const isIncident = (s === activeHL || t === activeHL)
+            return isIncident ? baseColor + 'B3' : 'rgba(255,255,255,0.02)'
+          }
+          
+          return baseColor + '40'
         }}
         linkWidth={link => {
           const pr = pathResultRef.current
-          if (!pr || pr.notFound) return 1.0
+          const activeHL = highlightIdRef.current
           const s = typeof link.source === 'object' ? link.source.id : link.source
           const t = typeof link.target === 'object' ? link.target.id : link.target
-          return pathEdgeSetRef.current.has(`${s}|${t}`) ? 2.5 : 0.5
+          const isPathEdge = pr && !pr.notFound && pathEdgeSetRef.current.has(`${s}|${t}`)
+          
+          if (isPathEdge) return 8.0;
+          
+          const val = link.value ?? 0.5
+          const minVal = threshold
+          const norm = val > minVal ? (val - minVal) / (1.0 - minVal || 1.0) : 0.0
+          const baseWidth = Math.pow(norm, 3.0) * 14.0 + 1.0;
+          if (pr && !pr.notFound) {
+            return baseWidth * 0.1;
+          }
+          if (activeHL) {
+            const isIncident = (s === activeHL || t === activeHL)
+            return isIncident ? baseWidth * 1.5 : baseWidth * 0.15;
+          }
+          return baseWidth;
         }}
         onNodeClick={handleNodeClick}
         onRenderFramePre={handleRenderFramePre}

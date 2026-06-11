@@ -229,7 +229,14 @@ def gerar_html(caminhos_info, grafo, meta, caminho_saida):
             no,
             label=f"{no}\n{cidade}",
             title=f"<b>{no}</b> — {cidade}<br>Região: {regiao}",
-            color=c,
+            color={
+                "background": c,
+                "border": "#222222",
+                "highlight": {
+                    "background": "#FFFFFF",
+                    "border": "#FFFFFF"
+                }
+            },
             size=28 if em_rota else 18,
             font={"size": 14 if em_rota else 11, "color": "white"},
             borderWidth=3 if em_rota else 1,
@@ -247,10 +254,17 @@ def gerar_html(caminhos_info, grafo, meta, caminho_saida):
 
             c = cor_aresta(origem_no, destino_no)
             em_rota = c != COR_ARESTA_FUNDO
+            w = float(aresta['peso'])
+            if w == 1.0:
+                edge_width = 6 if em_rota else 2
+            elif w == 2.0:
+                edge_width = 18 if em_rota else 10
+            else:
+                edge_width = 38 if em_rota else 26
             net.add_edge(
                 origem_no, destino_no,
                 color=c,
-                width=4 if em_rota else 1,
+                width=edge_width,
                 title=f"Peso: {aresta['peso']} | {aresta['tipo_conexao']}",
                 label=str(int(aresta['peso'])) if em_rota else "",
                 font={"size": 12, "color": "#f1c40f", "strokeWidth": 3, "strokeColor": "#1a1a2e"}
@@ -305,7 +319,7 @@ def main():
         caminho = reconstruir_caminho(predecessores, origem, destino)
         custo   = round(distancias[destino], 2)
         arestas = caminho_para_arestas(caminho)
-        print(f"  {origem} → {destino}: custo={custo}  caminho={' -> '.join(caminho)}")
+        print(f"  {origem} -> {destino}: custo={custo}  caminho={' -> '.join(caminho)}")
         caminhos_info.append({"caminho": caminho, "arestas": arestas, "custo": custo})
 
     print("\nGerando visualização...")

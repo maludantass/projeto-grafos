@@ -323,8 +323,8 @@ EDGES_DATA.forEach(e => {
   let cor = e.tipo === "regional" ? "#aaaaaa" : "#FF9800";
   if(e.id===3) cor="#FF9800"; if(e.id===10) cor="#FF9800"; if(e.id===13) cor="#FF9800"; if(e.id===14) cor="#FF9800";
   if(e.id===16) cor="#2196F3"; if(e.id===20) cor="#2196F3";
-  e.color = { color: cor, highlight: "#FFD600" };
-  e.width = e.weight === 1 ? 1 : (e.weight * 1.5);
+  e.color = { color: cor, highlight: cor };
+  e.width = e.weight === 1.0 ? 2 : (e.weight === 2.0 ? 10 : 26);
 });
 
 const COR_REGIAO = { "Norte": "#2196F3", "Nordeste": "#FF9800", "Centro-Oeste": "#9C27B0", "Sudeste": "#F44336", "Sul": "#4CAF50" };
@@ -362,6 +362,10 @@ const CAMINHO_REC_POA = ["REC", "SSA", "GIG", "GRU", "CWB", "FLN", "POA"];
 const CAMINHO_MAO_GRU = ["MAO", "BSB", "GRU"];
 const ORIG_EDGE_COLORS = {}; const ORIG_EDGE_WIDTHS = {};
 
+NODES_DATA.forEach(n => {
+  n.color.highlight = "#FFFFFF";
+});
+
 const nodesDS = new vis.DataSet(NODES_DATA);
 const edgesDS = new vis.DataSet(EDGES_DATA);
 EDGES_DATA.forEach(e => { ORIG_EDGE_COLORS[e.id] = e.color.color; ORIG_EDGE_WIDTHS[e.id] = e.width; });
@@ -383,14 +387,37 @@ network.on("click", function(params) {
   if (params.nodes.length === 0) {
     if (!modoAtivo) {
       noSelecionado = null;
-      nodesDS.update(NODES_DATA.map(n => ({ id: n.id, opacity: 1 })));
+      nodesDS.update(NODES_DATA.map(n => ({
+        id: n.id,
+        opacity: 1,
+        color: {
+          background: n.color.background,
+          border: n.color.border,
+          highlight: "#FFFFFF"
+        }
+      })));
       edgesDS.update(EDGES_DATA.map(e => ({ id: e.id, color: { color: ORIG_EDGE_COLORS[e.id] }, width: ORIG_EDGE_WIDTHS[e.id] })));
     }
     return;
   }
   const id = params.nodes[0]; noSelecionado = id; const n = NODES_DATA.find(x => x.id === id); if (!n) return;
   const connectedNodes = network.getConnectedNodes(id);
-  nodesDS.update(NODES_DATA.map(node => ({ id: node.id, opacity: node.id === id || connectedNodes.includes(node.id) ? 1 : 0.12 })));
+  nodesDS.update(NODES_DATA.map(node => {
+    const isSelected = node.id === id;
+    return {
+      id: node.id,
+      opacity: isSelected ? 1 : (connectedNodes.includes(node.id) ? 0.6 : 0.12),
+      color: isSelected ? {
+        background: "#FFFFFF",
+        border: "#FFFFFF",
+        highlight: "#FFFFFF"
+      } : {
+        background: node.color.background,
+        border: node.color.border,
+        highlight: "#FFFFFF"
+      }
+    };
+  }));
   edgesDS.update(EDGES_DATA.map(e => ({ id: e.id, color: { color: e.from === id || e.to === id ? ORIG_EDGE_COLORS[e.id] : "#243041" }, width: e.from === id || e.to === id ? ORIG_EDGE_WIDTHS[e.id] + 2 : 1 })));
   document.getElementById("info-box").innerHTML = `<b>${n.id}</b> — ${n.cidade}<br><span class="dim">Região:</span> ${n.region}<br><span class="dim">Grau:</span> ${n.grau}<br><span class="dim">Densidade ego:</span> ${n.densidade}`;
 });
@@ -399,14 +426,37 @@ network.on("hoverNode", function(params) {
   if (modoAtivo || noSelecionado) return; clearTimeout(hoverTimeout);
   hoverTimeout = setTimeout(() => {
     const nodeId = params.node; const connectedNodes = network.getConnectedNodes(nodeId);
-    nodesDS.update(NODES_DATA.map(n => ({ id: n.id, opacity: n.id === nodeId || connectedNodes.includes(n.id) ? 1 : 0.12 })));
+    nodesDS.update(NODES_DATA.map(n => {
+      const isHovered = n.id === nodeId;
+      return {
+        id: n.id,
+        opacity: isHovered ? 1 : (connectedNodes.includes(n.id) ? 0.6 : 0.12),
+        color: isHovered ? {
+          background: "#FFFFFF",
+          border: "#FFFFFF",
+          highlight: "#FFFFFF"
+        } : {
+          background: n.color.background,
+          border: n.color.border,
+          highlight: "#FFFFFF"
+        }
+      };
+    }));
     edgesDS.update(EDGES_DATA.map(e => ({ id: e.id, color: { color: e.from === nodeId || e.to === nodeId ? ORIG_EDGE_COLORS[e.id] : "#243041" }, width: e.from === nodeId || e.to === nodeId ? ORIG_EDGE_WIDTHS[e.id] + 2 : 1 })));
   }, 20);
 });
 
 network.on("blurNode", function() {
   if (modoAtivo || noSelecionado) return;
-  nodesDS.update(NODES_DATA.map(n => ({ id: n.id, opacity: 1 })));
+  nodesDS.update(NODES_DATA.map(n => ({
+    id: n.id,
+    opacity: 1,
+    color: {
+      background: n.color.background,
+      border: n.color.border,
+      highlight: "#FFFFFF"
+    }
+  })));
   edgesDS.update(EDGES_DATA.map(e => ({ id: e.id, color: { color: ORIG_EDGE_COLORS[e.id] }, width: ORIG_EDGE_WIDTHS[e.id] })));
 });
 
@@ -415,6 +465,25 @@ function buscar() {
   const n = NODES_DATA.find(x => x.id === q || x.cidade.toUpperCase().includes(q));
   if (!n) { alert("Aeroporto não encontrado: " + q); return; }
   network.selectNodes([n.id]); network.focus(n.id, { scale: 1.6, animation: { duration: 600, easingFunction: "easeInOutQuad" } });
+  const id = n.id; noSelecionado = id;
+  const connectedNodes = network.getConnectedNodes(id);
+  nodesDS.update(NODES_DATA.map(node => {
+    const isSelected = node.id === id;
+    return {
+      id: node.id,
+      opacity: isSelected ? 1 : (connectedNodes.includes(node.id) ? 0.6 : 0.12),
+      color: isSelected ? {
+        background: "#FFFFFF",
+        border: "#FFFFFF",
+        highlight: "#FFFFFF"
+      } : {
+        background: node.color.background,
+        border: node.color.border,
+        highlight: "#FFFFFF"
+      }
+    };
+  }));
+  edgesDS.update(EDGES_DATA.map(e => ({ id: e.id, color: { color: e.from === id || e.to === id ? ORIG_EDGE_COLORS[e.id] : "#243041" }, width: e.from === id || e.to === id ? ORIG_EDGE_WIDTHS[e.id] + 2 : 1 })));
   document.getElementById("info-box").innerHTML = `<b>${n.id}</b> — ${n.cidade}<br><span class="dim">Região:</span> ${n.region}<br><span class="dim">Grau:</span> ${n.grau}<br><span class="dim">Densidade ego:</span> ${n.densidade}`;
 }
 function limparBusca() { document.getElementById("search-input").value = ""; network.unselectAll(); network.fit({ animation: true }); document.getElementById("info-box").innerHTML = '<span class="dim">Clique em um aeroporto para ver detalhes.</span>'; }
@@ -425,7 +494,7 @@ function destacarCaminho(modo) {
   document.getElementById("btn-rec-poa").classList.toggle("active", modo==="rec-poa"); document.getElementById("btn-mao-gru").classList.toggle("active", modo==="mao-gru");
   const caminho = modo === "rec-poa" ? CAMINHO_REC_POA : CAMINHO_MAO_GRU; const arestas = modo === "rec-poa" ? ARESTAS_REC_POA : ARESTAS_MAO_GRU; const corDest = modo === "rec-poa" ? "#FF9800" : "#2196F3";
   nodesDS.update(NODES_DATA.map(n => ({ id: n.id, opacity: 0.15 }))); edgesDS.update(EDGES_DATA.map(e => ({ id: e.id, color: { color: "#333" }, width: 1 })));
-  caminho.forEach(id => nodesDS.update([{ id, opacity: 1.0 }])); [...arestas].forEach(eid => edgesDS.update([{ id: eid, color: { color: corDest }, width: 5 }]));
+  caminho.forEach(id => nodesDS.update([{ id, opacity: 1.0 }])); [...arestas].forEach(eid => edgesDS.update([{ id: eid, color: { color: corDest }, width: ORIG_EDGE_WIDTHS[eid] * 1.5 }]));
 }
 function filtrarRegiao(regiao) {
   regiaoAtiva = regiao; document.querySelectorAll(".region-btn").forEach(btn => btn.classList.remove("active"));
@@ -435,11 +504,29 @@ function filtrarRegiao(regiao) {
 }
 function limparFiltroRegiao() {
   regiaoAtiva = null; document.querySelectorAll(".region-btn").forEach(btn => btn.classList.remove("active"));
-  nodesDS.update(NODES_DATA.map(n => ({ id: n.id, opacity: 1 }))); edgesDS.update(EDGES_DATA.map(e => ({ id: e.id, color: { color: ORIG_EDGE_COLORS[e.id] }, width: ORIG_EDGE_WIDTHS[e.id] })));
+  nodesDS.update(NODES_DATA.map(n => ({
+    id: n.id,
+    opacity: 1,
+    color: {
+      background: n.color.background,
+      border: n.color.border,
+      highlight: "#FFFFFF"
+    }
+  })));
+  edgesDS.update(EDGES_DATA.map(e => ({ id: e.id, color: { color: ORIG_EDGE_COLORS[e.id] }, width: ORIG_EDGE_WIDTHS[e.id] })));
 }
 function resetarCaminhos() {
   modoAtivo = null; noSelecionado = null; document.getElementById("btn-rec-poa").classList.remove("active"); document.getElementById("btn-mao-gru").classList.remove("active");
-  nodesDS.update(NODES_DATA.map(n => ({ id: n.id, opacity: 1.0 }))); edgesDS.update(EDGES_DATA.map(e => ({ id: e.id, color: { color: ORIG_EDGE_COLORS[e.id] }, width: ORIG_EDGE_WIDTHS[e.id], }))); network.unselectAll(); document.getElementById("info-box").innerHTML = '<span class="dim">Clique em um aeroporto para ver detalhes.</span>';
+  nodesDS.update(NODES_DATA.map(n => ({
+    id: n.id,
+    opacity: 1.0,
+    color: {
+      background: n.color.background,
+      border: n.color.border,
+      highlight: "#FFFFFF"
+    }
+  })));
+  edgesDS.update(EDGES_DATA.map(e => ({ id: e.id, color: { color: ORIG_EDGE_COLORS[e.id] }, width: ORIG_EDGE_WIDTHS[e.id], }))); network.unselectAll(); document.getElementById("info-box").innerHTML = '<span class="dim">Clique em um aeroporto para ver detalhes.</span>';
 }
 
 
@@ -940,12 +1027,11 @@ const COORDS_SPREAD = {
   "CWB": {x:-50.0,  y:-26.5}, "FLN": {x:-47.5,  y:-28.5}, "POA": {x:-52.0,  y:-31.0}
 };
 
-function initMapaAVD() {
   const mapNodes = NODES_DATA.map(n => ({
     id: n.id, label: n.id, title: n.title,
     x: COORDS_SPREAD[n.id].x * 35,
     y: -COORDS_SPREAD[n.id].y * 35, 
-    color: { background: COR_REGIAO[n.region], border: "rgba(255,255,255,0.8)" },
+    color: { background: COR_REGIAO[n.region], border: "rgba(255,255,255,0.8)", highlight: { background: "#FFFFFF", border: "#FFFFFF" } },
     font: { color: "#FFF", face: "Montserrat", size: 16, bold: true, background: "rgba(10,18,30,0.8)", strokeWidth: 0, multi: true },
     size: 25 + n.grau * 4, 
     shadow: { enabled: true, color: 'rgba(0,0,0,0.6)', size: 15, x: 0, y: 5 }, 
@@ -958,7 +1044,7 @@ function initMapaAVD() {
     return {
       id: e.id, from: e.from, to: e.to,
       color: { color: isInter ? "#E53935" : "#78909C" },
-      dashes: !isInter, width: isInter ? 4 : 2,
+      dashes: !isInter, width: e.weight === 1.0 ? 2 : (e.weight === 2.0 ? 10 : 26),
       smooth: { type: "curvedCW", roundness: 0.1 }
     };
   });
@@ -974,10 +1060,10 @@ function initMapaAVD() {
 function resetarMapaAVD() {
   clearInterval(animTimer);
   document.getElementById('map-status').innerText = "";
-  nodesMapDS.update(nodesMapDS.get().map(n => ({ id: n.id, color: { background: COR_REGIAO[NODES_DATA.find(x=>x.id===n.id).region], border: "rgba(255,255,255,0.8)" }, opacity: 1 })));
+  nodesMapDS.update(nodesMapDS.get().map(n => ({ id: n.id, color: { background: COR_REGIAO[NODES_DATA.find(x=>x.id===n.id).region], border: "rgba(255,255,255,0.8)", highlight: { background: "#FFFFFF", border: "#FFFFFF" } }, opacity: 1 })));
   edgesMapDS.update(edgesMapDS.get().map(e => {
     let r1 = NODES_DATA.find(n => n.id === e.from)?.region; let r2 = NODES_DATA.find(n => n.id === e.to)?.region;
-    return { id: e.id, color: { color: r1 !== r2 ? "#E53935" : "#78909C" }, width: r1 !== r2 ? 4 : 2 };
+    return { id: e.id, color: { color: r1 !== r2 ? "#E53935" : "#78909C" }, width: e.weight === 1.0 ? 2 : (e.weight === 2.0 ? 10 : 26) };
   }));
 }
 
