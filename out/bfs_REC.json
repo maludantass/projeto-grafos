@@ -1,7 +1,7 @@
 {
   "algoritmo": "BFS",
   "origem": "REC",
-  "tempo_ms": 0.0349,
+  "tempo_ms": 0.0995,
   "nos_visitados": 20,
   "nivel_maximo": 7,
   "num_camadas": 8,

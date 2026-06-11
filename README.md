@@ -62,9 +62,13 @@ projeto-grafos/
 │       └── index.html               # frontend React da Parte 2 (build)
 ├── src/
 │   ├── cli.py                       # interface de linha de comando
-│   ├── solve.py                     # execução completa automatizada
-│   ├── metricas.py                  # métricas globais, regionais e ego-redes
-│   ├── viz.py                       # visualizações matplotlib/pyvis
+│   ├── solve.py                     # execução completa (Parte 2) automatizada
+│   ├── metricas.py                  # métricas globais, regionais e ego-redes (Parte 1)
+│   ├── viz.py                       # visualizações matplotlib (Parte 1)
+│   ├── arvore_percurso.py           # visualização do percurso da Parte 1 via pyvis
+│   ├── avd_exploratorias.py         # visualizações exploratórias (Parte 1)
+│   ├── avd_explanatorias.py         # visualizações explanatórias (Parte 1)
+│   ├── construir_grafo_spotify.py   # script de construção do grafo do Spotify
 │   ├── performance_parte2.py        # benchmark da Parte 2
 │   └── graphs/
 │       ├── graph.py                 # estrutura de dados: lista de adjacência
@@ -77,7 +81,8 @@ projeto-grafos/
     ├── test_bfs.py
     ├── test_dfs.py
     ├── test_dijkstra.py
-    └── test_bellman_ford.py
+    ├── test_bellman_ford.py
+    └── test_bfs_dfs_dataset2.py     # testes para o dataset do Spotify
 ```
 
 ---
@@ -149,11 +154,25 @@ python -m src.cli --dataset ./data/aeroportos_data.csv --alg BELLMAN_FORD --sour
 python -m src.cli --dataset ./data/aeroportos_data.csv --alg BELLMAN_FORD --source MAO --target GRU --out ./out/
 ```
 
-### Executar tudo de uma vez (solve.py)
+### Executar geração de saídas da Parte 1 (Métricas e Visualizações)
+
+Para gerar todas as métricas, visualizações matplotlib e páginas HTML interativas da Parte 1, execute os seguintes scripts:
 
 ```bash
-# Gera todas as métricas, visualizações e saídas da Parte 1 automaticamente
-python -m src.solve
+# 1. Gera métricas globais, regionais, ego-redes, graus e rankings (global.json, regioes.json, etc.)
+python -m src.metricas
+
+# 2. Gera visualizações (viz1_distribuicao_graus.png, viz2_ranking_aeroportos.png, viz3_comparacao_regioes.png, viz4_bfs_camadas_BSB.png)
+python -m src.viz
+
+# 3. Gera a visualização interativa do percurso Recife-POA e Manaus-GRU (arvore_percurso.html)
+python -m src.arvore_percurso
+
+# 4. Gera análises exploratórias (viz10_1_heatmap_adjacencias.png e viz10_2_centralidade_grau.png)
+python -m src.avd_exploratorias
+
+# 5. Gera análises explanatórias (viz10_3_vulnerabilidade_barras.png e viz10_4_mapa_conectividade.png)
+python -m src.avd_explanatorias
 ```
 
 ---
@@ -174,6 +193,13 @@ python -m src.cli --dataset ./data/dataset_parte2/ --alg DIJKSTRA \
 # Bellman-Ford entre duas músicas
 python -m src.cli --dataset ./data/dataset_parte2/ --alg BELLMAN_FORD \
   --source 3pyQ7RB5P8iwZMkPAeZ3ym --target 4cpdzzOLPuoRLnaJBcQFYp --out ./out/
+```
+
+### Executar tudo de uma vez (solve.py)
+
+```bash
+# Gera todas as saídas e arquivos JSON de BFS, DFS, Dijkstra e Bellman-Ford da Parte 2 automaticamente
+python -m src.solve
 ```
 
 ### Benchmark completo da Parte 2
@@ -241,6 +267,7 @@ pytest tests/test_bfs.py -v
 pytest tests/test_dfs.py -v
 pytest tests/test_dijkstra.py -v
 pytest tests/test_bellman_ford.py -v
+pytest tests/test_bfs_dfs_dataset2.py -v
 ```
 
 ### Cobertura dos testes
@@ -251,6 +278,7 @@ pytest tests/test_bellman_ford.py -v
 | `test_dfs.py` | Detecção de ciclo, classificação de arestas (árvore/retorno/avanço/cruzada), tempos entrada/saída |
 | `test_dijkstra.py` | Caminhos e custos corretos com pesos ≥ 0; rejeição de pesos negativos |
 | `test_bellman_ford.py` | Pesos negativos sem ciclo (distâncias corretas); detecção de ciclo negativo (flag) |
+| `test_bfs_dfs_dataset2.py` | Invariantes do BFS/DFS (níveis, visita, ciclos) no grafo maior do Spotify (Parte 2) |
 
 ---
 
@@ -359,10 +387,10 @@ O grafo é **não-direcionado** e **conectado** — todos os 20 aeroportos são 
 | Arquivo | Descrição |
 |---------|-----------|
 | `out/parte2_report.json` | Benchmark completo: tempos, memória, complexidade |
-| `out/bfs_dataset2.json` | BFS da Parte 2 (fonte 1) |
-| `out/dfs_dataset2.json` | DFS da Parte 2 (fonte 1) |
-| `out/dijkstra_dataset2_f*.json` | Dijkstra para 5+ pares |
-| `out/bellman_ford_dataset2_*.json` | Bellman-Ford para 3 pares |
+| `out/bfs_dataset2.json`, `_f2.json`, `_f3.json` | BFS da Parte 2 para as 3 fontes padrão |
+| `out/dfs_dataset2.json`, `_f2.json`, `_f3.json` | DFS da Parte 2 para as 3 fontes padrão |
+| `out/dijkstra_dataset2_f*.json` | Dijkstra da Parte 2 para 5 pares entre fontes |
+| `out/bellman_ford_dataset2_f*.json` | Bellman-Ford da Parte 2 para 3 pares entre fontes |
 | `out/bellman_ford_peso_negativo.json` | Caso sintético: peso negativo sem ciclo negativo |
 | `out/bellman_ford_ciclo_negativo.json` | Caso sintético: ciclo negativo detectado |
 
@@ -376,7 +404,7 @@ O grafo é **não-direcionado** e **conectado** — todos os 20 aeroportos são 
 | `viz4_bfs_camadas_BSB.png` | Camadas BFS | BSB alcança todos em até 3 saltos — centralidade hub |
 | `viz10_1_heatmap_adjacencias.png` | Heatmap | Concentração de conexões entre regiões Sul/Sudeste |
 | `viz10_2_centralidade_grau.png` | Rede colorida | Centralidade de grau evidencia BSB como hub principal |
-| `viz10_3_vulnerabilidade_barras.png` | Barras | Remoção de BSB ou GRU fragmenta o grafo |
+| `viz10_3_vulnerabilidade_barras.png` | Barras agrupadas | Perfil multidimensional de centralidade e ego-rede dos hubs principais |
 | `viz10_4_mapa_conectividade.png` | Mapa geográfico | Distribuição espacial das rotas pelo território |
 
 ---
@@ -404,11 +432,11 @@ Executado no grafo Spotify (4.000 vértices, 19.717 arestas), média de 5 execu�
 ## Dependências
 
 ```
-matplotlib==3.10.9
-numpy==2.4.4
-pyvis
-pandas
-pytest
+matplotlib>=3.10
+numpy>=2.0
+geopandas>=1.0
+pyvis>=0.3
+pytest>=7.0
 ```
 
 > Os algoritmos BFS, DFS, Dijkstra e Bellman-Ford foram **implementados do zero** em `src/graphs/algorithms.py`, sem uso de NetworkX, igraph ou similares. O módulo `heapq` da biblioteca padrão do Python é utilizado internamente pelo Dijkstra.

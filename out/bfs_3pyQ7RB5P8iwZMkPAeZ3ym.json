@@ -1,7 +1,7 @@
 {
   "algoritmo": "BFS",
   "origem": "3pyQ7RB5P8iwZMkPAeZ3ym",
-  "tempo_ms": 4.2562,
+  "tempo_ms": 2.2474,
   "nos_visitados": 513,
   "nivel_maximo": 7,
   "num_camadas": 8,
